@@ -1,6 +1,10 @@
 import { setRequestLocale } from "next-intl/server";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { getUpcomingTournaments, type UpcomingTournament } from "@/lib/data/tournaments";
+import { formatDateRange } from "@/lib/format";
+
+export const revalidate = 600;
 
 const STATS = [
   { value: "~2.600", key: "players" },
@@ -30,11 +34,19 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <Home />;
+  const upcoming = await getUpcomingTournaments(3);
+  return <Home locale={locale} upcoming={upcoming} />;
 }
 
-function Home() {
+function Home({
+  locale,
+  upcoming,
+}: {
+  readonly locale: string;
+  readonly upcoming: UpcomingTournament[];
+}) {
   const t = useTranslations("home");
+  const tc = useTranslations("calendar");
 
   return (
     <>
@@ -84,10 +96,48 @@ function Home() {
         </div>
       </section>
 
+      {/* NAREDNI TURNIRI */}
+      {upcoming.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold sm:text-3xl">{t("sections.upcoming")}</h2>
+              <p className="mt-1 text-slate">{t("sections.upcomingSub")}</p>
+            </div>
+            <Link href="/kalendar" className="hidden shrink-0 text-sm font-semibold text-clay-dark hover:underline sm:block">
+              {t("ctaCalendar")} →
+            </Link>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {upcoming.map((tr) => (
+              <Link
+                key={tr.id}
+                href={tr.legacy_id ? `/turnir/${tr.legacy_id}` : "/kalendar"}
+                className="group rounded-2xl border border-line bg-card p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-[var(--shadow-tvs)]"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center rounded-full bg-clay/12 px-2.5 py-0.5 text-xs font-bold text-clay-dark">
+                    {tc(`series.${tr.serija}`)}
+                  </span>
+                  <span className="font-mono text-xs text-muted">
+                    {formatDateRange(tr.datum_od, tr.datum_do, locale)}
+                  </span>
+                </div>
+                <h3 className="mt-3 font-display text-lg font-bold text-navy">{tr.naziv}</h3>
+                <p className="mt-1 text-sm text-slate">
+                  {tr.clubs?.naziv}
+                  {tr.clubs?.grad ? ` · ${tr.clubs.grad}` : ""}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* EXPLORE */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="mb-8 flex items-baseline gap-3">
-          <span className="font-mono text-sm text-clay">01</span>
+          <span className="font-mono text-sm text-clay">/ tvs</span>
           <h2 className="text-2xl font-extrabold sm:text-3xl">{t("sections.explore")}</h2>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -102,9 +152,6 @@ function Home() {
               </div>
               <h3 className="text-base font-bold text-navy">{t(`cards.${c.key}.title`)}</h3>
               <p className="mt-1.5 text-sm text-slate">{t(`cards.${c.key}.desc`)}</p>
-              <span className="mt-4 inline-block text-sm font-semibold text-clay-dark opacity-0 transition group-hover:opacity-100">
-                →
-              </span>
             </Link>
           ))}
         </div>
