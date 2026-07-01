@@ -69,5 +69,33 @@
     "language": "Jezik",
     "wip": "U izradi",
     "wipDesc": "Ovaj deo sistema je u izradi i uskoro će biti dostupan."
+  },
+  "calendar": {
+    "title": "Kalendar turnira",
+    "subtitle": "Pregled turnira aktuelne sezone — serija, sistem, domaćin i rokovi prijave.",
+    "empty": "Trenutno nema objavljenih turnira.",
+    "deadline": "Rok prijave",
+    "director": "Direktor",
+    "host": "Domaćin",
+    "count": "{n, plural, =0 {nema turnira} one {# turnir} few {# turnira} other {# turnira}}",
+    "series": {
+      "s2000": "Serija 2000",
+      "s1000": "Serija 1000",
+      "s500": "Serija 500",
+      "s250": "Serija 250",
+      "master": "Master"
+    },
+    "system": {
+      "kvalitativni": "Sistem: kvalitet I–V",
+      "starosni": "Sistem: starosni razredi"
+    },
+    "status": {
+      "najava": "Najava",
+      "prijave": "Prijave otvorene",
+      "zreb": "Žreb",
+      "u_toku": "U toku",
+      "zavrsen": "Završen",
+      "ponovo_otvoren": "Ponovo otvoren"
+    }
   }
 }

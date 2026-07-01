@@ -15,7 +15,7 @@ Komunikacija: **srpski**. Sajt: dvojezičan (SR default, EN). Detalji: `docs/TVS
 - **Supabase**: `src/lib/supabase/{client,server}.ts` (server je `async`). Tipovi: `pnpm db:types`. Sve mutacije preko RLS; klijent = anon ključ, nikad service-role. Helperi: `is_staff/is_coordinator/is_admin/is_referee`.
 
 ## Cloud (jedini resursi)
-Supabase `xvgmkdvhmveqyicautpi` · Vercel `prj_j4zTPYcJTGhd1LqqqFPYxhLFdTfR` (tim `team_j9xXu6MjUJP3Z8abVpBNVLAN`) · GitHub `svabic-07/veterani_tenis`.
+Supabase `ckfbofnjgotarmpiphgz` (projekat `veterani-tenis`, eu-central-1) · Vercel `prj_j4zTPYcJTGhd1LqqqFPYxhLFdTfR` (tim `team_j9xXu6MjUJP3Z8abVpBNVLAN`) · GitHub `svabic-07/veterani_tenis`.
 ⚠️ **CourtNomad se NE dira** (odvojen projekat, samo referenca u spec-u).
 
 ## Pre commita

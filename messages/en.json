@@ -69,5 +69,33 @@
     "language": "Language",
     "wip": "In progress",
     "wipDesc": "This part of the system is under construction and will be available soon."
+  },
+  "calendar": {
+    "title": "Tournament calendar",
+    "subtitle": "Current-season tournaments — series, system, host and entry deadlines.",
+    "empty": "No published tournaments yet.",
+    "deadline": "Entry deadline",
+    "director": "Director",
+    "host": "Host",
+    "count": "{n, plural, =0 {no tournaments} one {# tournament} other {# tournaments}}",
+    "series": {
+      "s2000": "Series 2000",
+      "s1000": "Series 1000",
+      "s500": "Series 500",
+      "s250": "Series 250",
+      "master": "Masters"
+    },
+    "system": {
+      "kvalitativni": "System: quality I–V",
+      "starosni": "System: age groups"
+    },
+    "status": {
+      "najava": "Announced",
+      "prijave": "Entries open",
+      "zreb": "Draw",
+      "u_toku": "In progress",
+      "zavrsen": "Finished",
+      "ponovo_otvoren": "Reopened"
+    }
   }
 }
