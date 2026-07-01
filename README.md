@@ -1,5 +1,7 @@
 # Teniski Veterani Srbije (TVS)
 
+> 📊 **Aktuelni status projekta:** [`STATUS.md`](STATUS.md)
+
 Informacioni sistem sa četiri povezana portala oko jedne Supabase baze:
 
 1. **Javni sajt** — kalendar, žreb i rezultati uživo, rang liste, profili igrača, vesti (SR/EN)
