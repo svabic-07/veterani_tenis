@@ -123,5 +123,39 @@
       "miks": "Mixed"
     },
     "notFound": "Tournament not found."
+  },
+  "players": {
+    "title": "Players",
+    "subtitle": "Member directory — search by name and category.",
+    "searchPlaceholder": "Search by first or last name…",
+    "search": "Search",
+    "category": "Category",
+    "allCategories": "All categories",
+    "count": "{n, plural, =0 {no players} one {# player} other {# players}}",
+    "empty": "No results for the selected filters.",
+    "profile": {
+      "back": "← Players",
+      "category": "Category",
+      "club": "Club",
+      "country": "Country",
+      "birthYear": "Birth year",
+      "ranking": "Ranking & points",
+      "history": "Tournament history",
+      "noRanking": "Ranking has not been calculated for this player yet.",
+      "noHistory": "No recorded appearances."
+    }
+  },
+  "rankings": {
+    "title": "Rankings",
+    "subtitle": "Quality categories (I–V) by discipline. Sum of N best results over the last 52 weeks.",
+    "category": "Category",
+    "discipline": "Discipline",
+    "week": "As of",
+    "rank": "#",
+    "player": "Player",
+    "points": "Points",
+    "tournaments": "Events",
+    "empty": "The ranking for this category and discipline has not been calculated yet. It will appear after the first tournaments are played or existing data is migrated.",
+    "disc": { "singl": "Singles", "dubl": "Doubles", "miks": "Mixed" }
   }
 }

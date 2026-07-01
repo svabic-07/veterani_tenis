@@ -123,5 +123,39 @@
       "miks": "Miks"
     },
     "notFound": "Turnir nije pronađen."
+  },
+  "players": {
+    "title": "Igrači",
+    "subtitle": "Direktorijum članova — pretraga po imenu i kategoriji.",
+    "searchPlaceholder": "Pretraga po imenu ili prezimenu…",
+    "search": "Pretraži",
+    "category": "Kategorija",
+    "allCategories": "Sve kategorije",
+    "count": "{n, plural, =0 {nema igrača} one {# igrač} few {# igrača} other {# igrača}}",
+    "empty": "Nema rezultata za zadate filtere.",
+    "profile": {
+      "back": "← Igrači",
+      "category": "Kategorija",
+      "club": "Klub",
+      "country": "Država",
+      "birthYear": "Godište",
+      "ranking": "Rang i bodovi",
+      "history": "Istorija turnira",
+      "noRanking": "Rang lista još nije obračunata za ovog igrača.",
+      "noHistory": "Nema zabeleženih nastupa."
+    }
+  },
+  "rankings": {
+    "title": "Rang liste",
+    "subtitle": "Kvalitativne kategorije (I–V) po disciplini. Zbir N najboljih rezultata u poslednjih 52 nedelje.",
+    "category": "Kategorija",
+    "discipline": "Disciplina",
+    "week": "Obračun",
+    "rank": "#",
+    "player": "Igrač",
+    "points": "Bodovi",
+    "tournaments": "Turnira",
+    "empty": "Rang lista za ovu kategoriju i disciplinu još nije obračunata. Pojaviće se nakon prvih odigranih turnira ili migracije postojećih podataka.",
+    "disc": { "singl": "Singl", "dubl": "Dubl", "miks": "Miks" }
   }
 }

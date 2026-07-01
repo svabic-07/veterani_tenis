@@ -173,6 +173,98 @@ export type Database = {
           },
         ]
       }
+      ranking_points: {
+        Row: {
+          aktivno_do: string | null
+          bodovi: number
+          created_at: string
+          disciplina: Database["public"]["Enums"]["discipline"]
+          id: string
+          kategorija: string
+          player_id: string
+          tournament_id: string | null
+        }
+        Insert: {
+          aktivno_do?: string | null
+          bodovi?: number
+          created_at?: string
+          disciplina: Database["public"]["Enums"]["discipline"]
+          id?: string
+          kategorija: string
+          player_id: string
+          tournament_id?: string | null
+        }
+        Update: {
+          aktivno_do?: string | null
+          bodovi?: number
+          created_at?: string
+          disciplina?: Database["public"]["Enums"]["discipline"]
+          id?: string
+          kategorija?: string
+          player_id?: string
+          tournament_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ranking_points_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ranking_points_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rankings: {
+        Row: {
+          bodovi: number
+          broj_turnira: number
+          created_at: string
+          disciplina: Database["public"]["Enums"]["discipline"]
+          id: string
+          kategorija: string
+          mesto: number | null
+          nedelja: string
+          player_id: string
+        }
+        Insert: {
+          bodovi?: number
+          broj_turnira?: number
+          created_at?: string
+          disciplina: Database["public"]["Enums"]["discipline"]
+          id?: string
+          kategorija: string
+          mesto?: number | null
+          nedelja: string
+          player_id: string
+        }
+        Update: {
+          bodovi?: number
+          broj_turnira?: number
+          created_at?: string
+          disciplina?: Database["public"]["Enums"]["discipline"]
+          id?: string
+          kategorija?: string
+          mesto?: number | null
+          nedelja?: string
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rankings_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasons: {
         Row: {
           aktivna: boolean
