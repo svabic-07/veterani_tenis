@@ -5,6 +5,12 @@ import { Constants } from "@/lib/supabase/types";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "rankings" });
+  return { title: t("title") };
+}
+
 const CATEGORIES = Constants.public.Enums.quality_category;
 const DISCIPLINES = Constants.public.Enums.discipline;
 

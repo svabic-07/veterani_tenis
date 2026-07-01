@@ -2,6 +2,11 @@ import { setRequestLocale } from "next-intl/server";
 
 export const dynamic = "force-static";
 
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return { title: locale === "sr" ? "Pravilnik i propozicije" : "Regulations" };
+}
+
 export default async function PravilnikPage({
   params,
 }: {

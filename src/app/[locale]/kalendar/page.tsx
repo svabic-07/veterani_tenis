@@ -5,6 +5,12 @@ import { formatDateRange, formatDeadline } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "calendar" });
+  return { title: t("title") };
+}
+
 const STATUS_STYLE: Record<string, string> = {
   najava: "bg-white border border-line2 text-slate",
   prijave: "bg-ball/30 text-court-dark",

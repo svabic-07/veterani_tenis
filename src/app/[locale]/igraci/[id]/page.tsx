@@ -5,6 +5,12 @@ import { getPlayerById } from "@/lib/data/players";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const p = await getPlayerById(id);
+  return { title: p ? `${p.ime} ${p.prezime}` : "Igrač" };
+}
+
 export default async function ProfilPage({
   params,
 }: {

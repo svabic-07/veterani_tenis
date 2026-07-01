@@ -6,6 +6,12 @@ import { formatDateRange, formatDeadline } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const tr = await getTournamentBySlug(slug);
+  return { title: tr?.naziv ?? "Turnir" };
+}
+
 const STATUS_STYLE: Record<string, string> = {
   najava: "bg-white/15 border border-white/25 text-white",
   prijave: "bg-ball text-navy",
