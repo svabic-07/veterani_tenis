@@ -1,0 +1,73 @@
+{
+  "brand": {
+    "name": "Teniski Veterani Srbije",
+    "short": "TVS",
+    "tagline": "Zvanični informacioni sistem"
+  },
+  "nav": {
+    "calendar": "Kalendar",
+    "rankings": "Rang liste",
+    "players": "Igrači",
+    "tournaments": "Turniri",
+    "rules": "Pravilnik",
+    "news": "Vesti",
+    "login": "Prijava",
+    "myAccount": "Moj nalog",
+    "menu": "Meni"
+  },
+  "home": {
+    "eyebrow": "Sezona 2026",
+    "title": "Novi digitalni dom teniskih veterana Srbije",
+    "lead": "Kalendar turnira, žreb i rezultati uživo, rang liste i profili igrača — na jednom mestu, na srpskom i engleskom.",
+    "ctaCalendar": "Pogledaj kalendar",
+    "ctaRankings": "Rang liste",
+    "stats": {
+      "players": "igrača u bazi",
+      "categories": "kvalitativnih + starosnih kategorija",
+      "series": "serije turnira + Master",
+      "disciplines": "discipline: singl, dubl, miks"
+    },
+    "sections": {
+      "upcoming": "Naredni turniri",
+      "upcomingSub": "Prijave i žreb za predstojeća takmičenja.",
+      "rankings": "Rang liste",
+      "rankingsSub": "Kvalitativne (I–V) i starosne kategorije, po disciplini.",
+      "explore": "Istraži sistem"
+    },
+    "cards": {
+      "calendar": { "title": "Kalendar turnira", "desc": "Filteri po seriji, sistemu, disciplini i gradu." },
+      "players": { "title": "Profili igrača", "desc": "Bodovi, kretanje ranga, istorija turnira, međusobni skor." },
+      "referee": { "title": "Sudijski portal", "desc": "Žreb, satnica i unos rezultata — optimizovano za teren." },
+      "rules": { "title": "Pravilnik", "desc": "Propozicije, bodovanje i kategorije članova." }
+    }
+  },
+  "footer": {
+    "rights": "Sva prava zadržana.",
+    "builtWith": "Next.js · Supabase · Vercel",
+    "sections": {
+      "explore": "Istraži",
+      "account": "Nalog",
+      "about": "Informacije"
+    },
+    "links": {
+      "calendar": "Kalendar",
+      "rankings": "Rang liste",
+      "players": "Igrači",
+      "rules": "Pravilnik",
+      "news": "Vesti",
+      "login": "Prijava igrača",
+      "referee": "Sudijski portal",
+      "about": "O savezu",
+      "contact": "Kontakt"
+    }
+  },
+  "common": {
+    "loading": "Učitavanje…",
+    "notFoundTitle": "Stranica nije pronađena",
+    "notFoundDesc": "Tražena stranica ne postoji ili je premeštena.",
+    "backHome": "Nazad na početnu",
+    "language": "Jezik",
+    "wip": "U izradi",
+    "wipDesc": "Ovaj deo sistema je u izradi i uskoro će biti dostupan."
+  }
+}

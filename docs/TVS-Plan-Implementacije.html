@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVS · Plan implementacije | Teniski Veterani Srbije</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --clay:#C8553D; --clay-dark:#9E3B28; --clay-soft:#E8917A;
+  --court:#2F6E4F; --court-dark:#1F4C36; --court-soft:#5FA37E;
+  --ball:#D6E84B; --ball-deep:#B7CC2E;
+  --navy:#15233A; --ink:#1B2A41; --slate:#46566C; --muted:#7A879B;
+  --bg:#F7F3EC; --bg2:#EFE8DD; --card:#FFFFFF; --line:#E6DED1; --line2:#D9CFBE;
+  --ok:#2F8F5B; --warn:#D98A1F; --bad:#C8413B; --info:#3B6FB0;
+  --r:16px; --r-sm:10px; --r-lg:26px;
+  --sh-sm:0 1px 2px rgba(20,35,58,.06), 0 2px 8px rgba(20,35,58,.05);
+  --sh:0 6px 24px rgba(20,35,58,.09); --sh-lg:0 20px 60px rgba(20,35,58,.16);
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:24px}
+body{margin:0; font-family:'Inter',system-ui,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); -webkit-font-smoothing:antialiased; line-height:1.62; font-size:16px}
+h1,h2,h3,h4,h5{font-family:'Sora',system-ui,sans-serif; line-height:1.18; color:var(--navy); margin:0}
+a{color:var(--clay-dark); text-decoration:none}
+::selection{background:var(--ball); color:var(--navy)}
+
+.shell{display:grid; grid-template-columns:288px 1fr; max-width:1500px; margin:0 auto; min-height:100vh}
+.side{position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; background:linear-gradient(180deg,var(--navy),#0F1B2E); color:#E8EEF6; padding:26px 20px 40px}
+.side::-webkit-scrollbar{width:7px} .side::-webkit-scrollbar-thumb{background:#33425a; border-radius:8px}
+.brand{display:flex; gap:13px; align-items:center; margin-bottom:6px}
+.brand .logo{width:46px;height:46px;border-radius:13px;flex:0 0 auto; background:radial-gradient(circle at 32% 30%, var(--ball), var(--ball-deep) 70%); display:grid;place-items:center; box-shadow:inset 0 0 0 3px rgba(255,255,255,.18), var(--sh); position:relative; overflow:hidden}
+.brand .logo::before{content:""; position:absolute; inset:0; background:radial-gradient(40px 40px at -8px 50%, transparent 18px, rgba(20,35,58,.55) 19px 21px, transparent 22px),radial-gradient(40px 40px at 54px 50%, transparent 18px, rgba(20,35,58,.55) 19px 21px, transparent 22px)}
+.brand b{font-family:'Sora'; font-weight:800; font-size:1.06rem; color:#fff; letter-spacing:.2px; display:block}
+.brand span{font-size:.72rem; color:#9FB2CC; letter-spacing:.14em; text-transform:uppercase}
+.side .kicker{font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; color:#7D90AD; margin:26px 8px 9px; font-weight:600}
+.nav a{display:flex; align-items:center; gap:11px; color:#C6D3E6; padding:8.5px 12px; border-radius:10px; font-size:.9rem; font-weight:500; transition:.16s; border:1px solid transparent}
+.nav a .n{font-family:var(--mono); font-size:.72rem; color:#6E82A0; width:20px; text-align:right}
+.nav a:hover{background:rgba(255,255,255,.06); color:#fff}
+.nav a.on{background:linear-gradient(90deg,rgba(200,85,61,.26),rgba(200,85,61,.05)); color:#fff; border-color:rgba(200,85,61,.45)}
+.nav a.on .n{color:var(--clay-soft)}
+.side .foot{margin-top:28px; padding-top:18px; border-top:1px solid #2A3953; font-size:.74rem; color:#7D90AD}
+
+.main{min-width:0; padding:0 0 80px}
+.topbar,.drawer,.scrim{display:none}
+.wrap{max-width:1020px; margin:0 auto; padding:0 34px}
+
+.hero{position:relative; overflow:hidden; color:#fff; padding:74px 0 60px; background:radial-gradient(1100px 460px at 88% -8%, rgba(214,232,75,.20), transparent 60%),radial-gradient(760px 420px at 6% 16%, rgba(200,85,61,.40), transparent 62%),linear-gradient(135deg,#16263E 0%, #13314A 52%, #1C5340 100%)}
+.hero::after{content:""; position:absolute; inset:0; opacity:.5; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px); background-size:46px 46px; mask:linear-gradient(180deg,#000,transparent 78%)}
+.hero .wrap{position:relative; z-index:2}
+.hero .eyebrow{display:inline-flex; gap:9px; align-items:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); padding:7px 15px; border-radius:100px; font-size:.74rem; letter-spacing:.13em; text-transform:uppercase; font-weight:600; color:#EAF1F8}
+.hero h1{font-size:clamp(2.2rem,4.6vw,3.4rem); font-weight:800; color:#fff; margin:20px 0 0; letter-spacing:-.5px}
+.hero h1 em{font-style:normal; color:var(--ball)}
+.hero .lead{font-size:1.12rem; color:#D7E2F0; max-width:660px; margin:18px 0 0}
+.hero .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:30px}
+.chip{display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); color:#fff; padding:8px 14px; border-radius:11px; font-size:.84rem; font-weight:600}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--ball); display:inline-block}
+.hero .meta{display:flex; flex-wrap:wrap; gap:26px; margin-top:34px; padding-top:24px; border-top:1px solid rgba(255,255,255,.16)}
+.hero .meta div{font-size:.82rem; color:#A9BBD2}
+.hero .meta b{display:block; font-family:'Sora'; font-size:1.5rem; color:#fff; font-weight:700}
+
+section{padding:54px 0 8px}
+.sec-h{display:flex; align-items:baseline; gap:14px; margin-bottom:8px}
+.sec-h .num{font-family:var(--mono); font-size:.82rem; color:var(--clay); font-weight:500; padding-top:6px}
+.sec-h h2{font-size:1.9rem; font-weight:800; letter-spacing:-.4px}
+.sec-sub{color:var(--slate); font-size:1.04rem; max-width:780px; margin:0 0 26px; padding-left:38px}
+.eyebrow-line{display:flex; align-items:center; gap:12px; color:var(--clay-dark); font-weight:700; font-size:.74rem; letter-spacing:.16em; text-transform:uppercase; margin:34px 0 14px}
+.eyebrow-line::before{content:""; width:26px; height:3px; border-radius:3px; background:var(--clay)}
+p{margin:0 0 15px} .lead-p{font-size:1.06rem; color:var(--slate)}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--sh-sm); padding:24px}
+.grid{display:grid; gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.feat{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:22px; box-shadow:var(--sh-sm); transition:.18s; position:relative; overflow:hidden}
+.feat:hover{transform:translateY(-3px); box-shadow:var(--sh); border-color:var(--line2)}
+.feat .ic{width:42px;height:42px;border-radius:11px; display:grid;place-items:center; font-size:1.2rem; margin-bottom:13px; background:linear-gradient(135deg,#FBEFE9,#F6E6DC); border:1px solid #F0DDCF}
+.feat h4{font-size:1.04rem; font-weight:700; margin-bottom:6px}
+.feat p{font-size:.9rem; color:var(--slate); margin:0}
+.feat.green .ic{background:linear-gradient(135deg,#E7F3EC,#D9EEE0); border-color:#CDE8D6}
+.feat.ball .ic{background:linear-gradient(135deg,#F4F7DA,#EAF0C2); border-color:#E2EAB0}
+.feat.navy .ic{background:linear-gradient(135deg,#E9EEF6,#DEE7F2); border-color:#D2DEEE}
+
+.pill{display:inline-flex; align-items:center; gap:6px; padding:3px 11px; border-radius:100px; font-size:.76rem; font-weight:700}
+.pill.clay{background:#F8E5DE; color:var(--clay-dark)} .pill.green{background:#DCF0E4; color:var(--court-dark)}
+.pill.ball{background:#EEF3C8; color:#5C6B16} .pill.navy{background:#E3EAF5; color:#284065}
+.pill.line{background:#fff; border:1px solid var(--line2); color:var(--slate)}
+.tag{font-family:var(--mono); font-size:.74rem; background:var(--bg2); border:1px solid var(--line); border-radius:7px; padding:2px 8px; color:var(--slate)}
+
+.tbl{width:100%; border-collapse:collapse; font-size:.88rem; background:var(--card); border:1px solid var(--line); border-radius:var(--r); overflow:hidden}
+.tbl th{background:var(--navy); color:#EAF1F8; text-align:left; padding:11px 13px; font-family:'Sora'; font-weight:600; font-size:.8rem}
+.tbl td{padding:10px 13px; border-top:1px solid var(--line); vertical-align:top}
+.tbl tr:nth-child(even) td{background:#FBF8F3}
+.tbl .c{text-align:center}
+.tbl-wrap{overflow-x:auto; border-radius:var(--r); box-shadow:var(--sh-sm)}
+
+.note{display:flex; gap:14px; padding:17px 19px; border-radius:var(--r-sm); font-size:.92rem; border:1px solid; margin:18px 0}
+.note .ni{font-size:1.15rem; flex:0 0 auto; line-height:1.4}
+.note.tip{background:#EAF4EE; border-color:#C6E4D2; color:#235640}
+.note.warn{background:#FBF1DF; border-color:#F0D9A8; color:#7C5510}
+.note.info{background:#E9F0F9; border-color:#CBDCF0; color:#244064}
+.note.prio{background:linear-gradient(120deg,#FBE7DF,#F9EFE5); border-color:#F0C9B6; color:#8A3017}
+
+.chk{list-style:none; padding:0; margin:0; display:grid; gap:9px}
+.chk li{display:flex; gap:11px; align-items:flex-start; font-size:.92rem; color:var(--slate)}
+.chk li::before{content:"✓"; flex:0 0 auto; width:21px;height:21px; border-radius:6px; background:#E4F1E9; color:var(--ok); font-weight:800; font-size:.78rem; display:grid; place-items:center; margin-top:2px}
+.chk.x li::before{content:"›"; background:#F8E5DE; color:var(--clay-dark)}
+.chk.lock li::before{content:"🔒"; background:#EDEAF3; font-size:.7rem}
+
+ol.steps{counter-reset:s; list-style:none; padding:0; margin:0; display:grid; gap:11px}
+ol.steps li{counter-increment:s; position:relative; padding:13px 16px 13px 50px; background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:var(--sh-sm); font-size:.92rem; color:var(--slate)}
+ol.steps li::before{content:counter(s); position:absolute; left:13px; top:12px; width:26px;height:26px; border-radius:8px; background:var(--clay); color:#fff; font-family:'Sora'; font-weight:700; font-size:.84rem; display:grid; place-items:center}
+ol.steps li b{color:var(--ink)}
+
+.road{position:relative; margin:8px 0 8px 6px; padding-left:30px}
+.road::before{content:""; position:absolute; left:8px; top:6px; bottom:6px; width:2px; background:linear-gradient(var(--clay),var(--court))}
+.phase{position:relative; margin-bottom:22px}
+.phase::before{content:""; position:absolute; left:-29px; top:3px; width:16px;height:16px; border-radius:50%; background:#fff; border:3px solid var(--clay); box-shadow:0 0 0 4px #F8E5DE}
+.phase h4{font-size:1.06rem; display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.phase .ph-t{font-family:var(--mono); font-size:.72rem; color:#fff; background:var(--clay); padding:2px 9px; border-radius:7px}
+.phase .ph-d{font-family:var(--mono); font-size:.68rem; color:var(--muted); background:var(--bg2); padding:2px 8px; border-radius:6px}
+.phase p{font-size:.9rem; color:var(--slate); margin:6px 0 0}
+.phase .deliver{margin:9px 0 0; padding:10px 13px; background:#F6FAF7; border:1px solid #D8EBDF; border-radius:10px; font-size:.84rem; color:var(--court-dark)}
+.phase .deliver b{color:var(--court-dark)}
+
+.arch{display:grid; gap:14px; margin:8px 0}
+.layer{border:1px dashed var(--line2); border-radius:var(--r); padding:16px; background:linear-gradient(180deg,#fff,#FCFAF6)}
+.layer .lh{font-size:.72rem; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); font-weight:700; margin-bottom:11px}
+.boxrow{display:flex; flex-wrap:wrap; gap:11px}
+.box{flex:1 1 150px; background:#fff; border:1px solid var(--line); border-radius:11px; padding:13px 14px; box-shadow:var(--sh-sm)}
+.box b{font-size:.92rem; display:block} .box small{color:var(--muted); font-size:.78rem}
+.box.clay{border-top:3px solid var(--clay)} .box.green{border-top:3px solid var(--court)} .box.navy{border-top:3px solid var(--navy)}
+
+.codeblock{background:#0F1B2E; color:#D7E2F0; border-radius:12px; padding:16px 18px; font-family:var(--mono); font-size:.8rem; overflow-x:auto; line-height:1.7; box-shadow:var(--sh)}
+.codeblock .c{color:#6E82A0} .codeblock .k{color:var(--ball)} .codeblock .s{color:var(--clay-soft)}
+
+footer.end{margin-top:60px; padding:34px; background:var(--navy); color:#A9BBD2; border-radius:var(--r-lg); text-align:center}
+footer.end b{color:#fff; font-family:'Sora'}
+
+@media(max-width:1080px){.g4{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{display:none}
+  .topbar{display:flex; position:sticky; top:0; z-index:40; align-items:center; gap:12px; padding:12px 18px; background:rgba(21,35,58,.97); color:#fff}
+  .topbar b{font-family:'Sora'; font-weight:700}
+  .topbar button{margin-left:auto; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:9px; padding:7px 12px; font-weight:600}
+  .drawer{display:block; position:fixed; inset:0 30% 0 0; background:#0F1B2E; z-index:60; padding:22px; overflow-y:auto; transform:translateX(-105%); transition:.25s; box-shadow:var(--sh-lg)}
+  .drawer.open{transform:none}
+  .scrim{display:block; position:fixed; inset:0; background:rgba(8,14,24,.5); z-index:55; opacity:0; pointer-events:none; transition:.25s}
+  .scrim.open{opacity:1; pointer-events:auto}
+  .wrap{padding:0 20px}
+}
+@media(max-width:680px){.g2,.g3,.g4{grid-template-columns:1fr} .sec-sub{padding-left:0} .hero{padding:54px 0 44px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <b>TVS · Plan implementacije</b>
+  <button onclick="document.querySelector('.drawer').classList.add('open');document.querySelector('.scrim').classList.add('open')">☰ Sadržaj</button>
+</div>
+<div class="scrim" onclick="this.classList.remove('open');document.querySelector('.drawer').classList.remove('open')"></div>
+<nav class="drawer" id="drawerNav"></nav>
+
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo"></div>
+      <div><b>Teniski Veterani Srbije</b><span>Plan implementacije</span></div>
+    </div>
+    <div class="kicker">Sadržaj</div>
+    <div class="nav" id="navList"></div>
+    <div class="foot">Radni dokument v1.0 · jul 2026<br>Prati specifikaciju (zaseban fajl)</div>
+  </aside>
+
+  <main class="main">
+    <header class="hero">
+      <div class="wrap">
+        <span class="eyebrow"><i style="width:8px;height:8px;border-radius:50%;background:var(--ball);display:inline-block"></i> Kako gradimo — faze, pravila, odluke</span>
+        <h1>Plan implementacije <em>sistema TVS</em></h1>
+        <p class="lead">Konkretan plan izrade: tehnologija, model podataka, žreb engine po ITF pravilima, dvojni bodovni model, princip „sve ispravljivo uz audit (osim integriteta žreba)", uloge sa Koordinatorom kao takmičarskim autoritetom, i faze isporuke — na kraju svake faze <b>deploy na Vercel</b> i <b>predlog modela (Opus/Sonnet)</b> za sledeću. Dizajn ide prvo (Claude Design + slike iz ChatGPT-a), <b>mobile-first</b>.</p>
+        <div class="chips">
+          <span class="chip"><i></i> Mobile-first (web)</span>
+          <span class="chip"><i></i> Claude Design + ChatGPT slike</span>
+          <span class="chip"><i></i> Deploy na Vercel po fazi</span>
+          <span class="chip"><i></i> Opus / Sonnet predlog</span>
+          <span class="chip"><i></i> SR + EN</span>
+          <span class="chip"><i></i> Koordinator = autoritet</span>
+        </div>
+        <div class="meta">
+          <div><b>7</b> faza isporuke (F0–F6)</div>
+          <div><b>2</b> bodovna modela (opcija)</div>
+          <div><b>4</b> uloge + RLS</div>
+          <div><b>1</b> cilj: bolji od postojećeg</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <!-- ===== 01 PRINCIPI ===== -->
+      <section id="principi">
+        <div class="sec-h"><span class="num">01</span><h2>Principi i cilj</h2></div>
+        <p class="sec-sub">Pet vodećih odluka koje oblikuju svaku fazu — pre svega: bolji od postojećeg, i „sve ispravljivo uz audit, osim integriteta žreba".</p>
+
+        <div class="grid g2">
+          <div class="feat clay" style="border-top:3px solid var(--clay)"><div class="ic">✏️</div><h4>Ispravljivo uz audit — osim žreba</h4><p>Sve što postojeća aplikacija zaključava (rezultati, status turnira…) kod nas se može ispraviti — uz <b>audit-log</b>. Jedino struktura žreba ostaje zaštićena i menja se samo kontrolisanim, zabeleženim opozivom.</p></div>
+          <div class="feat green"><div class="ic">🗂️</div><h4>Žreb prati pravila</h4><p>Automatski žreb poštuje ITF pravila nošenja (8→2, 16→4, 32→8, 64→16), raspored nosilaca, bye-ove i hibrid „grupa od 5". Ručna izmena pre zaključavanja.</p></div>
+          <div class="feat ball"><div class="ic">🎛️</div><h4>Dva bodovna modela</h4><p>Klasični (napredovanje) i „svi dobijaju bodove" (Master-stil) — <b>Koordinator bira</b> po turniru/seriji/sezoni.</p></div>
+          <div class="feat navy"><div class="ic">🧩</div><h4>Odvojene baze</h4><p>Veterani = sopstvena Supabase + Next.js (razdvojivo). CourtNomad koristi veteransku bazu preko kontrolisanog, opozivog pristupa.</p></div>
+          <div class="feat"><div class="ic">🎖️</div><h4>Koordinator = autoritet</h4><p>Koordinator donosi sve takmičarske odluke (igrači, sudije, turniri, bodovi, korekcije). „Admin" je samo tehnika.</p></div>
+          <div class="feat"><div class="ic">📱</div><h4>Bolji od postojećeg</h4><p>Moderan UI, mobilni rad na terenu, dvojezičnost, dubl/miks, live status, push (kroz CourtNomad), automatski obračun.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Konkretno: šta postojeći ne dozvoljava → mi omogućavamo</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Situacija</th><th>Postojeća aplikacija</th><th>Novi sistem</th></tr></thead>
+            <tbody>
+              <tr><td>Greška u žrebu</td><td>Nepovratno; zvati administratora telefonom</td><td>Koordinator opoziva/ponovo žreba — <b>zabeleženo (audit)</b></td></tr>
+              <tr><td>Pogrešno unet rezultat</td><td>Teško/nemoguće ispraviti</td><td>Ispravka uz <b>auto re-propagaciju</b> kroz bracket i preračun bodova</td></tr>
+              <tr><td>Turnir „završen" greškom</td><td>Bodovi obračunati, kraj</td><td>Koordinator <b>ponovo otvori</b> i preračuna</td></tr>
+              <tr><td>Promena nosilaca posle žreba</td><td>Zaključano</td><td>Samo kroz opoziv žreba (integritet) — kontrolisano</td></tr>
+              <tr><td>Satnica</td><td>Po igraču (dolazak)</td><td>Po igraču <i>i</i> opciono po terenu/meču; menja se uz audit</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note prio"><span class="ni">⚖️</span><div><b>Zlatno pravilo:</b> editabilnost je podrazumevana i bezbedna jer je <b>svaka izmena zabeležena</b> (ko, šta, kada, staro→novo). Integritet takmičenja (struktura žreba) se ne dira slobodno — samo kroz koordinatorski opoziv koji je takođe u audit-logu.</div></div>
+      </section>
+
+      <!-- ===== 02 STACK ===== -->
+      <section id="stack">
+        <div class="sec-h"><span class="num">02</span><h2>Tehnologija, dizajn i postavka <span class="pill ball" style="vertical-align:middle">Faza 0</span></h2></div>
+        <p class="sec-sub">Temelj koji blokira sve ostalo: stack, repo, okruženja, <b>dizajn (radi se prvo)</b>, dvojezičnost i CI/CD. Mobile-first.</p>
+
+        <div class="grid g4">
+          <div class="feat navy"><div class="ic">⚡</div><h4>Next.js (App Router)</h4><p>Najnovija verzija, React Server Components, Server Actions; SEO za javni deo.</p></div>
+          <div class="feat green"><div class="ic">🗄️</div><h4>Supabase</h4><p>Postgres + Auth + Storage + Realtime + Edge Functions; RLS + SECURITY DEFINER RPC.</p></div>
+          <div class="feat"><div class="ic">▲</div><h4>Vercel</h4><p>Auto-deploy, preview okruženja po PR-u, globalni CDN; domen kasnije.</p></div>
+          <div class="feat ball"><div class="ic">🌍</div><h4>next-intl (SR/EN)</h4><p>Dvojezičnost od starta; rute pod <span class="tag">/[locale]/</span>.</p></div>
+          <div class="feat"><div class="ic">🎨</div><h4>Tailwind + shadcn/ui</h4><p>Dizajn sistem, pristupačne komponente, dosledan izgled.</p></div>
+          <div class="feat"><div class="ic">🔁</div><h4>React Query</h4><p>Keširanje i sinhronizacija podataka; optimistični update u sudijskom portalu.</p></div>
+          <div class="feat"><div class="ic">🧪</div><h4>CI/CD</h4><p>Typegen iz Supabase, lint/test/typecheck u CI; migracije verzionisane u repou.</p></div>
+          <div class="feat"><div class="ic">📲</div><h4>PWA</h4><p>„Instaliraj na ekran", offline-tolerantan unos na terenu.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Zadaci faze 0</div>
+        <ol class="steps">
+          <li><b>Repo + okruženja:</b> Next.js app, Supabase projekat (veteranski, odvojen), Vercel povezan; <span class="tag">.env</span> tajne, dev/staging/prod.</li>
+          <li><b>Dizajn sistem:</b> boje, tipografija, komponente (kartice, tabele, žreb, satnica), tamna/svetla tema.</li>
+          <li><b>i18n skelet:</b> SR (default) + EN, rečnici, prekidač jezika.</li>
+          <li><b>Uloge i Auth:</b> Supabase Auth, RBAC enum (gost/igrač/sudija/koordinator/admin), RLS skelet.</li>
+          <li><b>Typegen + CI:</b> generisanje TS tipova iz baze, lint/test koraci, šablon migracija.</li>
+        </ol>
+
+        <div class="eyebrow-line">Dizajn i vizuelni identitet — radi se PRVO</div>
+        <div class="grid g3">
+          <div class="feat"><div class="ic">🎨</div><h4>Claude Design</h4><p>Vizuelni dizajn UI-ja i dizajn sistem (boje, tipografija, komponente, ekrani) — <b>pre kodiranja</b>, da se sve gradi na završenom izgledu.</p></div>
+          <div class="feat ball"><div class="ic">🖼️</div><h4>Slike: ChatGPT</h4><p>Sve slike za sajt (hero, pozadine, ilustracije) generišu se u ChatGPT-u; <b>Claude piše promptove</b> za slike i ostali sadržaj.</p></div>
+          <div class="feat green"><div class="ic">📱</div><h4>Mobile-first (web)</h4><p>Dizajn se radi prvo za telefon pa naviše; sudijski portal mora biti <b>odličan na mobilnom</b> (rad na terenu).</p></div>
+        </div>
+        <div class="note tip"><span class="ni">🎨</span><div><b>Kada se radi dizajn:</b> front-load u <b>Fazi 0</b> (dizajn sistem + ključni ekrani + slike). Zatim se po svakom portalu (Faze 1–4) radi kratak <b>dizajn-pas pre kodiranja</b> tog dela — tako je svaka faza vizuelno dovršena pre razvoja. Tok slika: Claude napiše prompt → slika se generiše u ChatGPT-u → ubacuje se u sajt.</div></div>
+      </section>
+
+      <!-- ===== 03 MODEL ===== -->
+      <section id="model">
+        <div class="sec-h"><span class="num">03</span><h2>Model podataka i migracija</h2></div>
+        <p class="sec-sub">Proširenje modela iz specifikacije — sa naglaskom na nova podešavanja: bodovni model, N po sezoni, zaključavanje žreba i audit.</p>
+
+        <div class="eyebrow-line">Ključne nove/proširene tabele (povrh ERD-a iz spec.)</div>
+        <div class="codeblock"><span class="c">-- sezona: koordinator zadaje N i podrazumevani model</span>
+<span class="k">seasons</span>(id, naziv, n_best <span class="s">int</span> <span class="c">/* 8|10|13 */</span>, default_scoring <span class="s">enum</span>, aktivna <span class="s">bool</span>)
+
+<span class="c">-- turnir bira bodovni model (nasleđuje od sezone, može override)</span>
+<span class="k">tournaments</span>(… , scoring_model <span class="s">enum('klasicni','svi_boduju')</span>, status <span class="s">enum('najava','prijave','zreb','u_toku','zavrsen','ponovo_otvoren')</span>)
+
+<span class="c">-- žreb: zaključavanje + ko/kad, radi integriteta</span>
+<span class="k">draws</span>(… , locked <span class="s">bool</span>, locked_at <span class="s">ts</span>, seed_source <span class="s">jsonb</span> <span class="c">/* rang na dan žreba */</span>)
+
+<span class="c">-- tablice bodova kao podatak (po modelu/seriji/kosturu)</span>
+<span class="k">scoring_tables</span>(id, model <span class="s">enum</span>, serija, kostur, kolo, bodovi <span class="s">int</span>)
+
+<span class="c">-- SVE izmene se beleže (editabilnost = bezbedna)</span>
+<span class="k">audit_log</span>(id, entitet, entitet_id, akcija, staro <span class="s">jsonb</span>, novo <span class="s">jsonb</span>, ko <span class="s">uuid</span>, kada <span class="s">ts</span>)</div>
+
+        <div class="grid g2" style="margin-top:18px">
+          <div class="card" style="border-top:3px solid var(--court)">
+            <h4 style="margin-bottom:10px">Redosled migracija</h4>
+            <ol class="steps" style="gap:8px">
+              <li>Šifarnici: klubovi, kategorije, serije, sezone</li>
+              <li>Igrači (~2.600) + uloge; čuvati <b>stari ID</b> radi povezivanja</li>
+              <li>Istorija turnira i rezultata → bodovi</li>
+              <li>Preračun rang lista (validacija prema postojećim)</li>
+            </ol>
+          </div>
+          <div class="card" style="border-top:3px solid var(--clay)">
+            <h4 style="margin-bottom:10px">Pravila migracije</h4>
+            <ul class="chk" style="gap:7px">
+              <li>Idempotentne skripte (mogu se ponoviti bez duplikata)</li>
+              <li>Validacija: broj igrača, zbir bodova, top rang po kategoriji = isti</li>
+              <li>JMBG enkriptovan; nije javan</li>
+              <li>Izveštaj o nepodudaranjima pre „go-live"</li>
+            </ul>
+          </div>
+        </div>
+        <div class="note info"><span class="ni">🔒</span><div><b>RLS od početka:</b> igrač vidi/menja svoje; sudija svoj turnir; koordinator sve takmičarske podatke; admin tehnički nivo. Sve mutacije idu kroz RPC (server-autoritativno) sa upisom u <span class="tag">audit_log</span>.</div></div>
+      </section>
+
+      <!-- ===== 04 ŽREB ===== -->
+      <section id="zreb">
+        <div class="sec-h"><span class="num">04</span><h2>Žreb engine (po pravilima)</h2></div>
+        <p class="sec-sub">Automatski žreb koji poštuje ITF nošenje, bye-ove i hibrid „grupa od 5", uz ručnu izmenu pre zaključavanja i koordinatorski opoziv posle.</p>
+
+        <ol class="steps">
+          <li><b>Učesnici:</b> sistem povuče prijavljene po kategoriji/disciplini i sortira po rang bodovima (prikaže bodove + broj turnira, kao u postojećoj app).</li>
+          <li><b>Broj nosilaca po veličini žreba</b> (ITF): 8→<b>2</b>, 16→<b>4</b>, 32→<b>8</b>, 64→<b>16</b>, 128→<b>32</b>. Round-robin: 6–7 → 2, 3–5 → 0.</li>
+          <li><b>Nošenje:</b> auto-predlog po rangu na dan zatvaranja prijava + <b>ručna izmena</b> (koordinator/sudija). Nerangirani se ne nose (osim „seed exempt" koje odobri koordinator).</li>
+          <li><b>Raspored:</b> N1 → vrh (linija 1), N2 → dno; N3–4 u različite četvrtine; N5–8 u osmine; razdvajanje istog kluba/države (gosti).</li>
+          <li><b>Bye-ovi:</b> manjak igrača → bye nosiocima po opadajućem redu (najjači prvo), ostatak žrebom.</li>
+          <li><b>Grupa od 5</b> (hibrid): rang 3–4–5 round-robin (3 meča) → prva dvojica u PF (2. iz grupe vs N1, 1. iz grupe vs N2).</li>
+          <li><b>Zaključavanje:</b> po kreiranju žreb se <b>zaključa</b> (snimi se i izvor nošenja). Izmena samo kroz koordinatorski <b>opoziv uz audit</b> (ne telefonom).</li>
+          <li><b>Dubl/miks:</b> nošenje po zbiru bodova para; par s nerangiranim igračem ide ispod parova s istim bodovima.</li>
+        </ol>
+
+        <div class="note warn"><span class="ni">🔐</span><div><b>Integritet:</b> žreb je jedina stvar koja se ne menja slobodno. Posle zaključavanja, struktura ostaje fiksna; jedini put za ispravku je koordinatorski opoziv/ponovni žreb, koji se beleži u <span class="tag">audit_log</span> (ko, kada, razlog).</div></div>
+      </section>
+
+      <!-- ===== 05 BODOVANJE ===== -->
+      <section id="bodovanje">
+        <div class="sec-h"><span class="num">05</span><h2>Bodovni modeli — opcija koordinatora</h2></div>
+        <p class="sec-sub">Dva modela bodovanja; koordinator bira koji se primenjuje, po turniru / seriji / sezoni. Obračun se radi na „ZAVRŠI TURNIR".</p>
+
+        <div class="grid g2">
+          <div class="card" style="border-top:3px solid var(--court)">
+            <h4 style="margin-bottom:8px">Model A · Klasični (napredovanje)</h4>
+            <p style="font-size:.9rem;color:var(--slate);margin:0 0 8px">Bodovi po dostignutom kolu (tablica po kosturu × seriji). Poraz u 1. kolu = mali „utešni" bodovi. Nagrađuje rezultat.</p>
+            <span class="tag">podrazumevani</span> <span class="tag">tabela 8/16/32/64/128</span>
+          </div>
+          <div class="card" style="border-top:3px solid var(--clay)">
+            <h4 style="margin-bottom:8px">Model B · „Svi dobijaju bodove" (Master-stil)</h4>
+            <p style="font-size:.9rem;color:var(--slate);margin:0 0 8px">Svaki učesnik osvaja bodove i bez pobede. Nagrađuje učešće.</p>
+            <table class="tbl" style="font-size:.82rem">
+              <tbody>
+                <tr><td>Pobednik</td><td class="c"><b>800</b></td><td>Finale</td><td class="c">600</td></tr>
+                <tr><td>Polufinale</td><td class="c">400</td><td>Pobeda u grupi</td><td class="c">200</td></tr>
+                <tr><td>Bez pobede</td><td class="c">500</td><td>Rezerva</td><td class="c">200</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid g3" style="margin-top:18px">
+          <div class="feat"><div class="ic">🎯</div><h4>Gde se bira</h4><p>Koordinator postavlja model na nivou sezone (default) i može ga override-ovati po turniru/seriji.</p></div>
+          <div class="feat"><div class="ic">🧮</div><h4>Kada se računa</h4><p>Na „ZAVRŠI TURNIR" engine primeni izabrani model i upiše bodove svim igračima.</p></div>
+          <div class="feat"><div class="ic">↩️</div><h4>Ponovni obračun</h4><p>Ako koordinator ponovo otvori turnir ili ispravi rezultat — bodovi se preračunaju, sve u audit-logu.</p></div>
+        </div>
+        <div class="note tip"><span class="ni">🎛️</span><div>Tablice oba modela su <b>podatak u bazi</b> (<span class="tag">scoring_tables</span>), pa Koordinator menja vrednosti bez programera. Rang lista uzima <b>N najboljih (8/10/13)</b> iz aktivnih (52 nedelje) — N zadaje koordinator po sezoni.</div></div>
+      </section>
+
+      <!-- ===== 06 EDITABILNOST ===== -->
+      <section id="editabilnost">
+        <div class="sec-h"><span class="num">06</span><h2>Editabilnost i korekcije (matrica)</h2></div>
+        <p class="sec-sub">Šta se može menjati, ko, do kada — i šta ostaje zaštićeno. Sve izmene se beleže u audit-log.</p>
+
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Entitet</th><th>Ko menja</th><th>Do kada</th><th>Napomena</th></tr></thead>
+            <tbody>
+              <tr><td><b>Prijave</b></td><td>Igrač / Sudija / Koordinator</td><td>Do roka (+ koordinator i posle)</td><td>Ručno dodavanje gosta/stranca</td></tr>
+              <tr><td><b>Nosioci</b></td><td>Sudija / Koordinator</td><td>Pre kreiranja žreba</td><td>Posle žreba — samo kroz opoziv</td></tr>
+              <tr><td><b>Žreb (struktura)</b></td><td><span class="pill clay">Samo Koordinator</span></td><td>Opoziv uz audit</td><td>🔒 Zaštićen integritet</td></tr>
+              <tr><td><b>Satnica</b></td><td>Sudija / Koordinator</td><td>Sve vreme (uz audit)</td><td>Po igraču i/ili po terenu</td></tr>
+              <tr><td><b>Rezultat meča</b></td><td>Sudija / Koordinator</td><td>I posle unosa</td><td>Auto re-propagacija + preračun</td></tr>
+              <tr><td><b>Bodovi / rang</b></td><td><span class="pill clay">Koordinator</span></td><td>Bilo kada</td><td>Ručna korekcija / brisanje</td></tr>
+              <tr><td><b>Status „završen"</b></td><td><span class="pill clay">Koordinator</span></td><td>Ponovo otvori</td><td>Vraća i preračunava bodove</td></tr>
+              <tr><td><b>Profil / kategorija</b></td><td>Igrač (zahtev) / Koordinator (odobri)</td><td>Bilo kada</td><td>Promena kategorije = odluka koordinatora</td></tr>
+              <tr><td><b>Uplate (evidencija)</b></td><td>Sudija / Koordinator</td><td>Bilo kada</td><td>Bez online naplate</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="grid g2" style="margin-top:18px">
+          <ul class="chk" style="gap:8px">
+            <li><b>Sve menjivo</b> što ne narušava integritet — uz obavezan audit zapis</li>
+            <li>Ispravka rezultata automatski povlači promene kroz bracket i bodove</li>
+            <li>Koordinator može „vratiti" završen turnir i preračunati</li>
+          </ul>
+          <ul class="chk lock" style="gap:8px">
+            <li>Struktura žreba se ne menja slobodno (integritet takmičenja)</li>
+            <li>Izmena žreba = isključivo koordinatorski opoziv, zabeležen</li>
+            <li>JMBG i lični podaci — zaštićeni, ne menjaju drugi igrači</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ===== 07 ULOGE ===== -->
+      <section id="uloge">
+        <div class="sec-h"><span class="num">07</span><h2>Uloge i prava (RBAC + RLS)</h2></div>
+        <p class="sec-sub">Koordinator je takmičarski autoritet; Admin je tehnička uloga. Pristup se sprovodi kroz Supabase RLS i RPC.</p>
+
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Mogućnost</th><th class="c">Gost</th><th class="c">Igrač</th><th class="c">Sudija</th><th class="c">Koordinator</th><th class="c">Admin (teh.)</th></tr></thead>
+            <tbody>
+              <tr><td>Javni pregled (kalendar, žreb, rang, profili)</td><td class="c">✓</td><td class="c">✓</td><td class="c">✓</td><td class="c">✓</td><td class="c">✓</td></tr>
+              <tr><td>Prijava/odjava na turnir, svoj profil</td><td class="c">—</td><td class="c">✓</td><td class="c">✓</td><td class="c">✓</td><td class="c">—</td></tr>
+              <tr><td>Svoj turnir: žreb, satnica, unos rezultata</td><td class="c">—</td><td class="c">—</td><td class="c">✓</td><td class="c">✓</td><td class="c">—</td></tr>
+              <tr><td>Opoziv žreba, ispravka rezultata, „ponovo otvori"</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><b>✓</b></td><td class="c">—</td></tr>
+              <tr><td>Kalendar/turniri, dodela sudija, kategorije, disciplina</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><b>✓</b></td><td class="c">—</td></tr>
+              <tr><td>Bodovni model, tablice, obračun ranga, korekcije bodova</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><b>✓</b></td><td class="c">—</td></tr>
+              <tr><td>Nalozi/uloge, migracija, integracije, CMS, backup</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c"><b>✓</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note info"><span class="ni">🔐</span><div><b>Sprovođenje:</b> RLS politike po tabeli (vlasništvo reda) + <b>SECURITY DEFINER RPC</b> za sve mutacije (server-autoritativno). Koordinatorske radnje proveravaju ulogu i upisuju u <span class="tag">audit_log</span>. Anon ključ na klijentu — nikad service-role.</div></div>
+      </section>
+
+      <!-- ===== 08 FAZE ===== -->
+      <section id="faze">
+        <div class="sec-h"><span class="num">08</span><h2>Faze isporuke</h2></div>
+        <p class="sec-sub">Redosled koji što pre daje korist: javni deo i sudijski portal kao prioriteti. Svaka faza ima jasan „gotovo", <b>završava se deploy-em na Vercel</b> i <b>predlogom modela (Opus/Sonnet) za sledeću fazu</b>.</p>
+        <div class="note info"><span class="ni">🤖</span><div><b>Izbor modela:</b> <b>Opus</b> za arhitekturu, bezbednost (RLS/RPC), net-new dizajn i kritičnu logiku (žreb, bodovanje, integracija). <b>Sonnet</b> za jasno specifikovan rad: read ekrani, CRUD forme, prevodi, migracione skripte. (Konvencija usklađena sa CourtNomad planom.)</div></div>
+
+        <div class="road">
+          <div class="phase">
+            <h4><span class="ph-t">Faza 0</span> Temelj + dizajn <span class="ph-d">~2 ned.</span></h4>
+            <p>Stack, repo, Supabase (veteranski), Vercel; <b>dizajn sistem (Claude Design) + ključni ekrani + slike (ChatGPT, promptove piše Claude)</b>, mobile-first; i18n skelet (SR/EN); Auth + RBAC + RLS skelet; typegen + CI.</p>
+            <div class="deliver"><b>Gotovo kada:</b> okruženja rade, dizajn sistem usvojen, tipovi sinhronizovani, prijava radi po ulozi, RLS čita bezbedno.</div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center"><span class="pill green">🚀 Deploy na Vercel (preview)</span><span class="pill navy">Model: Opus</span><span class="pill line">→ sledeća: Sonnet</span></div>
+          </div>
+          <div class="phase">
+            <h4><span class="ph-t">Faza 1</span> Migracija + javni sajt <span class="ph-d">~3–4 ned.</span></h4>
+            <p>Uvoz baze igrača/klubova/istorije <b>od aktuelnog sajta</b>; kalendar, profili, direktorijum članova, rang liste, stranice turnira (read-only). Dizajn-pas za javni deo pre kodiranja.</p>
+            <div class="deliver"><b>Gotovo kada:</b> migrirana baza validirana (broj igrača, bodovi, top rang = isti), javni sajt uživo na pregled, odličan na mobilnom.</div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center"><span class="pill green">🚀 Deploy na Vercel</span><span class="pill navy">Model: Sonnet</span><span class="pill line">→ sledeća: Sonnet</span></div>
+          </div>
+          <div class="phase">
+            <h4><span class="ph-t">Faza 2</span> Igrački portal <span class="ph-d">~2–3 ned.</span></h4>
+            <p>Auth + migracija naloga, profil, prijava/odjava na turnire, partneri (dubl/miks), status uplata, izjava o odgovornosti. Dizajn-pas za igrački portal.</p>
+            <div class="deliver"><b>Gotovo kada:</b> član se samostalno prijavljuje/odjavljuje i vidi svoje bodove.</div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center"><span class="pill green">🚀 Deploy na Vercel</span><span class="pill navy">Model: Sonnet</span><span class="pill line">→ sledeća: <b>Opus</b></span></div>
+          </div>
+          <div class="phase">
+            <h4><span class="ph-t">Faza 3 ★</span> Sudijski portal <span class="ph-d">~3–4 ned.</span></h4>
+            <p>Žreb engine po ITF (auto+ručno, bye, grupa od 5), satnica (po igraču + opciono teren/meč), unos rezultata po setovima + auto-napredovanje, „ZAVRŠI TURNIR", <b>mobilni rad na terenu</b>. Dizajn-pas za sudijski portal.</p>
+            <div class="deliver"><b>Gotovo kada:</b> turnir se vodi od žreba do finala na telefonu; rezultati hrane rang.</div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center"><span class="pill green">🚀 Deploy na Vercel</span><span class="pill navy">Model: Opus</span><span class="pill line">→ sledeća: <b>Opus</b></span></div>
+          </div>
+          <div class="phase">
+            <h4><span class="ph-t">Faza 4</span> Koordinatorski panel + obračun <span class="ph-d">~3 ned.</span></h4>
+            <p>Dva bodovna modela, obračun rang liste (N po sezoni), korekcije uz audit (rezultat, opoziv žreba, ponovo otvori), evidencija uplata, disciplinska; tehnički admin (uloge, prevodi, integracije).</p>
+            <div class="deliver"><b>Gotovo kada:</b> koordinator vodi celo takmičenje i ispravlja greške bez programera.</div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center"><span class="pill green">🚀 Deploy na Vercel</span><span class="pill navy">Model: Opus</span><span class="pill line">→ sledeća: Sonnet</span></div>
+          </div>
+          <div class="phase">
+            <h4><span class="ph-t">Faza 5</span> Engleski + dorade + PWA <span class="ph-d">~2 ned.</span></h4>
+            <p>Kompletan EN prevod, galerija, PWA/offline, optimizacije i testiranje (E2E tok turnira). Finalni dizajn-polish, mobile QA.</p>
+            <div class="deliver"><b>Gotovo kada:</b> dvojezično, brzo, prolaze E2E testovi ključnih tokova.</div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center"><span class="pill green">🚀 Deploy na Vercel</span><span class="pill navy">Model: Sonnet</span><span class="pill line">→ sledeća: <b>Opus</b></span></div>
+          </div>
+          <div class="phase">
+            <h4><span class="ph-t">Faza 6</span> Integracija + domen + produkcija <span class="ph-d">~2 ned.</span></h4>
+            <p>Kontrolisan pristup CourtNomad-a veteranskoj bazi, povezivanje naloga; domen na Vercel; go-live; obuka direktora/koordinatora.</p>
+            <div class="deliver"><b>Gotovo kada:</b> sistem u produkciji, CourtNomad čita/zapisuje preko kontrolisanog pristupa, obuka održana.</div>
+            <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:7px;align-items:center"><span class="pill green">🚀 Produkcijski deploy + domen</span><span class="pill navy">Model: Opus</span><span class="pill line">→ održavanje: Sonnet</span></div>
+          </div>
+        </div>
+        <div class="note tip"><span class="ni">⚡</span><div><b>Ubrzanje:</b> pošto je isti autor, veteranski bekend može da <b>pozajmi kôd/obrasce</b> iz CourtNomad-a (turnirski engine, RPC, rejting, push) — u sopstvenoj, odvojenoj bazi.</div></div>
+      </section>
+
+      <!-- ===== 09 COURTNOMAD ===== -->
+      <section id="courtnomad">
+        <div class="sec-h"><span class="num">09</span><h2>Integracija sa CourtNomad-om</h2></div>
+        <p class="sec-sub">Odvojene baze i Next.js aplikacije; CourtNomad koristi veteransku bazu preko kontrolisanog, opozivog pristupa. Razdvojivo u svakom trenutku.</p>
+
+        <div class="arch">
+          <div class="boxrow">
+            <div class="layer" style="flex:1;border-style:solid;border-color:var(--clay-soft);background:linear-gradient(180deg,#FCF4F0,#FFFDFB)">
+              <div class="lh" style="color:var(--clay-dark)">🟠 Veterani (vlasništvo TVS)</div>
+              <div class="boxrow" style="flex-direction:column">
+                <div class="box clay"><b>Veterani Next.js / Vercel</b><small>javni + igrački + sudijski + koordinatorski</small></div>
+                <div class="box clay"><b>Veterani Supabase</b><small>izvor istine: članovi, turniri, žreb, rezultati, rang</small></div>
+              </div>
+            </div>
+            <div class="layer" style="flex:1;border-style:solid;border-color:var(--court-soft);background:linear-gradient(180deg,#F1F8F3,#FBFCF9)">
+              <div class="lh" style="color:var(--court-dark)">🟢 CourtNomad (vlasništvo autora)</div>
+              <div class="boxrow" style="flex-direction:column">
+                <div class="box green"><b>Expo app + web</b><small>komfor + napredne funkcije</small></div>
+                <div class="box green"><b>CourtNomad Supabase</b><small>rejting, matchmaking, push, travel</small></div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;padding:11px;background:linear-gradient(90deg,#FBF0EB,#EFF6F1);border:1px dashed var(--line2);border-radius:12px;font-weight:600;color:var(--slate);font-size:.9rem">⇄ Integracija: CourtNomad <b>koristi veteransku bazu</b> (ograničen, opoziv pristup) + povezivanje naloga ⇄</div>
+        </div>
+
+        <div class="grid g2" style="margin-top:18px">
+          <div class="card" style="border-top:3px solid var(--court)">
+            <h4 style="margin-bottom:10px">Način pristupa (za dogovor)</h4>
+            <ul class="chk" style="gap:8px">
+              <li><b>Ograničena role/ključ</b> na veteranskoj bazi (preporuka — „koristi njihovu bazu")</li>
+              <li>ili zaseban <b>integracioni API</b> (čistija granica, lakša revizija)</li>
+              <li>Opoziv pristupa = trenutno razdvajanje, bez štete po veterane</li>
+            </ul>
+          </div>
+          <div class="card" style="border-top:3px solid var(--clay)">
+            <h4 style="margin-bottom:10px">Povezivanje naloga</h4>
+            <ul class="chk" style="gap:8px">
+              <li>CourtNomad korisnik „preuzme" svoj TVS profil (verifikacija)</li>
+              <li>Mapiranje CourtNomad ↔ veteranski član</li>
+              <li>Veteranski podaci ostaju u veteranskoj bazi (izvor istine)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="note info"><span class="ni">🧩</span><div>Realizuje se u <b>Fazi 6</b>. Do tada veteranski sistem radi potpuno samostalno; integracija je dodatak, ne uslov.</div></div>
+      </section>
+
+      <!-- ===== 10 QA ===== -->
+      <section id="qa">
+        <div class="sec-h"><span class="num">10</span><h2>QA, deploy i rizici</h2></div>
+        <p class="sec-sub">Kako osiguravamo ispravnost (posebno obračun bodova i žreb), kako objavljujemo i šta su rizici.</p>
+
+        <div class="grid g3">
+          <div class="feat green"><div class="ic">🧪</div><h4>Testiranje</h4><p>Jedinični testovi za žreb i bodovanje; <b>E2E tok turnira</b> (prijava → žreb → rezultat → obračun); validacija migracije.</p></div>
+          <div class="feat"><div class="ic">🚦</div><h4>Deploy</h4><p>Vercel preview po PR-u, staging baza; produkcija tek po prolasku testova i provere migracije.</p></div>
+          <div class="feat"><div class="ic">⏪</div><h4>Rollback</h4><p>Verzionisane migracije, backup pre go-live; mogućnost vraćanja; audit-log za rekonstrukciju.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Rizici i ublažavanje</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Rizik</th><th>Ublažavanje</th></tr></thead>
+            <tbody>
+              <tr><td>Pogrešan obračun bodova (dva modela)</td><td>Testovi po modelu; preračun je idempotentan; audit-log; ručna korekcija koordinatora</td></tr>
+              <tr><td>Greška u žrebu na terenu</td><td>Koordinatorski opoziv uz audit; ručna izmena pre zaključavanja</td></tr>
+              <tr><td>Neusklađena migracija</td><td>Validacioni izveštaj (brojevi/bodovi/rang) pre go-live; čuvanje starih ID-jeva</td></tr>
+              <tr><td>Slaba mreža na terenu</td><td>PWA/offline-tolerantan unos, sinhronizacija kasnije</td></tr>
+              <tr><td>Razdvajanje od CourtNomad-a</td><td>Odvojene baze + opoziv pristupa; veterani nezavisni</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="eyebrow-line">Otvorena pitanja (za potvrdu)</div>
+        <ul class="chk x" style="gap:8px">
+          <li>Pristup postojećoj <b>bazi</b> radi migracije (format/izvoz)</li>
+          <li>Pune tablice bodova za oba modela (vrednosti po kosturu/seriji)</li>
+          <li>Da li <b>strani gosti</b> osvajaju bodove za TVS rang ili igraju van konkurencije</li>
+          <li>Način integracije s CourtNomad-om (ograničen ključ vs API) + povezivanje naloga</li>
+          <li>Članarina (1500 din) — samo evidencija ili i potvrda; domen</li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="wrap">
+      <footer class="end">
+        <b>TVS — Plan implementacije (radni dokument)</b><br>
+        Prati glavni dokument „TVS-Redizajn-Specifikacija". Sledeći korak: pristup bazi i potvrda otvorenih pitanja.
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script>
+const NAV=[
+ ["01","Principi i cilj","principi"],
+ ["02","Tehnologija i postavka","stack"],
+ ["03","Model podataka + migracija","model"],
+ ["04","Žreb engine (pravila)","zreb"],
+ ["05","Bodovni modeli (opcija)","bodovanje"],
+ ["06","Editabilnost (matrica)","editabilnost"],
+ ["07","Uloge i prava (RLS)","uloge"],
+ ["08","Faze isporuke","faze"],
+ ["09","Integracija CourtNomad","courtnomad"],
+ ["10","QA, deploy, rizici","qa"],
+];
+function buildNav(){return NAV.map(([n,l,id])=>`<a href="#${id}"><span class="n">${n}</span> ${l}</a>`).join("")}
+document.getElementById('navList').innerHTML=buildNav();
+document.getElementById('drawerNav').innerHTML='<div class="kicker" style="color:#7D90AD;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;margin:0 8px 12px;font-weight:600">Sadržaj</div>'+buildNav();
+document.querySelectorAll('.drawer a').forEach(a=>a.addEventListener('click',()=>{document.querySelector('.drawer').classList.remove('open');document.querySelector('.scrim').classList.remove('open')}));
+const links=[...document.querySelectorAll('#navList a')];
+const map={}; links.forEach(a=>map[a.getAttribute('href').slice(1)]=a);
+const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('on')); const m=map[e.target.id]; if(m)m.classList.add('on')}})},{rootMargin:"-20% 0px -72% 0px"});
+setTimeout(()=>document.querySelectorAll('section[id]').forEach(s=>obs.observe(s)),60);
+</script>
+</body>
+</html>

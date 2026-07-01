@@ -1,0 +1,73 @@
+{
+  "brand": {
+    "name": "Serbian Tennis Veterans",
+    "short": "TVS",
+    "tagline": "Official information system"
+  },
+  "nav": {
+    "calendar": "Calendar",
+    "rankings": "Rankings",
+    "players": "Players",
+    "tournaments": "Tournaments",
+    "rules": "Regulations",
+    "news": "News",
+    "login": "Sign in",
+    "myAccount": "My account",
+    "menu": "Menu"
+  },
+  "home": {
+    "eyebrow": "2026 Season",
+    "title": "The new digital home of Serbian tennis veterans",
+    "lead": "Tournament calendar, live draws and results, rankings and player profiles — in one place, in Serbian and English.",
+    "ctaCalendar": "View calendar",
+    "ctaRankings": "Rankings",
+    "stats": {
+      "players": "players in the database",
+      "categories": "qualitative + age categories",
+      "series": "tournament series + Masters",
+      "disciplines": "disciplines: singles, doubles, mixed"
+    },
+    "sections": {
+      "upcoming": "Upcoming tournaments",
+      "upcomingSub": "Entries and draws for upcoming events.",
+      "rankings": "Rankings",
+      "rankingsSub": "Qualitative (I–V) and age categories, by discipline.",
+      "explore": "Explore the system"
+    },
+    "cards": {
+      "calendar": { "title": "Tournament calendar", "desc": "Filter by series, system, discipline and city." },
+      "players": { "title": "Player profiles", "desc": "Points, ranking movement, tournament history, head-to-head." },
+      "referee": { "title": "Referee portal", "desc": "Draws, schedule and result entry — optimized for on-court use." },
+      "rules": { "title": "Regulations", "desc": "Propositions, scoring and member categories." }
+    }
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "builtWith": "Next.js · Supabase · Vercel",
+    "sections": {
+      "explore": "Explore",
+      "account": "Account",
+      "about": "Information"
+    },
+    "links": {
+      "calendar": "Calendar",
+      "rankings": "Rankings",
+      "players": "Players",
+      "rules": "Regulations",
+      "news": "News",
+      "login": "Player sign in",
+      "referee": "Referee portal",
+      "about": "About the association",
+      "contact": "Contact"
+    }
+  },
+  "common": {
+    "loading": "Loading…",
+    "notFoundTitle": "Page not found",
+    "notFoundDesc": "The requested page does not exist or has been moved.",
+    "backHome": "Back to home",
+    "language": "Language",
+    "wip": "In progress",
+    "wipDesc": "This part of the system is under construction and will be available soon."
+  }
+}

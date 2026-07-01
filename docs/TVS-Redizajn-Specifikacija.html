@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVS · Redizajn — Specifikacija sistema | Teniski Veterani Srbije</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --clay:#C8553D; --clay-dark:#9E3B28; --clay-soft:#E8917A;
+  --court:#2F6E4F; --court-dark:#1F4C36; --court-soft:#5FA37E;
+  --ball:#D6E84B; --ball-deep:#B7CC2E;
+  --navy:#15233A; --ink:#1B2A41; --slate:#46566C; --muted:#7A879B;
+  --bg:#F7F3EC; --bg2:#EFE8DD; --card:#FFFFFF; --line:#E6DED1; --line2:#D9CFBE;
+  --ok:#2F8F5B; --warn:#D98A1F; --bad:#C8413B; --info:#3B6FB0;
+  --r:16px; --r-sm:10px; --r-lg:26px;
+  --sh-sm:0 1px 2px rgba(20,35,58,.06), 0 2px 8px rgba(20,35,58,.05);
+  --sh:0 6px 24px rgba(20,35,58,.09); --sh-lg:0 20px 60px rgba(20,35,58,.16);
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:24px}
+body{
+  margin:0; font-family:'Inter',system-ui,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--ink); background:var(--bg);
+  -webkit-font-smoothing:antialiased; line-height:1.62; font-size:16px;
+}
+h1,h2,h3,h4,h5{font-family:'Sora',system-ui,sans-serif; line-height:1.18; color:var(--navy); margin:0}
+a{color:var(--clay-dark); text-decoration:none}
+::selection{background:var(--ball); color:var(--navy)}
+
+/* LAYOUT */
+.shell{display:grid; grid-template-columns:288px 1fr; max-width:1500px; margin:0 auto; min-height:100vh}
+.side{
+  position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto;
+  background:linear-gradient(180deg,var(--navy),#0F1B2E); color:#E8EEF6; padding:26px 20px 40px;
+}
+.side::-webkit-scrollbar{width:7px} .side::-webkit-scrollbar-thumb{background:#33425a; border-radius:8px}
+.brand{display:flex; gap:13px; align-items:center; margin-bottom:6px}
+.brand .logo{
+  width:46px;height:46px;border-radius:13px;flex:0 0 auto;
+  background:radial-gradient(circle at 32% 30%, var(--ball), var(--ball-deep) 70%);
+  display:grid;place-items:center; box-shadow:inset 0 0 0 3px rgba(255,255,255,.18), var(--sh);
+  position:relative; overflow:hidden;
+}
+.brand .logo::before{content:""; position:absolute; inset:0; background:
+  radial-gradient(40px 40px at -8px 50%, transparent 18px, rgba(20,35,58,.55) 19px 21px, transparent 22px),
+  radial-gradient(40px 40px at 54px 50%, transparent 18px, rgba(20,35,58,.55) 19px 21px, transparent 22px);}
+.brand b{font-family:'Sora'; font-weight:800; font-size:1.06rem; color:#fff; letter-spacing:.2px; display:block}
+.brand span{font-size:.72rem; color:#9FB2CC; letter-spacing:.14em; text-transform:uppercase}
+.side .kicker{font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; color:#7D90AD; margin:26px 8px 9px; font-weight:600}
+.nav a{
+  display:flex; align-items:center; gap:11px; color:#C6D3E6; padding:8.5px 12px; border-radius:10px;
+  font-size:.9rem; font-weight:500; transition:.16s; border:1px solid transparent;
+}
+.nav a .n{font-family:var(--mono); font-size:.72rem; color:#6E82A0; width:20px; text-align:right}
+.nav a:hover{background:rgba(255,255,255,.06); color:#fff}
+.nav a.on{background:linear-gradient(90deg,rgba(200,85,61,.26),rgba(200,85,61,.05)); color:#fff; border-color:rgba(200,85,61,.45)}
+.nav a.on .n{color:var(--clay-soft)}
+.side .foot{margin-top:28px; padding-top:18px; border-top:1px solid #2A3953; font-size:.74rem; color:#7D90AD}
+
+.main{min-width:0; padding:0 0 80px}
+.topbar,.drawer,.scrim{display:none}
+.wrap{max-width:1020px; margin:0 auto; padding:0 34px}
+
+/* HERO */
+.hero{
+  position:relative; overflow:hidden; color:#fff; padding:74px 0 64px;
+  background:
+    radial-gradient(1100px 460px at 88% -8%, rgba(214,232,75,.20), transparent 60%),
+    radial-gradient(760px 420px at 6% 16%, rgba(200,85,61,.40), transparent 62%),
+    linear-gradient(135deg,#16263E 0%, #13314A 52%, #1C5340 100%);
+}
+.hero::after{content:""; position:absolute; inset:0; opacity:.5; pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:46px 46px; mask:linear-gradient(180deg,#000,transparent 78%)}
+.hero .wrap{position:relative; z-index:2}
+.hero .eyebrow{display:inline-flex; gap:9px; align-items:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2);
+  padding:7px 15px; border-radius:100px; font-size:.74rem; letter-spacing:.13em; text-transform:uppercase; font-weight:600; color:#EAF1F8; backdrop-filter:blur(6px)}
+.hero h1{font-size:clamp(2.2rem,4.6vw,3.5rem); font-weight:800; color:#fff; margin:20px 0 0; letter-spacing:-.5px}
+.hero h1 em{font-style:normal; color:var(--ball)}
+.hero .lead{font-size:1.12rem; color:#D7E2F0; max-width:640px; margin:18px 0 0}
+.hero .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:30px}
+.chip{display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22);
+  color:#fff; padding:8px 14px; border-radius:11px; font-size:.84rem; font-weight:600}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--ball); display:inline-block}
+.hero .meta{display:flex; flex-wrap:wrap; gap:26px; margin-top:34px; padding-top:24px; border-top:1px solid rgba(255,255,255,.16)}
+.hero .meta div{font-size:.82rem; color:#A9BBD2}
+.hero .meta b{display:block; font-family:'Sora'; font-size:1.5rem; color:#fff; font-weight:700}
+
+/* SECTIONS */
+section{padding:54px 0 8px}
+.sec-h{display:flex; align-items:baseline; gap:14px; margin-bottom:8px}
+.sec-h .num{font-family:var(--mono); font-size:.82rem; color:var(--clay); font-weight:500; padding-top:6px}
+.sec-h h2{font-size:1.92rem; font-weight:800; letter-spacing:-.4px}
+.sec-sub{color:var(--slate); font-size:1.04rem; max-width:760px; margin:0 0 26px; padding-left:38px}
+.eyebrow-line{display:flex; align-items:center; gap:12px; color:var(--clay-dark); font-weight:700; font-size:.74rem; letter-spacing:.16em; text-transform:uppercase; margin:34px 0 14px}
+.eyebrow-line::before{content:""; width:26px; height:3px; border-radius:3px; background:var(--clay)}
+
+p{margin:0 0 15px}
+.lead-p{font-size:1.06rem; color:var(--slate)}
+
+/* CARDS */
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--sh-sm); padding:24px}
+.grid{display:grid; gap:18px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.feat{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:22px; box-shadow:var(--sh-sm); transition:.18s; position:relative; overflow:hidden}
+.feat:hover{transform:translateY(-3px); box-shadow:var(--sh); border-color:var(--line2)}
+.feat .ic{width:42px;height:42px;border-radius:11px; display:grid;place-items:center; font-size:1.2rem; margin-bottom:13px;
+  background:linear-gradient(135deg,#FBEFE9,#F6E6DC); border:1px solid #F0DDCF}
+.feat h4{font-size:1.04rem; font-weight:700; margin-bottom:6px}
+.feat p{font-size:.9rem; color:var(--slate); margin:0}
+.feat.green .ic{background:linear-gradient(135deg,#E7F3EC,#D9EEE0); border-color:#CDE8D6}
+.feat.ball .ic{background:linear-gradient(135deg,#F4F7DA,#EAF0C2); border-color:#E2EAB0}
+.feat.navy .ic{background:linear-gradient(135deg,#E9EEF6,#DEE7F2); border-color:#D2DEEE}
+
+/* PILLS / BADGES */
+.pill{display:inline-flex; align-items:center; gap:6px; padding:3px 11px; border-radius:100px; font-size:.76rem; font-weight:700; letter-spacing:.02em}
+.pill.clay{background:#F8E5DE; color:var(--clay-dark)}
+.pill.green{background:#DCF0E4; color:var(--court-dark)}
+.pill.ball{background:#EEF3C8; color:#5C6B16}
+.pill.navy{background:#E3EAF5; color:#284065}
+.pill.line{background:#fff; border:1px solid var(--line2); color:var(--slate)}
+.tag{font-family:var(--mono); font-size:.74rem; background:var(--bg2); border:1px solid var(--line); border-radius:7px; padding:2px 8px; color:var(--slate)}
+
+/* TABLES */
+.tbl{width:100%; border-collapse:collapse; font-size:.88rem; background:var(--card); border:1px solid var(--line); border-radius:var(--r); overflow:hidden}
+.tbl th{background:var(--navy); color:#EAF1F8; text-align:left; padding:11px 13px; font-family:'Sora'; font-weight:600; font-size:.8rem; letter-spacing:.02em}
+.tbl td{padding:10px 13px; border-top:1px solid var(--line)}
+.tbl tr:nth-child(even) td,.tbl tbody tr:nth-child(even){background:#FBF8F3}
+.tbl .c{text-align:center} .tbl .r{text-align:right}
+.tbl-wrap{overflow-x:auto; border-radius:var(--r); box-shadow:var(--sh-sm)}
+
+/* CALLOUT */
+.note{display:flex; gap:14px; padding:17px 19px; border-radius:var(--r-sm); font-size:.92rem; border:1px solid; margin:18px 0}
+.note .ni{font-size:1.15rem; flex:0 0 auto; line-height:1.4}
+.note.tip{background:#EAF4EE; border-color:#C6E4D2; color:#235640}
+.note.warn{background:#FBF1DF; border-color:#F0D9A8; color:#7C5510}
+.note.info{background:#E9F0F9; border-color:#CBDCF0; color:#244064}
+.note.prio{background:linear-gradient(120deg,#FBE7DF,#F9EFE5); border-color:#F0C9B6; color:#8A3017}
+
+/* ARCH DIAGRAM */
+.arch{display:grid; gap:14px; margin:8px 0}
+.layer{border:1px dashed var(--line2); border-radius:var(--r); padding:16px; background:linear-gradient(180deg,#fff,#FCFAF6)}
+.layer .lh{font-size:.72rem; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); font-weight:700; margin-bottom:11px}
+.boxrow{display:flex; flex-wrap:wrap; gap:11px}
+.box{flex:1 1 150px; background:#fff; border:1px solid var(--line); border-radius:11px; padding:13px 14px; box-shadow:var(--sh-sm)}
+.box b{font-size:.92rem; display:block} .box small{color:var(--muted); font-size:.78rem}
+.box.clay{border-top:3px solid var(--clay)} .box.green{border-top:3px solid var(--court)}
+.box.navy{border-top:3px solid var(--navy)} .box.ball{border-top:3px solid var(--ball-deep)}
+.flowarrow{text-align:center; color:var(--clay); font-size:1.3rem; line-height:.4}
+
+/* WIREFRAME / MOCKUPS */
+.mock{border:1px solid var(--line2); border-radius:var(--r); overflow:hidden; box-shadow:var(--sh); background:#fff; margin:10px 0}
+.mock .bar{display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--navy); color:#fff}
+.mock .bar .dots{display:flex; gap:6px} .mock .bar .dots i{width:10px;height:10px;border-radius:50%}
+.mock .bar .dots i:nth-child(1){background:#ff6058} .mock .bar .dots i:nth-child(2){background:#ffbd2e} .mock .bar .dots i:nth-child(3){background:#28c93f}
+.mock .bar .url{flex:1; background:rgba(255,255,255,.12); border-radius:7px; padding:4px 11px; font-family:var(--mono); font-size:.74rem; color:#C7D5EA}
+.mock .scr{padding:18px; background:linear-gradient(180deg,#FCFBF8,#F6F2EB)}
+.mockttl{font-family:'Sora'; font-weight:700; color:var(--navy)}
+.skel{background:linear-gradient(90deg,#ECE6DB,#F3EEE5,#ECE6DB); border-radius:6px; height:11px; display:block}
+.wf-row{display:flex; gap:12px; flex-wrap:wrap}
+.wf-card{background:#fff; border:1px solid var(--line); border-radius:11px; padding:13px; flex:1 1 0; min-width:0; box-shadow:var(--sh-sm)}
+
+/* BRACKET */
+.bracket{display:flex; gap:30px; overflow-x:auto; padding:8px 2px 14px}
+.round{display:flex; flex-direction:column; justify-content:space-around; gap:14px; min-width:172px}
+.rd-name{font-size:.7rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); font-weight:700; text-align:center; margin-bottom:4px}
+.seed{background:#fff; border:1px solid var(--line2); border-radius:9px; box-shadow:var(--sh-sm); overflow:hidden}
+.seed .p{display:flex; justify-content:space-between; gap:8px; padding:7px 10px; font-size:.82rem}
+.seed .p+.p{border-top:1px solid var(--line)}
+.seed .p.win{background:#F2F8F3; font-weight:700; color:var(--court-dark)}
+.seed .p .s{font-family:var(--mono); color:var(--slate); font-size:.78rem}
+.seed .p .nm{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.seed .p .sd{font-family:var(--mono); font-size:.68rem; color:var(--muted); margin-right:5px}
+
+/* SCHEDULE GRID */
+.sched{width:100%; border-collapse:collapse; font-size:.8rem}
+.sched th,.sched td{border:1px solid var(--line); padding:7px 9px; text-align:left}
+.sched th{background:var(--bg2); font-family:'Sora'; font-weight:600; font-size:.74rem}
+.sched .t{font-family:var(--mono); color:var(--clay-dark); font-weight:600; background:#FBF6F0; white-space:nowrap}
+.match-chip{background:#fff; border:1px solid var(--line2); border-left:3px solid var(--court); border-radius:7px; padding:5px 8px; font-size:.76rem}
+.match-chip.done{border-left-color:var(--muted); opacity:.72}
+.match-chip.live{border-left-color:var(--clay); box-shadow:0 0 0 2px #F8E5DE}
+
+/* TABS */
+.tabs{display:flex; gap:7px; flex-wrap:wrap; margin:6px 0 18px}
+.tab{padding:9px 16px; border-radius:100px; border:1px solid var(--line2); background:#fff; font-weight:600; font-size:.86rem; color:var(--slate); cursor:pointer; transition:.15s; font-family:'Sora'}
+.tab:hover{border-color:var(--clay-soft)}
+.tab.on{background:var(--clay); color:#fff; border-color:var(--clay)}
+.panel{display:none; animation:fade .3s ease}
+.panel.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* CHECKLIST */
+.chk{list-style:none; padding:0; margin:0; display:grid; gap:9px}
+.chk li{display:flex; gap:11px; align-items:flex-start; font-size:.92rem; color:var(--slate)}
+.chk li::before{content:"✓"; flex:0 0 auto; width:21px;height:21px; border-radius:6px; background:#E4F1E9; color:var(--ok); font-weight:800; font-size:.78rem; display:grid; place-items:center; margin-top:2px}
+.chk.x li::before{content:"›"; background:#F8E5DE; color:var(--clay-dark)}
+
+/* ROADMAP */
+.road{position:relative; margin:8px 0 8px 6px; padding-left:30px}
+.road::before{content:""; position:absolute; left:8px; top:6px; bottom:6px; width:2px; background:linear-gradient(var(--clay),var(--court))}
+.phase{position:relative; margin-bottom:20px}
+.phase::before{content:""; position:absolute; left:-29px; top:3px; width:16px;height:16px; border-radius:50%; background:#fff; border:3px solid var(--clay); box-shadow:0 0 0 4px #F8E5DE}
+.phase h4{font-size:1.04rem; display:flex; gap:10px; align-items:center}
+.phase .ph-t{font-family:var(--mono); font-size:.72rem; color:#fff; background:var(--clay); padding:2px 9px; border-radius:7px}
+.phase p{font-size:.9rem; color:var(--slate); margin:5px 0 0}
+
+/* DATA MODEL */
+.erd{display:grid; grid-template-columns:repeat(auto-fill,minmax(214px,1fr)); gap:14px}
+.ent{background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--sh-sm)}
+.ent h5{background:var(--navy); color:#fff; font-size:.84rem; padding:8px 12px; display:flex; justify-content:space-between; align-items:center}
+.ent h5 .k{font-family:var(--mono); font-size:.64rem; background:rgba(255,255,255,.16); padding:1px 6px; border-radius:5px; color:#CFE0CF}
+.ent ul{list-style:none; margin:0; padding:6px 0}
+.ent li{font-size:.78rem; padding:3px 12px; display:flex; justify-content:space-between; gap:8px; color:var(--slate)}
+.ent li .ty{font-family:var(--mono); font-size:.68rem; color:var(--muted)}
+.ent li.pk{color:var(--clay-dark); font-weight:600}
+.ent li.fk{color:var(--info)}
+
+footer.end{margin-top:60px; padding:34px; background:var(--navy); color:#A9BBD2; border-radius:var(--r-lg); text-align:center}
+footer.end b{color:#fff; font-family:'Sora'}
+
+/* RESPONSIVE */
+@media(max-width:1080px){.g4{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{display:none}
+  .topbar{display:flex; position:sticky; top:0; z-index:40; align-items:center; gap:12px; padding:12px 18px; background:rgba(21,35,58,.97); backdrop-filter:blur(8px); color:#fff}
+  .topbar b{font-family:'Sora'; font-weight:700}
+  .topbar button{margin-left:auto; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25); color:#fff; border-radius:9px; padding:7px 12px; font-weight:600}
+  .drawer{display:block; position:fixed; inset:0 30% 0 0; background:#0F1B2E; z-index:60; padding:22px; overflow-y:auto; transform:translateX(-105%); transition:.25s; box-shadow:var(--sh-lg)}
+  .drawer.open{transform:none}
+  .scrim{display:block; position:fixed; inset:0; background:rgba(8,14,24,.5); z-index:55; opacity:0; pointer-events:none; transition:.25s}
+  .scrim.open{opacity:1; pointer-events:auto}
+  .wrap{padding:0 20px}
+}
+@media(max-width:680px){.g2,.g3,.g4{grid-template-columns:1fr} .sec-sub{padding-left:0} .hero{padding:54px 0 44px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <b>TVS · Specifikacija</b>
+  <button onclick="document.querySelector('.drawer').classList.add('open');document.querySelector('.scrim').classList.add('open')">☰ Sadržaj</button>
+</div>
+<div class="scrim" onclick="this.classList.remove('open');document.querySelector('.drawer').classList.remove('open')"></div>
+<nav class="drawer" id="drawerNav"></nav>
+
+<div class="shell">
+  <aside class="side">
+    <div class="brand">
+      <div class="logo"></div>
+      <div><b>Teniski Veterani Srbije</b><span>Redizajn · Specifikacija</span></div>
+    </div>
+    <div class="kicker">Sadržaj</div>
+    <div class="nav" id="navList"></div>
+    <div class="foot">
+      Radni dokument v1.0 · jun 2026<br>Next.js · Vercel · Supabase
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="hero">
+      <div class="wrap">
+        <span class="eyebrow"><i style="width:8px;height:8px;border-radius:50%;background:var(--ball);display:inline-block"></i> Predlog redizajna informacionog sistema</span>
+        <h1>Novi digitalni dom <em>teniskih veterana Srbije</em></h1>
+        <p class="lead">Kompletna specifikacija četiri povezana portala — javni sajt, igrački portal, sudijski/direktorski portal i koordinatorski panel — po uzoru na ITF World Tennis Masters Tour, prilagođeno pravilima i kategorijama TVS-a.</p>
+        <div class="chips">
+          <span class="chip"><i></i> Next.js (App Router)</span>
+          <span class="chip"><i></i> Supabase (Postgres + Auth)</span>
+          <span class="chip"><i></i> Vercel hosting</span>
+          <span class="chip"><i></i> Srpski + Engleski</span>
+          <span class="chip"><i></i> Singl · Dubl · Miks</span>
+        </div>
+        <div class="meta">
+          <div><b>4</b> povezana portala</div>
+          <div><b>~2.600</b> igrača u bazi</div>
+          <div><b>5+11</b> kvalitativnih + starosnih kategorija</div>
+          <div><b>4</b> serije turnira + Master</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <!-- ============ 01 PREGLED ============ -->
+      <section id="pregled">
+        <div class="sec-h"><span class="num">01</span><h2>Pregled i cilj projekta</h2></div>
+        <p class="sec-sub">Šta gradimo, zašto, i kako se novi sistem odnosi prema postojećem sajtu i prema ITF Masters Tour modelu.</p>
+
+        <p class="lead-p">Cilj je da Teniski Veterani Srbije dobiju moderan, brz i pouzdan informacioni sistem koji objedinjuje <b>četiri portala</b> oko jedne baze podataka. Javnosti pruža iskustvo na nivou ITF Masters Tour-a (kalendar, profili igrača, žreb, rezultati uživo, rang liste), a organizatorima daje alate za vođenje turnira od prijave do finala — uz puno poštovanje postojećih TVS pravila, kategorija i sistema bodovanja.</p>
+
+        <div class="eyebrow-line">Četiri portala, jedna baza</div>
+        <div class="grid g4">
+          <div class="feat navy"><div class="ic">🌐</div><h4>Javni sajt</h4><p>Kalendar, turniri, žreb i rezultati uživo, rang liste, profili igrača, vesti — dvojezično (SR/EN).</p></div>
+          <div class="feat green"><div class="ic">🎾</div><h4>Igrački portal</h4><p>Nalog igrača: prijava/odjava na turnire, izbor kategorije i partnera, lični rezultati i bodovi.</p></div>
+          <div class="feat"><div class="ic">⚖️</div><h4>Sudijski portal <span class="pill clay">prioritet</span></h4><p>Direktor/sudija: žreb, satnica, unos rezultata po setovima, evidencija loptica i uplata.</p></div>
+          <div class="feat ball"><div class="ic">🛠️</div><h4>Koordinatorski panel</h4><p>Koordinator (takmičarski autoritet): članovi, klubovi, kalendar, sudije, bodovni model, rang, korekcije. Admin (tehnički) drži sistem.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Ključni ciljevi</div>
+        <div class="grid g2">
+          <ul class="chk">
+            <li>Sve funkcije postojećeg sajta — zadržane i unapređene</li>
+            <li>Iskustvo nivoa ITF Masters Tour-a (filtriranje, žreb, live rezultati)</li>
+            <li>Podrška za singl, dubl i miks u svim kategorijama</li>
+            <li>Dvojezičnost zbog gostujućih igrača iz inostranstva</li>
+          </ul>
+          <ul class="chk">
+            <li>Sudijski portal optimizovan za rad na terenu (mobilni/tablet)</li>
+            <li>Automatski obračun rang liste (N najboljih — 8/10/13, 52 nedelje)</li>
+            <li>Migracija postojeće baze igrača i istorije rezultata</li>
+            <li>Skalabilnost i niski troškovi održavanja (serverless)</li>
+          </ul>
+        </div>
+
+        <div class="note info"><span class="ni">ℹ️</span><div><b>Polazne odluke (dogovorene):</b> discipline = <b>singl + dubl + miks</b>; jezici = <b>srpski + engleski</b>; plaćanje = <b>evidencija uplata</b> (bez online naplate u prvoj fazi); sudijski unos = <b>žreb + satnica + rezultat po setovima</b> (bez praćenja poen-po-poen).</div></div>
+        <div class="note tip"><span class="ni">📱</span><div><b>Novo:</b> sistem se povezuje s <b>CourtNomad</b> mobilnom aplikacijom kroz <b>integraciju</b> (odvojene baze, razdvojivo) — članovi sve rade i s telefona, a podaci ostaju u veteranskoj bazi. Detaljno u sekciji 12.</div></div>
+      </section>
+
+      <!-- ============ 02 POSTOJEĆI ============ -->
+      <section id="postojeci">
+        <div class="sec-h"><span class="num">02</span><h2>Postojeći sistem TVS-a</h2></div>
+        <p class="sec-sub">Analiza trenutnog sajta teniskiveteranisrbije.com — šta već postoji i šta prenosimo.</p>
+
+        <p>Postojeći sajt je već prilično funkcionalan i ima jasno definisana pravila. Novi sistem ne kreće od nule — preuzima logiku, podatke i pravila, a menja tehnologiju, dizajn i korisničko iskustvo.</p>
+
+        <div class="tbl-wrap" style="margin:18px 0">
+          <table class="tbl">
+            <thead><tr><th>Modul</th><th>Trenutno stanje</th><th>U novom sistemu</th></tr></thead>
+            <tbody>
+              <tr><td><b>Kalendar turnira</b></td><td>Lista turnira, filter mesec / TVS-ITF</td><td>Bogat filter (serija, sistem, disciplina, grad, datum) + mapa</td></tr>
+              <tr><td><b>Stranica turnira</b></td><td>Info, domaćin, sudija, „bracket" prikaz mečeva</td><td>Žreb po kategorijama i disciplinama, satnica, live rezultati, pobednici</td></tr>
+              <tr><td><b>Članovi</b></td><td>~2.600 igrača (95 strana), profil /clan/ID</td><td>Pretraga + filteri, bogat profil, statistika, H2H, trofeji</td></tr>
+              <tr><td><b>Rang liste</b></td><td>Kvalitativne (I–V) i starosne (20–75)</td><td>+ po disciplini (S/D/X), pol, istorija pozicija, izvor bodova</td></tr>
+              <tr><td><b>Sudijska aplikacija</b></td><td>Login; žreb, satnica, unos rezultata (zatvoreno)</td><td>Redizajniran portal, mobile-first ★ (detaljno u sekciji 09)</td></tr>
+              <tr><td><b>Igrački nalog</b></td><td>Login; samostalna prijava/odjava na turnire</td><td>Pun portal: profil, partneri, rezultati, obaveštenja</td></tr>
+              <tr><td><b>Pravilnik</b></td><td>Propozicije, bodovanje, kategorije, FAQ</td><td>Isti sadržaj, pretraživo, dvojezično, povezano s podacima</td></tr>
+              <tr><td><b>Vesti / Galerija</b></td><td>Postoji</td><td>CMS kroz admin panel</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid g2">
+          <div class="card" style="border-top:3px solid var(--court)">
+            <h4 style="margin-bottom:10px">✅ Snage koje zadržavamo</h4>
+            <ul class="chk" style="gap:7px">
+              <li>Jasan sistem kategorija (kvalitativne + starosne)</li>
+              <li>Razrađena tablica bodovanja po kosturu žreba</li>
+              <li>Definisane propozicije po serijama (2000/1000/500/250)</li>
+              <li>Postojeća baza igrača i rezultata (migracija)</li>
+            </ul>
+          </div>
+          <div class="card" style="border-top:3px solid var(--clay)">
+            <h4 style="margin-bottom:10px">⚠️ Što unapređujemo</h4>
+            <ul class="chk x" style="gap:7px">
+              <li>Zastareo dizajn i slaba mobilna upotrebljivost</li>
+              <li>Nema dubl/miks konkurencije ni dvojezičnosti</li>
+              <li>Žreb i rezultati nisu vizuelno interaktivni</li>
+              <li>Ručni procesi koje treba automatizovati (rang lista)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 03 ITF ============ -->
+      <section id="itf">
+        <div class="sec-h"><span class="num">03</span><h2>ITF Masters Tour kao uzor</h2></div>
+        <p class="sec-sub">Koje funkcije svetskog veteranskog tenisa preuzimamo i kako ih prilagođavamo TVS-u.</p>
+
+        <p>ITF World Tennis Masters Tour okuplja preko <b>35.000 igrača (30–90+ godina)</b> na <b>550+ turnira u 69 država</b>, sa singl, dubl i miks konkurencijom u petogodišnjim starosnim razredima. Njihov digitalni sistem je referentna tačka za kvalitet — ali ga prilagođavamo: TVS ima i <b>kvalitativne kategorije (I–V)</b> kojih ITF nema, i jednostavniji model bez online naplate.</p>
+
+        <div class="tbl-wrap" style="margin:18px 0">
+          <table class="tbl">
+            <thead><tr><th>ITF funkcija</th><th>Kako radi kod ITF-a</th><th>TVS adaptacija</th></tr></thead>
+            <tbody>
+              <tr><td><b>Kalendar turnira</b></td><td>Filter po datumu, državi, gradaciji (MT1000–MT100)</td><td>Filter po seriji (2000–250), sistemu, disciplini, gradu</td></tr>
+              <tr><td><b>Profili igrača</b></td><td>Bio, rang, statistika, istorija, World Tennis Number</td><td>Bio, klub, kategorija, bodovi, istorija, H2H</td></tr>
+              <tr><td><b>Žreb i rezultati</b></td><td>tournamentsoftware.com — bracket, live skor</td><td>Sopstveni žreb i rezultati (Next.js + Supabase)</td></tr>
+              <tr><td><b>Rang liste</b></td><td>Singl/dubl/miks × starosni razred × pol</td><td>+ kvalitativne kategorije I–V (specifično za TVS)</td></tr>
+              <tr><td><b>IPIN / Tour Zone</b></td><td>Nalog igrača, online prijava i odjava</td><td>Igrački portal (Supabase Auth) — prijava/odjava</td></tr>
+              <tr><td><b>Tim + pojedinačno</b></td><td>World Championships, World Team Cup</td><td>Faza 2 — opcioni timski format (ostaje za kasnije)</td></tr>
+              <tr><td><b>Live Scores</b></td><td>Poen-po-poen uživo</td><td>Status meča + rezultat po setovima (bez poena)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note tip"><span class="ni">🎯</span><div><b>Princip:</b> uzimamo ITF-ovo iskustvo i strukturu (kalendar → turnir → žreb → meč → rezultat → rang), a logiku kategorija i bodovanja zadržavamo iz TVS pravilnika. Tako stranci lako prepoznaju sistem, a domaći igrači zadržavaju svoja pravila.</div></div>
+      </section>
+
+      <!-- ============ 04 KATEGORIJE ============ -->
+      <section id="kategorije">
+        <div class="sec-h"><span class="num">04</span><h2>Kategorije i sistem takmičenja</h2></div>
+        <p class="sec-sub">Dva paralelna sistema svrstavanja, tri discipline i četiri serije turnira — temelj cele baze podataka.</p>
+
+        <div class="eyebrow-line">A · Kvalitativne kategorije (po jačini)</div>
+        <div class="grid g3" style="gap:14px">
+          <div class="feat"><div class="ic" style="font-weight:800;color:var(--clay-dark)">I</div><h4>Elita</h4><p>Bivši takmičari i svi do 35 god. Najjača grupa.</p></div>
+          <div class="feat"><div class="ic" style="font-weight:800;color:var(--clay-dark)">II</div><h4>Napredni</h4><p>Dobri igrači min. 35 god; bivši takmičari stariji od 50.</p></div>
+          <div class="feat"><div class="ic" style="font-weight:800;color:var(--clay-dark)">III</div><h4>Srednji</h4><p>Ispod „dobrih", minimalno 45 godina.</p></div>
+          <div class="feat"><div class="ic" style="font-weight:800;color:var(--clay-dark)">IV</div><h4>Rekreativci</h4><p>Slabiji igrači, minimalno 50 godina.</p></div>
+          <div class="feat"><div class="ic" style="font-weight:800;color:var(--clay-dark)">V</div><h4>Početnici / senior</h4><p>Najstariji i početnici, minimalno 60 godina.</p></div>
+          <div class="feat ball"><div class="ic">⚙️</div><h4>Pravila prelaska</h4><p>1 promena kategorije po sezoni; slabiji smeju u jaču, ne obrnuto. Odluka Takmičarske komisije.</p></div>
+        </div>
+        <div class="note warn"><span class="ni">♀</span><div>Dame se ravnopravno takmiče sa gospodom u svim grupama, ali kategorije <b>IV i V</b> ne mogu igrati dame mlađe od 45 godina.</div></div>
+
+        <div class="eyebrow-line">B · Starosne kategorije (ITF sistem)</div>
+        <p>Stariji mogu igrati u mlađim razredima, ne i obrnuto. Postojeće TVS rang liste već prate ove razrede:</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px">
+          <span class="pill green">20+</span><span class="pill green">30+</span><span class="pill green">35+</span><span class="pill green">40+</span><span class="pill green">45+</span><span class="pill green">50+</span><span class="pill green">55+</span><span class="pill green">60+</span><span class="pill green">65+</span><span class="pill green">70+</span><span class="pill green">75+</span><span class="pill line">80+ / 85+ / 90+ (ITF, opciono)</span>
+        </div>
+
+        <div class="eyebrow-line">C · Discipline</div>
+        <div class="grid g3">
+          <div class="card"><h4>🎾 Singl</h4><p style="font-size:.9rem;color:var(--slate);margin:6px 0 0">Pojedinačno. Osnova postojećeg sistema i većine turnira.</p></div>
+          <div class="card"><h4>👥 Dubl</h4><p style="font-size:.9rem;color:var(--slate);margin:6px 0 0">Parovi. Potreban izbor/poziv partnera i žreb parova.</p></div>
+          <div class="card"><h4>⚥ Miks</h4><p style="font-size:.9rem;color:var(--slate);margin:6px 0 0">Mešoviti parovi. Posebne rang liste i žreb.</p></div>
+        </div>
+
+        <div class="eyebrow-line">D · Serije turnira i format mečeva</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Serija</th><th>Tereni</th><th>Rok prijave</th><th>Format meča</th><th>Maks. bodovi</th></tr></thead>
+            <tbody>
+              <tr><td><span class="pill clay">Serija 2000</span></td><td>min. 6 + rasveta</td><td>utorak 20:00</td><td>2 dobijena tie-break seta</td><td class="c">2000</td></tr>
+              <tr><td><span class="pill clay">Serija 1000</span></td><td>min. 6 + rasveta</td><td>četvrtak 20:00</td><td>produženi set do 9 gemova, 8:8 → TB</td><td class="c">1000</td></tr>
+              <tr><td><span class="pill clay">Serija 500</span></td><td>min. 3 + rasveta</td><td>četvrtak 20:00</td><td>produženi set do 9 gemova, 8:8 → TB</td><td class="c">500</td></tr>
+              <tr><td><span class="pill clay">Serija 250</span></td><td>min. 3 + rasveta</td><td>četvrtak 20:00</td><td>produženi set do 9 gemova, 8:8 → TB</td><td class="c">250</td></tr>
+              <tr><td><span class="pill ball">Master</span></td><td>finale sezone</td><td>po pozivu</td><td>grupni + eliminacija</td><td class="c">poseban</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note info"><span class="ni">📏</span><div><b>Varijante formata (po odluci direktora/sudije):</b> „zlatni poen" na 40:40 (NO-AD); skraćeni format (set kreće 2:2, do 6, 6:6 → TB7, a 1:1 u setovima → super tie-break do 10); kod loših vremenskih uslova treći set kao veliki TB do 10. Sistem mora podržati sve ove varijante pri unosu rezultata.</div></div>
+
+        <div class="eyebrow-line">E · Gostujući i strani igrači</div>
+        <div class="note tip"><span class="ni">🌍</span><div>Strani igrači dobijaju profil sa oznakom države (zastavica) i opciono ITF IPIN. Sistem mora omogućiti da direktor turnira <b>ručno doda gosta</b> u žreb i da se definiše da li gost <b>osvaja bodove</b> za TVS rang listu ili nastupa van konkurencije — <span class="tag">otvoreno pitanje · sekcija 13</span></div></div>
+      </section>
+
+      <!-- ============ 05 BODOVANJE ============ -->
+      <section id="bodovanje">
+        <div class="sec-h"><span class="num">05</span><h2>Bodovanje i rang liste</h2></div>
+        <p class="sec-sub">Motor sistema — automatski obračun bodova po dostignutom kolu i nedeljno ažuriranje rang lista.</p>
+
+        <p>Bodovi zavise od <b>tri faktora</b>: veličine žreba (kostur 8/16/32/64/128), serije turnira (kolone <b>A=2000</b>, <b>I=1000</b>, <b>II=500</b>, <b>III=250</b>) i kola do kog je igrač stigao. Sistem ovu tablicu čuva kao podatak (ne „hardkodovano"), pa Koordinator (Takmičarska komisija) je menja kroz koordinatorski panel.</p>
+
+        <div class="eyebrow-line">Primer · žreb od 32 igrača</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Dostignuto kolo</th><th class="c">A · 2000</th><th class="c">I · 1000</th><th class="c">II · 500</th><th class="c">III · 250</th></tr></thead>
+            <tbody>
+              <tr><td><b>Pobednik</b></td><td class="c">2000</td><td class="c">1000</td><td class="c">500</td><td class="c">250</td></tr>
+              <tr><td>Finale</td><td class="c">1200</td><td class="c">600</td><td class="c">300</td><td class="c">150</td></tr>
+              <tr><td>Polufinale</td><td class="c">720</td><td class="c">360</td><td class="c">180</td><td class="c">90</td></tr>
+              <tr><td>Četvrtfinale</td><td class="c">360</td><td class="c">180</td><td class="c">90</td><td class="c">45</td></tr>
+              <tr><td>Osmina</td><td class="c">180</td><td class="c">90</td><td class="c">45</td><td class="c">20</td></tr>
+              <tr><td>Šesnaestina</td><td class="c">90</td><td class="c">45</td><td class="c">20</td><td class="c">10</td></tr>
+              <tr><td>Utešni bodovi (poraz 1. kolo)</td><td class="c">30</td><td class="c">15</td><td class="c">5</td><td class="c">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.86rem;color:var(--muted);margin-top:8px">Pune tablice za kosture 8, 16, 32, 64 i 128 unose se u koordinatorski panel (preuzimaju se iz postojećeg pravilnika).</p>
+
+        <div class="grid g2" style="margin-top:22px">
+          <div class="card">
+            <h4 style="margin-bottom:12px">🏆 Master turnir (poseban obračun)</h4>
+            <table class="tbl" style="font-size:.84rem">
+              <tbody>
+                <tr><td>Pobednik</td><td class="r"><b>800</b></td></tr>
+                <tr><td>Učesnik finala</td><td class="r">600</td></tr>
+                <tr><td>Učesnik polufinala</td><td class="r">400</td></tr>
+                <tr><td>Učesnik bez pobede</td><td class="r">500</td></tr>
+                <tr><td>Svaka pobeda u grupi</td><td class="r">200</td></tr>
+                <tr><td>Rezerva</td><td class="r">200</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card" style="border-top:3px solid var(--court)">
+            <h4 style="margin-bottom:10px">📊 Logika rang liste</h4>
+            <ul class="chk" style="gap:9px">
+              <li><b>Zbir N najboljih</b> rezultata — N = <b>8, 10 ili 13</b> (koordinator bira na početku sezone)</li>
+              <li>Računaju se samo <b>aktivni turniri</b> — odigrani u poslednjih <b>52 nedelje</b></li>
+              <li>Bodovi stariji od godinu dana <b>automatski ispadaju</b></li>
+              <li>Obračun <b>nedeljno</b>, posebno po kategoriji × disciplini</li>
+              <li>Mogućnost <b>ručne korekcije / brisanja bodova</b> (koordinator, uz audit)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note info"><span class="ni">⚙️</span><div><b>Tehnički:</b> obračun radi kao zakazana funkcija (Supabase cron / edge function) koja za svakog igrača bira <b>N najvećih</b> aktivnih rezultata i upisuje rang. <b>N (8, 10 ili 13) zadaje koordinator na početku sezone</b> kao podešavanje sezone. Istorija pozicija se čuva radi prikaza „kretanja" na profilu (↑↓), kao na ITF-u.</div></div>
+
+        <div class="eyebrow-line">Dva bodovna modela — bira koordinator</div>
+        <div class="grid g2">
+          <div class="card" style="border-top:3px solid var(--court)"><h4 style="margin-bottom:8px">A · Klasični (napredovanje)</h4><p style="font-size:.9rem;color:var(--slate);margin:0">Boduje se po dostignutom kolu (tabela gore); poraz u 1. kolu = mali „utešni" bodovi. Podrazumevani model.</p></div>
+          <div class="card" style="border-top:3px solid var(--clay)"><h4 style="margin-bottom:8px">B · „Svi dobijaju bodove" (Master-stil)</h4><p style="font-size:.9rem;color:var(--slate);margin:0">Svaki učesnik osvaja bodove i bez pobede (npr. bez pobede 500, pobeda u grupi 200, PF 400, finale 600, pobednik 800). Nagrađuje učešće.</p></div>
+        </div>
+        <div class="note tip"><span class="ni">🎛️</span><div><b>Opcija koordinatora:</b> model bodovanja se bira <b>po turniru / seriji / sezoni</b> u koordinatorskom panelu; obračun na „ZAVRŠI TURNIR" koristi izabrani model.</div></div>
+      </section>
+
+      <!-- ============ 06 ARHITEKTURA ============ -->
+      <section id="arhitektura">
+        <div class="sec-h"><span class="num">06</span><h2>Arhitektura i tehnologija</h2></div>
+        <p class="sec-sub">Moderan, serverless stack uz niske troškove održavanja i laku skalabilnost.</p>
+        <div class="note tip"><span class="ni">🧩</span><div><b>Samostalan i razdvojiv:</b> veteranski sistem je zaokružena celina — <b>sopstvena Supabase baza i Next.js</b> — bez zavisnosti od drugih sistema. Integracija sa CourtNomad-om je opciona i opoziva (sekcija 12).</div></div>
+
+        <div class="arch">
+          <div class="layer">
+            <div class="lh">Korisnici · 4 portala (jedan kod, različite uloge)</div>
+            <div class="boxrow">
+              <div class="box navy"><b>🌐 Javni sajt</b><small>posetioci, igrači, gosti</small></div>
+              <div class="box green"><b>🎾 Igrački portal</b><small>član (Auth)</small></div>
+              <div class="box clay"><b>⚖️ Sudijski portal</b><small>direktor / sudija (Auth + role)</small></div>
+              <div class="box ball"><b>🛠️ Koordinator + Admin</b><small>takmičarski autoritet + tehnika</small></div>
+            </div>
+          </div>
+          <div class="flowarrow">▼</div>
+          <div class="layer">
+            <div class="lh">Aplikacija · Next.js (App Router) na Vercel-u</div>
+            <div class="boxrow">
+              <div class="box"><b>React Server Components</b><small>brz prikaz, SEO</small></div>
+              <div class="box"><b>API rute / Server Actions</b><small>žreb, rezultati, obračun</small></div>
+              <div class="box"><b>next-intl (SR/EN)</b><small>dvojezičnost</small></div>
+              <div class="box"><b>PWA / offline</b><small>rad na terenu</small></div>
+            </div>
+          </div>
+          <div class="flowarrow">▼</div>
+          <div class="layer">
+            <div class="lh">Podaci · Supabase (Postgres)</div>
+            <div class="boxrow">
+              <div class="box green"><b>Postgres baza</b><small>igrači, turniri, mečevi…</small></div>
+              <div class="box green"><b>Auth</b><small>nalozi + uloge (RLS)</small></div>
+              <div class="box green"><b>Storage</b><small>foto, dokumenti, galerija</small></div>
+              <div class="box green"><b>Realtime + Cron</b><small>live rezultati, obračun rang</small></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid g4" style="margin-top:22px">
+          <div class="feat navy"><div class="ic">⚡</div><h4>Next.js</h4><p>Najnovija verzija, App Router, SSR/RSC — brzina i SEO za javni deo.</p></div>
+          <div class="feat green"><div class="ic">🗄️</div><h4>Supabase</h4><p>Postgres + Auth + Storage + Realtime. RLS za bezbednost po ulozi.</p></div>
+          <div class="feat"><div class="ic">▲</div><h4>Vercel</h4><p>Auto-deploy, globalni CDN, preview okruženja. Domen se kasnije povezuje.</p></div>
+          <div class="feat ball"><div class="ic">🔐</div><h4>Uloge (RBAC)</h4><p>Gost · Igrač · Sudija/Direktor · Koordinator · Admin — kontrola pristupa.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Uloge i prava pristupa</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Uloga</th><th>Pristup</th><th>Ključne radnje</th></tr></thead>
+            <tbody>
+              <tr><td><span class="pill line">Gost</span></td><td>Javni sajt</td><td>Pregled kalendara, žreba, rezultata, rang lista, profila</td></tr>
+              <tr><td><span class="pill green">Igrač</span></td><td>+ Igrački portal</td><td>Prijava/odjava na turnire, profil, partneri, lični rezultati</td></tr>
+              <tr><td><span class="pill clay">Sudija / Direktor</span></td><td>+ Sudijski portal (svoji turniri)</td><td>Žreb, satnica, unos rezultata, evidencija loptica i uplata</td></tr>
+              <tr><td><span class="pill ball">Koordinator</span></td><td><b>Takmičarski autoritet</b> (sve)</td><td>Članovi i kategorije, klubovi, kalendar i turniri, dodela sudija, bodovni model, obračun ranga, korekcije i opoziv žreba (uz audit), disciplina</td></tr>
+              <tr><td><span class="pill navy">Admin (tehnički)</span></td><td>Sistem / infrastruktura</td><td>Nalozi i uloge, integracije, migracija, prevodi, bezbednost, backup — <b>bez takmičarskih odluka</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 07 FRONT ============ -->
+      <section id="front">
+        <div class="sec-h"><span class="num">07</span><h2>Portal · Javni sajt</h2></div>
+        <p class="sec-sub">Lice organizacije — ono što vidi svako, bez prijave. Dvojezično, brzo, optimizovano za mobilni.</p>
+
+        <div class="grid g3">
+          <div class="feat navy"><div class="ic">📅</div><h4>Kalendar turnira</h4><p>Filteri: mesec, serija, sistem (kvalitet/starost), disciplina, grad, TVS/ITF. Prikaz lista + mapa.</p></div>
+          <div class="feat"><div class="ic">🎯</div><h4>Stranica turnira</h4><p>Info i lokacija, lista prijavljenih, žreb po kategorijama, satnica, rezultati uživo, pobednici.</p></div>
+          <div class="feat green"><div class="ic">📈</div><h4>Rang liste</h4><p>Kvalitativne (I–V) i starosne (20–75+), po disciplini i polu; klik vodi na profil igrača.</p></div>
+          <div class="feat"><div class="ic">👤</div><h4>Profili igrača</h4><p>Foto, klub, kategorija, bodovi, kretanje ranga, istorija turnira, međusobni skor (H2H), trofeji.</p></div>
+          <div class="feat ball"><div class="ic">🔎</div><h4>Direktorijum članova</h4><p>Pretraga ~2.600 igrača, filter po klubu/gradu/kategoriji/godištu.</p></div>
+          <div class="feat"><div class="ic">📰</div><h4>Vesti i galerija</h4><p>Obaveštenja saveza, izveštaji s turnira, foto-galerije (kroz CMS).</p></div>
+          <div class="feat navy"><div class="ic">📖</div><h4>Pravilnik</h4><p>Propozicije, tablica bodovanja, kategorije članova, FAQ, brisanje bodova — pretraživo.</p></div>
+          <div class="feat green"><div class="ic">🌍</div><h4>SR / EN prekidač</h4><p>Ceo javni deo dvojezičan zbog gostujućih igrača iz inostranstva.</p></div>
+          <div class="feat"><div class="ic">📱</div><h4>Responsive + PWA</h4><p>Identično iskustvo na telefonu; „instaliraj na ekran" za brz pristup.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Skica · stranica turnira (javni prikaz)</div>
+        <div class="mock">
+          <div class="bar"><div class="dots"><i></i><i></i><i></i></div><div class="url">teniskiveteranisrbije.rs / turnir / kraljevo-open-2026</div></div>
+          <div class="scr">
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px">
+              <div>
+                <span class="pill clay">Serija 1000</span> <span class="pill green">Sistem: Kvalitet I–V</span>
+                <div class="mockttl" style="font-size:1.25rem;margin-top:7px">Kraljevo Open 2026</div>
+                <div style="font-size:.82rem;color:var(--muted)">18–19.07.2026 · TK Top Tenis, Kraljevo · Direktor: Boris Premović</div>
+              </div>
+              <div style="text-align:right"><span class="pill ball">Prijave otvorene</span><div style="font-size:.76rem;color:var(--muted);margin-top:5px">rok: čet 17.07. 20:00</div></div>
+            </div>
+            <div class="tabs"><span class="tab on">Žreb</span><span class="tab">Satnica</span><span class="tab">Prijavljeni</span><span class="tab">Rezultati</span><span class="tab">Lokacija</span></div>
+            <div class="bracket">
+              <div class="round"><div class="rd-name">Četvrtfinale</div>
+                <div class="seed"><div class="p win"><span class="nm"><span class="sd">1</span>M. Đukelić</span><span class="s">9</span></div><div class="p"><span class="nm">F. Paunović</span><span class="s">5</span></div></div>
+                <div class="seed"><div class="p"><span class="nm">N. Petrović</span><span class="s">7</span></div><div class="p win"><span class="nm">B. Jokić</span><span class="s">9</span></div></div>
+              </div>
+              <div class="round"><div class="rd-name">Polufinale</div>
+                <div class="seed"><div class="p win"><span class="nm"><span class="sd">1</span>M. Đukelić</span><span class="s">9</span></div><div class="p"><span class="nm">B. Jokić</span><span class="s">3</span></div></div>
+              </div>
+              <div class="round"><div class="rd-name">Finale</div>
+                <div class="seed"><div class="p win"><span class="nm"><span class="sd">1</span>M. Đukelić</span><span class="s">🏆</span></div><div class="p"><span class="nm">L. Ćirović</span><span class="s">—</span></div></div>
+              </div>
+            </div>
+            <div style="font-size:.76rem;color:var(--muted);margin-top:6px">Klik na meč otvara detalje rezultata (po setovima). Žreb postoji za svaku kategoriju i disciplinu.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 08 IGRAČI ============ -->
+      <section id="igraci">
+        <div class="sec-h"><span class="num">08</span><h2>Portal · Igrački</h2></div>
+        <p class="sec-sub">Nalog svakog člana — samostalna prijava na turnire i uvid u sopstvene rezultate i bodove.</p>
+
+        <div class="grid g3">
+          <div class="feat green"><div class="ic">🔑</div><h4>Nalog i prijava</h4><p>Postojeći nalozi migrirani; reset lozinke mejlom. Registracija novih članova uz odobrenje koordinatora.</p></div>
+          <div class="feat"><div class="ic">📝</div><h4>Prijava / odjava na turnir</h4><p>Izbor kategorije i discipline, do roka. Provera uslova (rang, kategorija) automatski.</p></div>
+          <div class="feat"><div class="ic">👥</div><h4>Traženje partnera</h4><p>Za dubl/miks — poziv partnera iz baze; obe strane potvrđuju par.</p></div>
+          <div class="feat green"><div class="ic">📊</div><h4>Moji rezultati</h4><p>Istorija mečeva, osvojeni bodovi po turniru, koji bodovi su aktivni a koji ispadaju.</p></div>
+          <div class="feat"><div class="ic">⚙️</div><h4>Profil i kategorija</h4><p>Lični podaci, klub, grad, foto; zahtev za promenu kategorije (odobrava Takmičarska komisija).</p></div>
+          <div class="feat ball"><div class="ic">💳</div><h4>Status uplata</h4><p>Evidencija članarine i kotizacija (bez online naplate) — vidljiv status „plaćeno / na čekanju".</p></div>
+          <div class="feat"><div class="ic">📄</div><h4>Izjava o odgovornosti</h4><p>Digitalna saglasnost (igranje na vlastitu odgovornost) — uslov za prva dva turnira.</p></div>
+          <div class="feat green"><div class="ic">🔔</div><h4>Obaveštenja</h4><p>Žreb objavljen, satnica, izmene, podsetnik na rok prijave (mejl / push).</p></div>
+          <div class="feat"><div class="ic">🌐</div><h4>ITF info</h4><p>Uputstvo i link za IPIN i prijavu na ITF veteranske turnire.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Skica · kontrolna tabla igrača</div>
+        <div class="mock">
+          <div class="bar"><div class="dots"><i></i><i></i><i></i></div><div class="url">moj.teniskiveteranisrbije.rs / pregled</div></div>
+          <div class="scr">
+            <div class="wf-row">
+              <div class="wf-card" style="flex:2 1 320px">
+                <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:8px">Sledeći turnir</div>
+                <div class="mockttl">Dodijev Memorijal — Prokuplje</div>
+                <div style="font-size:.82rem;color:var(--muted);margin:3px 0 10px">25–26.07.2026 · Serija 1000 · Kategorija II · Singl</div>
+                <span class="pill green">✓ Prijavljen</span> <span class="pill line">Odjava do čet 20:00</span>
+                <div style="margin-top:12px;display:flex;gap:8px"><span class="match-chip">🎾 Singl · Kat. II</span><span class="match-chip">👥 Dubl · partner: L. Čudić</span></div>
+              </div>
+              <div class="wf-card">
+                <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:8px">Moj rang</div>
+                <div style="font-family:'Sora';font-size:2rem;font-weight:800;color:var(--clay-dark)">#6 <span style="font-size:.9rem;color:var(--ok)">▲2</span></div>
+                <div style="font-size:.82rem;color:var(--muted)">Kategorija I · Singl</div>
+                <div style="margin-top:10px;font-size:.82rem"><b>1230</b> bodova <span style="color:var(--muted)">· 9 aktivnih turnira</span></div>
+              </div>
+            </div>
+            <div class="wf-row" style="margin-top:12px">
+              <div class="wf-card"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:6px">Status uplata</div><span class="pill green">Članarina ✓</span> <span class="pill ball">Kotizacija na čekanju</span></div>
+              <div class="wf-card"><div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:6px">Obaveštenja</div><div style="font-size:.82rem;color:var(--slate)">🔔 Žreb za Kraljevo Open objavljen</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 09 SUDIJE ============ -->
+      <section id="sudije">
+        <div class="sec-h"><span class="num">09</span><h2>Portal · Sudijski / direktorski <span class="pill clay" style="vertical-align:middle">najvažniji</span></h2></div>
+        <p class="sec-sub">Radni alat organizatora — od zatvaranja prijava do unosa finala. Optimizovan za telefon i tablet na terenu.</p>
+
+        <div class="note prio"><span class="ni">★</span><div><b>Srce sistema.</b> Direktor turnira ovde radi žreb, objavljuje satnicu i unosi rezultate koji <b>direktno hrane rang liste</b>. Sve obaveze iz propozicija (rokovi, format po seriji, izveštaj o lopticama) pretvaramo u vođen, „nepogrešiv" tok rada. <b>Pregledali smo postojeću aplikaciju (ulogovanjem)</b> — njen tačan tok je dokumentovan ispod; novi portal ga zadržava i unapređuje.</div></div>
+
+        <div class="eyebrow-line">Provereno u postojećoj aplikaciji (ulogovanjem)</div>
+        <div class="grid g2" style="align-items:start">
+          <div class="card" style="border-top:3px solid var(--court)">
+            <h4 style="margin-bottom:10px">Stvarni tok rada</h4>
+            <ol style="padding-left:18px;margin:0;font-size:.9rem;color:var(--slate);display:grid;gap:6px">
+              <li>Portal je vezan za <b>jedan turnir</b> (sudija → svoj turnir); prikazuju se samo kategorije s prijavljenima.</li>
+              <li>Po kategoriji: tabela prijavljenih (ID, ime, telefon, klub, <b>bodovi</b>, <b>broj turnira</b>) → ručno se dodele <b>nosioci</b> (padajući 0–8) → „Sačuvaj nosioce".</li>
+              <li>„Kreiraj žreb" — <b>nepovratno</b> (nema izmene nosilaca ni ponovnog žreba; grešku rešava admin).</li>
+              <li>Klik na meč → unos rezultata + izbor pobednika.</li>
+              <li><b>Satnica po igraču</b>: dan + sat + minut <b>dolaska</b> (ne ko s kim igra); štampanje; menja se do početka turnira.</li>
+              <li>„ZAVRŠI TURNIR" → <b>obračun bodova</b> svim igračima.</li>
+            </ol>
+          </div>
+          <div class="card" style="border-top:3px solid var(--clay)">
+            <h4 style="margin-bottom:10px">Operativna pravila satnice (iz uputstva)</h4>
+            <ul class="chk" style="gap:7px;font-size:.88rem">
+              <li>Polufinala 9/10/11h · finala 17/18/19h</li>
+              <li>Vrućine &gt;30°C → PF 8/9/10h, finala posle 17h</li>
+              <li>II kolo se ne stavlja pre 16h; kostur 32 zavisi od broja terena</li>
+              <li>2. dan: ako su PF i finale isti dan, odmor ≥ 4h</li>
+              <li><b>Grupa od 5:</b> rang 3–4–5 round-robin (3 meča) → prva dvojica u PF (2. iz grupe vs N1, 1. iz grupe vs N2)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="note tip"><span class="ni">⬆️</span><div><b>Šta novi portal unapređuje u odnosu na postojeći:</b> auto-predlog nosilaca po rangu (uz ručnu izmenu, po ITF pravilu), <b>opozivost žreba uz audit</b> (opoziva koordinator uz audit), satnica po igraču <i>i</i> opciono po terenu/meču (Skica B), live status meča, podrška za dubl/miks i mobilni rad na terenu.</div></div>
+
+        <div class="eyebrow-line">Tok rada direktora turnira</div>
+        <div class="road">
+          <div class="phase"><h4><span class="ph-t">1</span> Prijave</h4><p>Pregled prijavljenih po kategoriji i disciplini. Zatvaranje prijava po roku (serija 1000: čet 20:00). Ručno dodavanje gostiju/stranih igrača.</p></div>
+          <div class="phase"><h4><span class="ph-t">2 · čet 14:00</span> Žreb</h4><p>Automatsko nošenje (seeding) po rang listi, postavljanje „bye"-ova, ručno doterivanje. Generisanje žreba za svaku kategoriju i disciplinu; objava i slanje koordinatoru.</p></div>
+          <div class="phase"><h4><span class="ph-t">3 · čet 19:00</span> Satnica</h4><p>Raspored mečeva po terenima i terminima (ili samo vreme dolaska). Objava igračima; automatsko obaveštenje.</p></div>
+          <div class="phase"><h4><span class="ph-t">4 · dan igranja</span> Rezultati</h4><p>Unos rezultata po setovima čim se meč završi. Pobednik automatski ide u sledeće kolo. Podrška za predaju/retiranje (walkover) i varijante formata.</p></div>
+          <div class="phase"><h4><span class="ph-t">5 · nedelja</span> Finale</h4><p>Oba polufinala iste kategorije igraju se istovremeno; sva finala uneta do kraja poslednjeg dana. Sistem upozorava ako turnir „ulazi u sledeću nedelju".</p></div>
+          <div class="phase"><h4><span class="ph-t">6</span> Izveštaj</h4><p>Evidencija dodeljenih i potrošenih loptica, spisak odigranih mečeva, prijava spornih situacija — automatski izveštaj koordinatoru saveza.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Funkcije sudijskog portala</div>
+        <div class="grid g3">
+          <div class="feat"><div class="ic">📋</div><h4>Upravljanje prijavama</h4><p>Lista po kategoriji/disciplini, zatvaranje po roku, ručni unos gosta, provera prava nastupa.</p></div>
+          <div class="feat"><div class="ic">🗂️</div><h4>Generator žreba</h4><p>Seeding po rangu, bye, automatski + ručni (drag-and-drop), parovi za dubl, više kategorija odjednom.</p></div>
+          <div class="feat"><div class="ic">🕐</div><h4>Satnica</h4><p>Tereni × termini, dodela mečeva, „samo vreme dolaska" opcija, objava i izmene.</p></div>
+          <div class="feat green"><div class="ic">✍️</div><h4>Unos rezultata</h4><p>Po setovima/gemovima, walkover/predaja/retiranje, varijante formata (zlatni poen, skraćeno).</p></div>
+          <div class="feat green"><div class="ic">🔄</div><h4>Auto-napredovanje</h4><p>Unosom rezultata pobednik se sam upisuje u sledeće kolo bracketa.</p></div>
+          <div class="feat"><div class="ic">🎾</div><h4>Loptice i izveštaj</h4><p>Dodeljene/potrošene loptice po meču, automatski izveštaj koordinatoru.</p></div>
+          <div class="feat ball"><div class="ic">💴</div><h4>Evidencija kotizacije</h4><p>Ko je platio kotizaciju (čekiranje po igraču), bez online naplate.</p></div>
+          <div class="feat"><div class="ic">⚠️</div><h4>Sporne situacije</h4><p>Prijava nesportskog ponašanja/kršenja fer-pleja disciplinskoj komisiji.</p></div>
+          <div class="feat navy"><div class="ic">📱</div><h4>Mobile-first + offline</h4><p>Rad na terenu telefonom; unos i kad mreža „pukne", sinhronizacija kasnije.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Nosioci i automatski žreb — po ITF pravilu (Reg. 35–38)</div>
+        <p style="font-size:.94rem;color:var(--slate);margin:0 0 12px">Generator žreba primenjuje ITF logiku nošenja, prilagođenu TVS rang listama (kvalitativna I–V ili starosna, zavisno od sistema turnira). Broj nosilaca po veličini žreba:</p>
+        <div class="grid g2" style="align-items:start;gap:18px">
+          <div class="tbl-wrap" style="box-shadow:none">
+            <table class="tbl">
+              <thead><tr><th>Žreb</th><th class="c">Igrača</th><th class="c">Nosioci · singl</th><th class="c">Nosioci · dubl/miks</th></tr></thead>
+              <tbody>
+                <tr><td><b>8</b></td><td class="c">do 10</td><td class="c">2</td><td class="c">2</td></tr>
+                <tr><td><b>16</b></td><td class="c">11–20</td><td class="c">4</td><td class="c">4</td></tr>
+                <tr><td><b>32</b></td><td class="c">21–40</td><td class="c">8</td><td class="c">8</td></tr>
+                <tr><td><b>64</b></td><td class="c">41–80</td><td class="c">16</td><td class="c">16</td></tr>
+                <tr><td>128</td><td class="c">81–128</td><td class="c">32</td><td class="c">—</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:.8rem;color:var(--muted);margin:8px 0 0">Round-robin (grupe): 3–5 igrača = 0 nosilaca · 6–7 = 2 nosioca.</p>
+          </div>
+          <ul class="chk" style="gap:9px">
+            <li><b>Određivanje:</b> po TVS rang listi relevantne kategorije i discipline, na dan zatvaranja prijava; strogo po redosledu</li>
+            <li><b>Nerangirani se ne nose</b> (osim ručnih „seed exempt" izuzetaka koje odobri Takmičarska komisija)</li>
+            <li><b>Raspored:</b> N1 → vrh (linija 1), N2 → dno; N3–4 žrebom u različite četvrtine; N5–8 u osmine; N9–16 u šesnaestine</li>
+            <li><b>Razdvajanje kluba/države:</b> N1–2 različite polovine, N3–4 različite četvrtine — bitno za goste iz inostranstva i isti klub</li>
+            <li><b>Bye-ovi:</b> manjak igrača → bye nosiocima po opadajućem redu (najjači prvo), ostatak žrebom</li>
+            <li><b>Dubl/miks:</b> nošenje po zbiru bodova para; par s nerangiranim igračem ide ispod parova s istim bodovima</li>
+          </ul>
+        </div>
+        <div class="note tip"><span class="ni">⚙️</span><div><b>Za generator:</b> automatski žreb predlaže raspored po ovim pravilima, uz <b>ručnu korekciju</b> (drag-and-drop) i <b>log izvora nošenja</b> (rang na dan žreba) radi reproduktivnosti i provere. Format „produženog seta do 9" ne utiče na žreb, samo na unos rezultata.</div></div>
+
+        <div class="eyebrow-line">Skica A · generator žreba (seeding po rang listi)</div>
+        <div class="mock">
+          <div class="bar"><div class="dots"><i></i><i></i><i></i></div><div class="url">sudija.teniskiveteranisrbije.rs / turnir / 153 / zreb</div></div>
+          <div class="scr">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+              <span class="pill clay">Kraljevo Open · Kat. I · Singl</span>
+              <span class="tag">Kostur: 8</span><span class="tag">Nosioci: 2</span>
+              <span style="margin-left:auto" class="pill green">⚡ Automatski žreb</span><span class="pill line">✋ Ručno doteruj</span>
+            </div>
+            <div class="bracket">
+              <div class="round"><div class="rd-name">1. kolo</div>
+                <div class="seed"><div class="p"><span class="nm"><span class="sd">N1</span>M. Đukelić</span><span class="s">⠿</span></div><div class="p"><span class="nm">— bye —</span><span class="s"></span></div></div>
+                <div class="seed"><div class="p"><span class="nm">F. Paunović</span><span class="s">⠿</span></div><div class="p"><span class="nm">G. Janićijević</span><span class="s">⠿</span></div></div>
+                <div class="seed"><div class="p"><span class="nm">B. Jokić</span><span class="s">⠿</span></div><div class="p"><span class="nm">M. Vlahović</span><span class="s">⠿</span></div></div>
+                <div class="seed"><div class="p"><span class="nm">N. Petrović</span><span class="s">⠿</span></div><div class="p"><span class="nm"><span class="sd">N2</span>L. Ćirović</span><span class="s">⠿</span></div></div>
+              </div>
+              <div class="round"><div class="rd-name">Polufinale</div>
+                <div class="seed"><div class="p"><span class="nm"><span class="sd">N1</span>M. Đukelić</span><span class="s">·</span></div><div class="p"><span class="nm">pobednik 2</span><span class="s">·</span></div></div>
+                <div class="seed"><div class="p"><span class="nm">pobednik 3</span><span class="s">·</span></div><div class="p"><span class="nm"><span class="sd">N2</span>L. Ćirović</span><span class="s">·</span></div></div>
+              </div>
+              <div class="round"><div class="rd-name">Finale</div>
+                <div class="seed"><div class="p"><span class="nm">—</span><span class="s">·</span></div><div class="p"><span class="nm">—</span><span class="s">·</span></div></div>
+              </div>
+            </div>
+            <div style="font-size:.76rem;color:var(--muted);margin-top:8px">⠿ označava da se igrač može prevući (drag) na drugu poziciju. Nosioci (N1, N2) automatski razdvojeni po rang listi.</div>
+          </div>
+        </div>
+
+        <div class="eyebrow-line">Skica B · satnica (tereni × termini)</div>
+        <div class="mock">
+          <div class="bar"><div class="dots"><i></i><i></i><i></i></div><div class="url">sudija.teniskiveteranisrbije.rs / turnir / 153 / satnica</div></div>
+          <div class="scr">
+            <div class="tbl-wrap">
+              <table class="sched">
+                <thead><tr><th style="width:64px">Vreme</th><th>Teren 1</th><th>Teren 2</th><th>Teren 3</th></tr></thead>
+                <tbody>
+                  <tr><td class="t">09:00</td><td><span class="match-chip done">Kat I · Đukelić — bye</span></td><td><span class="match-chip done">Kat I · Paunović ⁄ Janićijević</span></td><td><span class="match-chip done">Kat II · Jokić ⁄ Vlahović</span></td></tr>
+                  <tr><td class="t">10:30</td><td><span class="match-chip live">▶ Kat I · Jokić ⁄ Vlahović</span></td><td><span class="match-chip">Kat II · Petrović ⁄ Ćirović</span></td><td><span class="match-chip">Dubl · Đukelić/Čudić ⁄ …</span></td></tr>
+                  <tr><td class="t">12:00</td><td><span class="match-chip">PF Kat I</span></td><td><span class="match-chip">PF Kat I</span></td><td><span class="match-chip">PF Kat II</span></td></tr>
+                  <tr><td class="t">16:00</td><td><span class="match-chip">🏆 Finale Kat I</span></td><td><span class="match-chip">🏆 Finale Kat II</span></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:.76rem;color:var(--muted);margin-top:8px">Zeleno = završeno · narandžasto „▶" = u toku. Oba polufinala iste kategorije zakazana istovremeno (po propozicijama).</div>
+          </div>
+        </div>
+
+        <div class="eyebrow-line">Skica C · unos rezultata po setovima</div>
+        <div class="mock">
+          <div class="bar"><div class="dots"><i></i><i></i><i></i></div><div class="url">sudija.teniskiveteranisrbije.rs / mec / 4821</div></div>
+          <div class="scr">
+            <div class="wf-row">
+              <div class="wf-card" style="flex:2 1 340px">
+                <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:10px">Polufinale · Kat. I · Singl · Teren 1</div>
+                <table style="width:100%;border-collapse:collapse;font-size:.92rem">
+                  <tr style="border-bottom:1px solid var(--line)"><td style="padding:9px 4px"><b>M. Đukelić</b> <span class="tag">N1</span></td><td style="text-align:center;width:46px"><input style="width:38px;text-align:center;border:1px solid var(--line2);border-radius:7px;padding:5px" value="9"></td><td style="text-align:center;width:46px"><input style="width:38px;text-align:center;border:1px solid var(--line2);border-radius:7px;padding:5px" value="—"></td></tr>
+                  <tr><td style="padding:9px 4px">B. Jokić</td><td style="text-align:center"><input style="width:38px;text-align:center;border:1px solid var(--line2);border-radius:7px;padding:5px" value="3"></td><td style="text-align:center"><input style="width:38px;text-align:center;border:1px solid var(--line2);border-radius:7px;padding:5px" value="—"></td></tr>
+                </table>
+                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+                  <span class="pill clay">💾 Sačuvaj i napreduj pobednika</span>
+                  <span class="pill line">Predaja / WO</span>
+                  <span class="pill line">Retiranje</span>
+                </div>
+              </div>
+              <div class="wf-card">
+                <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:8px">Format meča</div>
+                <ul class="chk" style="gap:7px;font-size:.84rem">
+                  <li>Produženi set do 9 (8:8 → TB)</li>
+                </ul>
+                <div style="margin-top:10px;font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:6px">Opcije</div>
+                <span class="pill line">⚙ Zlatni poen 40:40</span>
+                <div style="margin-top:10px;font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:6px">Loptice</div>
+                <span class="tag">utrošeno: 1 set</span>
+              </div>
+            </div>
+            <div style="font-size:.76rem;color:var(--muted);margin-top:8px">Polja seta se prilagođavaju formatu serije. Po čuvanju, pobednik se automatski upisuje u finale i obaveštava se naredni igrač.</div>
+          </div>
+        </div>
+
+        <div class="note warn"><span class="ni">⏱️</span><div><b>Ugrađene kontrole po propozicijama:</b> sistem prati rokove (žreb čet 14:00, satnica čet 19:00, rezultati na dan igranja, finala do nedelje) i upozorava direktora; format mečeva se automatski bira po seriji turnira; nedovršeni turniri se vide koordinatoru.</div></div>
+      </section>
+
+      <!-- ============ 10 ADMIN ============ -->
+      <section id="admin">
+        <div class="sec-h"><span class="num">10</span><h2>Portal · Koordinatorski panel <span class="pill ball" style="vertical-align:middle">+ tehnički admin</span></h2></div>
+        <p class="sec-sub">Koordinator je <b>takmičarski autoritet</b> — odlučuje o svemu vezanom za igrače, sudije i turnire. „Admin" je čisto tehnička uloga (sistem i infrastruktura), bez takmičarskih odluka.</p>
+
+        <div class="note prio"><span class="ni">🎖️</span><div><b>Koordinator</b> ima uvid u sve tehničke i takmičarske stavke (igrači, sudije, turniri) i donosi sve takmičarske odluke: kategorije, kalendar, dodela sudija, bodovni model, rang lista, korekcije i opoziv žreba (uz audit), disciplina.</div></div>
+
+        <div class="eyebrow-line">Koordinator · igrači i klubovi</div>
+        <div class="grid g3">
+          <div class="feat"><div class="ic">🧑‍🤝‍🧑</div><h4>Članovi i kategorije</h4><p>CRUD nad igračima, odobravanje i promena kategorija (I–V), spajanje duplikata, foto, oznaka države za strance.</p></div>
+          <div class="feat"><div class="ic">🏛️</div><h4>Klubovi</h4><p>Evidencija klubova i gradova; povezivanje igrača s klubom.</p></div>
+          <div class="feat"><div class="ic">⚖️</div><h4>Disciplinska komisija</h4><p>Opomene, oduzimanje bodova, isključenja; istorija sankcija po igraču.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Koordinator · turniri i bodovanje</div>
+        <div class="grid g3">
+          <div class="feat green"><div class="ic">📅</div><h4>Kalendar i turniri</h4><p>Kreiranje turnira, serija, sistem (kvalitet/starost), domaćin, <b>dodela sudije/direktora</b>, loptice.</p></div>
+          <div class="feat green"><div class="ic">🏷️</div><h4>Kategorije i discipline</h4><p>Definicije I–V i 20–90, starosne granice, dozvoljene discipline po turniru.</p></div>
+          <div class="feat green"><div class="ic">🧮</div><h4>Bodovni model (opcija)</h4><p>Bira <b>model bodovanja po turniru/seriji</b>: klasični (napredovanje) ili „svi dobijaju bodove" (Master-stil). Uređuje tablice.</p></div>
+          <div class="feat ball"><div class="ic">📈</div><h4>Obračun rang liste</h4><p>N (8/10/13) za sezonu, pokretanje/zamrzavanje obračuna (N najboljih, 52 nedelje).</p></div>
+          <div class="feat ball"><div class="ic">💳</div><h4>Evidencija uplata</h4><p>Članarina i kotizacije — pregled statusa po igraču/turniru.</p></div>
+          <div class="feat ball"><div class="ic">🎾</div><h4>Loptice i izveštaji</h4><p>Pregled izveštaja sudija (loptice, mečevi, sporne situacije).</p></div>
+        </div>
+
+        <div class="eyebrow-line">Koordinator · korekcije (sve uz audit-log)</div>
+        <div class="grid g3">
+          <div class="feat clay" style="border-top:3px solid var(--clay)"><div class="ic">✏️</div><h4>Ispravka rezultata</h4><p>Korekcija unetog rezultata uz <b>automatsko ponovno povlačenje</b> kroz bracket i preračun bodova.</p></div>
+          <div class="feat clay" style="border-top:3px solid var(--clay)"><div class="ic">🔓</div><h4>Opoziv / ponovni žreb</h4><p>Otključavanje i ponovni žreb kad zatreba (greška) — <b>kontrolisano i zabeleženo</b>, bez zvanja telefonom.</p></div>
+          <div class="feat clay" style="border-top:3px solid var(--clay)"><div class="ic">↩️</div><h4>Ponovo otvori turnir</h4><p>Vraćanje „završenog" turnira radi ispravke i ponovni obračun bodova.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Admin (tehnički) · sistem</div>
+        <div class="grid g3">
+          <div class="feat navy"><div class="ic">🔐</div><h4>Nalozi i uloge</h4><p>Dodela uloga (igrač, sudija, koordinator), reset naloga — bez takmičarskih odluka.</p></div>
+          <div class="feat navy"><div class="ic">⬆️</div><h4>Migracija / import</h4><p>Uvoz postojeće baze igrača i istorije rezultata (CSV iz stare baze).</p></div>
+          <div class="feat navy"><div class="ic">📰</div><h4>CMS i prevodi</h4><p>Vesti, galerija, FAQ, propozicije, prevodi SR/EN.</p></div>
+          <div class="feat navy"><div class="ic">🔗</div><h4>Integracije i bezbednost</h4><p>Pristup CourtNomad-a (ograničen ključ), RLS, backup, audit-log.</p></div>
+        </div>
+      </section>
+
+      <!-- ============ 11 BAZA ============ -->
+      <section id="baza">
+        <div class="sec-h"><span class="num">11</span><h2>Baza podataka (Supabase / Postgres)</h2></div>
+        <p class="sec-sub">Predlog modela podataka — temelj koji povezuje sva četiri portala. Finalizuje se uz dobijenu bazu.</p>
+
+        <div class="erd">
+          <div class="ent"><h5>clubs <span class="k">klub</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li>naziv <span class="ty">text</span></li><li>grad <span class="ty">text</span></li></ul></div>
+          <div class="ent"><h5>players <span class="k">igrač</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li>ime / prezime <span class="ty">text</span></li><li>pol <span class="ty">enum</span></li><li>godište <span class="ty">int</span></li><li class="fk">klub_id <span class="ty">→clubs</span></li><li>kategorija <span class="ty">I–V</span></li><li>država <span class="ty">text</span></li><li>itf_ipin <span class="ty">text</span></li><li>jmbg <span class="ty">enkript.</span></li></ul></div>
+          <div class="ent"><h5>users_roles <span class="k">RBAC</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">player_id <span class="ty">→players</span></li><li>uloga <span class="ty">enum</span></li></ul></div>
+          <div class="ent"><h5>tournaments <span class="k">turnir</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li>naziv <span class="ty">text</span></li><li>serija <span class="ty">2000–250</span></li><li>sistem <span class="ty">kval/star</span></li><li class="fk">klub_id <span class="ty">→clubs</span></li><li class="fk">direktor_id <span class="ty">→players</span></li><li>lokacija/geo <span class="ty">geo</span></li><li>datumi <span class="ty">date</span></li><li>status <span class="ty">enum</span></li></ul></div>
+          <div class="ent"><h5>tournament_events <span class="k">konkurencija</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">turnir_id <span class="ty">→tourn.</span></li><li>kategorija <span class="ty">I–V/20+</span></li><li>disciplina <span class="ty">S/D/X</span></li></ul></div>
+          <div class="ent"><h5>entries <span class="k">prijava</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">event_id <span class="ty">→events</span></li><li class="fk">player_id <span class="ty">→players</span></li><li class="fk">partner_id <span class="ty">→players</span></li><li>status <span class="ty">enum</span></li><li>plaćeno <span class="ty">bool</span></li><li>izjava <span class="ty">bool</span></li></ul></div>
+          <div class="ent"><h5>draws <span class="k">žreb</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">event_id <span class="ty">→events</span></li><li>veličina <span class="ty">8–128</span></li><li>nosioci <span class="ty">jsonb</span></li></ul></div>
+          <div class="ent"><h5>matches <span class="k">meč</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">draw_id <span class="ty">→draws</span></li><li>kolo <span class="ty">int</span></li><li>teren / termin <span class="ty">ts</span></li><li class="fk">igrač1/2 <span class="ty">→entries</span></li><li>status <span class="ty">enum</span></li><li class="fk">pobednik <span class="ty">→entries</span></li><li>loptice <span class="ty">int</span></li></ul></div>
+          <div class="ent"><h5>match_sets <span class="k">set</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">match_id <span class="ty">→matches</span></li><li>br. seta <span class="ty">int</span></li><li>gem1 / gem2 <span class="ty">int</span></li><li>tie-break <span class="ty">int</span></li></ul></div>
+          <div class="ent"><h5>ranking_points <span class="k">bodovi</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">player_id <span class="ty">→players</span></li><li class="fk">turnir_id <span class="ty">→tourn.</span></li><li>kat/disc <span class="ty">enum</span></li><li>bodovi <span class="ty">int</span></li><li>aktivno_do <span class="ty">date</span></li></ul></div>
+          <div class="ent"><h5>rankings <span class="k">rang</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">player_id <span class="ty">→players</span></li><li>kat/disc <span class="ty">enum</span></li><li>bodovi <span class="ty">int</span></li><li>mesto <span class="ty">int</span></li><li>nedelja <span class="ty">date</span></li></ul></div>
+          <div class="ent"><h5>payments <span class="k">uplate</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">player_id <span class="ty">→players</span></li><li>tip <span class="ty">član/kotiz.</span></li><li class="fk">turnir_id <span class="ty">→tourn.</span></li><li>iznos <span class="ty">int</span></li><li>upisao <span class="ty">uuid</span></li></ul></div>
+          <div class="ent"><h5>news / gallery <span class="k">CMS</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li>naslov_sr/en <span class="ty">text</span></li><li>telo_sr/en <span class="ty">rich</span></li><li>slike <span class="ty">storage</span></li></ul></div>
+          <div class="ent"><h5>sanctions <span class="k">disciplina</span></h5><ul><li class="pk">id <span class="ty">uuid</span></li><li class="fk">player_id <span class="ty">→players</span></li><li>tip <span class="ty">enum</span></li><li>opis <span class="ty">text</span></li></ul></div>
+        </div>
+
+        <div class="grid g2" style="margin-top:20px">
+          <div class="note tip" style="margin:0"><span class="ni">🔒</span><div><b>Bezbednost:</b> Row-Level Security (RLS) u Supabase-u — igrač vidi/menja samo svoje podatke, direktor samo svoje turnire, koordinator sve takmičarske podatke, admin (tehnički) sistemski nivo. JMBG se čuva enkriptovano i nije javan.</div></div>
+          <div class="note info" style="margin:0"><span class="ni">⬆️</span><div><b>Migracija:</b> mapiranje stare baze (~2.600 igrača, klubovi, istorija rezultata i bodova) u novi model kroz skripte za uvoz. Stari ID-jevi se čuvaju radi povezivanja.</div></div>
+        </div>
+      </section>
+
+      <!-- ============ 12 COURTNOMAD ============ -->
+      <section id="courtnomad">
+        <div class="sec-h"><span class="num">12</span><h2>CourtNomad — mobilna app i integracija (odvojeni sistemi)</h2></div>
+        <p class="sec-sub">Veterani su <b>samostalan sistem</b> (sopstvena baza i Next.js), a CourtNomad ga koristi preko integracije — razdvojivo u svakom trenutku. I zašto će članovi ipak želeti da instaliraju app.</p>
+
+        <div class="note prio"><span class="ni">🔑</span><div><b>Ključni princip — razdvojivost:</b> Veterani Srbije su <b>potpuno odvojen sistem</b> u vlasništvu TVS-a — <b>sopstvena Supabase baza i sopstveni Next.js</b> — koji se u svakom trenutku može izdvojiti i nastaviti samostalno. CourtNomad (vlasništvo autora) se povezuje i <b>koristi veteransku bazu</b> preko kontrolisanog, opozivog pristupa, da članovi dobiju mobilni komfor i napredne funkcije. <b>Baze i Next.js aplikacije su odvojene.</b></div></div>
+
+        <div class="eyebrow-line">Arhitektura: dva odvojena sistema, povezana integracijom</div>
+        <div class="grid g2" style="gap:14px">
+          <div class="layer" style="border-style:solid;border-color:var(--clay-soft);background:linear-gradient(180deg,#FCF4F0,#FFFDFB)">
+            <div class="lh" style="color:var(--clay-dark)">🟠 Veterani Srbije · vlasništvo TVS</div>
+            <div class="boxrow" style="flex-direction:column">
+              <div class="box clay"><b>Veterani Next.js / Vercel</b><small>javni + igrački + sudijski + koordinatorski</small></div>
+              <div class="box clay"><b>Veterani Supabase</b><small>IZVOR ISTINE: članovi, turniri, žreb, rezultati, TVS rang</small></div>
+            </div>
+          </div>
+          <div class="layer" style="border-style:solid;border-color:var(--court-soft);background:linear-gradient(180deg,#F1F8F3,#FBFCF9)">
+            <div class="lh" style="color:var(--court-dark)">🟢 CourtNomad · vlasništvo autora</div>
+            <div class="boxrow" style="flex-direction:column">
+              <div class="box green"><b>CourtNomad Expo app + web</b><small>mobilni komfor + napredne funkcije</small></div>
+              <div class="box green"><b>CourtNomad Supabase</b><small>rejting, matchmaking, push, travel, highlights</small></div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin:14px 0;padding:12px;background:linear-gradient(90deg,#FBF0EB,#EFF6F1);border:1px dashed var(--line2);border-radius:12px;font-weight:600;color:var(--slate);font-size:.92rem">⇄ &nbsp; Integracija: CourtNomad <b>koristi veteransku bazu</b> (ograničen, opoziv pristup) + povezivanje naloga &nbsp; ⇄</div>
+        <div class="note info"><span class="ni">🔗</span><div><b>Veteranska baza je izvor istine.</b> CourtNomad čita turnire/rezultate i (uz dozvolu) upisuje prijave i sudijske unose preko integracije — pa se na veteranskom sajtu vidi isti čas. Po vlasništvu je jednosmerno: <b>veteranski sistem nikad ne zavisi od CourtNomad-a.</b></div></div>
+
+        <div class="eyebrow-line">Podela posla: šta gde živi</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Funkcija</th><th class="c">Sajt veterana (web)</th><th class="c">CourtNomad (mobilni)</th></tr></thead>
+            <tbody>
+              <tr><td>Kalendar i stranice turnira</td><td class="c">✅ pun javni pregled, SEO</td><td class="c">✅ + push kad izađe žreb/satnica</td></tr>
+              <tr><td>Prijava / odjava na turnir</td><td class="c">✅</td><td class="c">✅ u par dodira + podsetnik na rok</td></tr>
+              <tr><td>Žreb i rezultati</td><td class="c">✅ pun prikaz, arhiva</td><td class="c">✅ + „tvoj meč je sledeći"</td></tr>
+              <tr><td>TVS rang liste</td><td class="c">✅ kompletne, javne</td><td class="c">✅ moj rang + kretanje (↑↓)</td></tr>
+              <tr><td><b>Sudijski portal</b></td><td class="c">✅ web (sto/laptop)</td><td class="c">✅ na terenu (telefon/tablet) ★</td></tr>
+              <tr><td>Koordinator / CMS / bodovanje</td><td class="c">✅</td><td class="c">— (ostaje na webu)</td></tr>
+              <tr><td>Evidencija uplata</td><td class="c">✅ unos</td><td class="c">reader (vidi status)</td></tr>
+              <tr><td>Globalni rejting (Glicko F–A)</td><td class="c">prikaz</td><td class="c">✅ napredno + napredak</td></tr>
+              <tr><td>Matchmaking · izazovi · sparing</td><td class="c">—</td><td class="c">✅ samo app</td></tr>
+              <tr><td>Push obaveštenja</td><td class="c">—</td><td class="c">✅ samo app</td></tr>
+              <tr><td>Travel mode · highlights · QR</td><td class="c">—</td><td class="c">✅ samo app</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="eyebrow-line">Zašto će član instalirati app (mamac kvalitetom)</div>
+        <div class="grid g4">
+          <div class="feat clay" style="border-top:3px solid var(--clay)"><div class="ic">🔔</div><h4>Push uživo</h4><p>Žreb objavljen, satnica, „na terenu si sledeći", potvrda rezultata — odmah na telefon.</p></div>
+          <div class="feat ball"><div class="ic">🏅</div><h4>Dva broja</h4><p>Zvanični TVS rang <i>i</i> globalni skill-rejting (kao UTR/WTN) — svaki meč pomera oba.</p></div>
+          <div class="feat green"><div class="ic">🤝</div><h4>Igraj cele godine</h4><p>Matchmaking, izazovi i sparing po nivou između turnira, ne samo na takmičenjima.</p></div>
+          <div class="feat"><div class="ic">📍</div><h4>Pronađi protivnika</h4><p>Igrači u tvom gradu + <b>Travel mode</b> — idealno za strane goste dok su u Srbiji.</p></div>
+          <div class="feat"><div class="ic">🎾</div><h4>Tereni i rezervacije</h4><p>Pronađi i rezerviši teren u klubu, sa cenama i dostupnošću.</p></div>
+          <div class="feat"><div class="ic">📸</div><h4>Highlights i deljenje</h4><p>Selfi uz rezultat, momenti meča, deljenje na mreže — besplatni marketing za TVS.</p></div>
+          <div class="feat"><div class="ic">🪪</div><h4>QR prijava na turniru</h4><p>Skeniraj i odmah vidi svoj žreb, satnicu i teren.</p></div>
+          <div class="feat navy"><div class="ic">⚖️</div><h4>Sudija u džepu</h4><p>Vođenje meča i unos rezultata s telefona — prirodnije od web-a na terenu.</p></div>
+        </div>
+
+        <div class="grid g2" style="margin-top:22px;align-items:start">
+          <div>
+            <div class="eyebrow-line" style="margin-top:6px">Iz CourtNomad-a se preuzima kôd i obrasci (isti autor — ne deljena baza)</div>
+            <ul class="chk" style="gap:8px">
+              <li>Turnirski engine: single-elim, nošenje, tabele, finalizacija meča</li>
+              <li>Klubovi (multi-tenant) + interni poeni + kategorije igrača</li>
+              <li>Sezone i lige; Glicko-2 rejting + matchmaking</li>
+              <li>Auth + RLS + RPC (server-autoritativno) + audit</li>
+              <li>Push (Expo, preko pg_net) — gotova infrastruktura</li>
+              <li>Dvojezičnost EN/SR; mape, recenzije, sporovi/moderacija</li>
+            </ul>
+            <div class="eyebrow-line">Šta TVS dodaje kao sloj</div>
+            <ul class="chk x" style="gap:8px">
+              <li>Kategorije I–V + starosne 20–75 i discipline S/D/X</li>
+              <li>Serije 2000–250 + Master i TVS tablica bodova</li>
+              <li>Format „produženi set do 9 / zlatni poen"</li>
+              <li>Zvanična TVS rang lista (N najboljih, 52 nedelje)</li>
+              <li>Tok „direktor = sudija" po propozicijama TVS-a</li>
+            </ul>
+          </div>
+          <div>
+            <div class="eyebrow-line" style="margin-top:6px">Skica · CourtNomad na telefonu</div>
+            <div style="max-width:300px;margin:0 auto;background:#0F1B2E;border-radius:34px;padding:12px;box-shadow:var(--sh-lg);border:1px solid #2A3953">
+              <div style="background:linear-gradient(180deg,#16263E,#13314A);border-radius:24px;overflow:hidden">
+                <div style="height:26px;display:flex;align-items:center;justify-content:center"><div style="width:90px;height:7px;border-radius:6px;background:rgba(255,255,255,.25)"></div></div>
+                <div style="padding:10px 13px 16px;color:#EAF1F8">
+                  <div style="background:rgba(214,232,75,.16);border:1px solid rgba(214,232,75,.4);border-radius:11px;padding:9px 11px;font-size:.74rem;margin-bottom:11px">🔔 <b>Žreb objavljen</b> — Kraljevo Open · tvoj prvi meč: 10:30, Teren 2</div>
+                  <div style="font-family:'Sora';font-weight:700;font-size:1rem;margin-bottom:2px">Kraljevo Open 2026</div>
+                  <div style="font-size:.7rem;color:#9FB2CC;margin-bottom:10px">Serija 1000 · Kat. I · Singl</div>
+                  <div style="display:flex;gap:7px;margin-bottom:11px"><span style="flex:1;background:var(--clay);color:#fff;text-align:center;border-radius:8px;padding:7px;font-size:.72rem;font-weight:700">Prijavljen ✓</span><span style="flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);text-align:center;border-radius:8px;padding:7px;font-size:.72rem">Žreb</span></div>
+                  <div style="background:rgba(255,255,255,.06);border-radius:11px;padding:10px;font-size:.72rem">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#9FB2CC">Moj TVS rang</span><b>#6 ▲2</b></div>
+                    <div style="display:flex;justify-content:space-between"><span style="color:#9FB2CC">CourtNomad rejting</span><b style="color:var(--ball)">C3 · 2380</b></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-around;margin-top:12px;padding-top:9px;border-top:1px solid rgba(255,255,255,.12);font-size:.62rem;color:#9FB2CC">
+                    <span>🏆 Rang</span><span>🎾 Igraj</span><span>📅 Tereni</span><span>👤 Profil</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="eyebrow-line">Strategija prelaska (da članovi pređu na app)</div>
+        <div class="grid g2">
+          <ul class="chk" style="gap:8px">
+            <li><b>QR kod na svakom turniru</b> → „instaliraj i vidi svoj žreb"</li>
+            <li><b>Push samo u app</b> — sajt nema, pa je app praktičnija na dan turnira</li>
+            <li><b>„Preuzmi svoj profil"</b> — ~2.600 postojećih igrača claim-uje nalog</li>
+          </ul>
+          <ul class="chk" style="gap:8px">
+            <li>Rano objavljena satnica i live napredovanje prvo u app</li>
+            <li>Deljenje medalja/rezultata na mreže = vidljivost TVS-a</li>
+            <li>Sajt ostaje besplatan i otvoren (zvanični javni registar)</li>
+          </ul>
+        </div>
+
+        <div class="note tip"><span class="ni">🧭</span><div><b>Potvrđeno:</b> odvojene baze + odvojen Next.js, razdvojivo u svakom trenutku. <b>Za dogovor ostaje način integracije:</b> CourtNomad pristupa veteranskoj bazi preko <b>ograničene role/ključa</b> (preporuka — „CourtNomad koristi njihovu bazu"), ili preko zasebnog <b>integracionog API-ja</b> (čistija granica, lakša revizija). Plus: kako se <b>povezuju nalozi</b> (član „preuzme" svoj TVS profil iz CourtNomad-a).</div></div>
+      </section>
+
+      <!-- ============ 13 FAZE ============ -->
+      <section id="faze">
+        <div class="sec-h"><span class="num">13</span><h2>Plan izrade po fazama</h2></div>
+        <p class="sec-sub">Predlog redosleda da sistem što pre bude koristan — javni deo i sudijski portal kao prioriteti.</p>
+        <div class="note tip"><span class="ni">⚡</span><div><b>Ubrzanje:</b> pošto je isti autor, veteranski bekend može da <b>reuse-uje kôd i obrasce</b> iz CourtNomad-a (turnirski engine, RPC, rejting, push) — u <b>sopstvenoj, odvojenoj bazi</b>. Brže nego od nule, a sistemi ostaju razdvojivi.</div></div>
+
+        <div class="road">
+          <div class="phase"><h4><span class="ph-t">Faza 0</span> Temelj</h4><p>Postavka Next.js + Supabase + Vercel, dizajn sistem (boje, tipografija, komponente), skelet dvojezičnosti i uloga.</p></div>
+          <div class="phase"><h4><span class="ph-t">Faza 1</span> Migracija + javni sajt</h4><p>Uvoz baze igrača, klubova i istorije. Kalendar, profili, direktorijum članova, rang liste, stranice turnira (read-only).</p></div>
+          <div class="phase"><h4><span class="ph-t">Faza 2</span> Igrački portal</h4><p>Auth i migracija naloga, profil, prijava/odjava na turnire, partneri za dubl/miks, status uplata.</p></div>
+          <div class="phase"><h4><span class="ph-t">Faza 3 ★</span> Sudijski portal</h4><p>Žreb, satnica, unos rezultata po setovima, auto-napredovanje, evidencija loptica i kotizacija, mobilni rad. <b>Prioritet.</b></p></div>
+          <div class="phase"><h4><span class="ph-t">Faza 4</span> Koordinatorski panel + obračun</h4><p>Bodovni modeli (klasični + „svi dobijaju bodove"), obračun rang liste, korekcije uz audit (rezultat, opoziv žreba, ponovo otvori turnir), evidencija uplata, disciplinska; tehnički admin (uloge, prevodi, integracije).</p></div>
+          <div class="phase"><h4><span class="ph-t">Faza 5</span> Engleski + dorade</h4><p>Kompletan EN prevod, galerija, PWA/offline, ITF info, optimizacije i testiranje.</p></div>
+          <div class="phase"><h4><span class="ph-t">Faza 6</span> Domen + produkcija</h4><p>Povezivanje domena na Vercel (kad bude poznat), finalni testovi, lansiranje, obuka direktora.</p></div>
+        </div>
+
+        <div class="eyebrow-line">Prilog · aktuelni kalendar (sezona 2026, uzorak za migraciju)</div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Datum</th><th>Turnir</th><th>Grad</th><th>Klub</th><th>Direktor</th><th>Sistem</th></tr></thead>
+            <tbody>
+              <tr><td>11–12.07</td><td><b>Oktagon Open</b></td><td>Pančevo</td><td>TC PopCOURT</td><td>Vladimir Popović</td><td><span class="pill green">Kategorija</span></td></tr>
+              <tr><td>18–19.07</td><td><b>Kraljevo Open</b></td><td>Kraljevo</td><td>TK Top Tenis</td><td>Boris Premović</td><td><span class="pill green">Kategorija</span></td></tr>
+              <tr><td>25–26.07</td><td><b>Dodijev Memorijal</b></td><td>Prokuplje</td><td>TK Topličanin</td><td>Žika Manić</td><td><span class="pill green">Kategorija</span></td></tr>
+              <tr><td>01–02.08</td><td><b>GM Open</b></td><td>Gornji Milanovac</td><td>TK Takovo</td><td>Nemanja Blagojević</td><td><span class="pill green">Kategorija</span></td></tr>
+              <tr><td>08–09.08</td><td><b>Spartak Open</b></td><td>Subotica</td><td>TK Spartak</td><td>Zoran Trivunov</td><td><span class="pill ball">Starosni 20+→70+</span></td></tr>
+              <tr><td>22–23.08</td><td><b>Plazina Memorijal</b></td><td>Čačak</td><td>TK Sloboda</td><td>Nešo Puzić</td><td><span class="pill green">Kategorija</span></td></tr>
+              <tr><td>29–30.08</td><td><b>Rasina &amp; Vina Open</b></td><td>Kruševac</td><td>TK Elteks</td><td>Milan Beader</td><td><span class="pill green">Kategorija</span></td></tr>
+              <tr><td>26–27.09</td><td><b>Dani Grožđa</b></td><td>Vršac</td><td>TK Vršac</td><td>Goran Lonec</td><td><span class="pill green">Kategorija</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.84rem;color:var(--muted);margin-top:8px">Svi prikazani su Serija 1000. Sistem podržava i serije 2000/500/250 i Master, kao i mešavinu kvalitativnog i starosnog sistema u istom kalendaru.</p>
+      </section>
+
+      <!-- ============ 13 PITANJA ============ -->
+      <section id="pitanja">
+        <div class="sec-h"><span class="num">14</span><h2>Otvorena pitanja i sledeći koraci</h2></div>
+        <p class="sec-sub">Šta nam treba da finalizujemo specifikaciju — pre svega za sudijski portal.</p>
+
+        <div class="note prio"><span class="ni">🔑</span><div><b>Najvažnije za sutra:</b> pristup postojećoj sudijskoj aplikaciji (bekend login). Time vidimo tačan tok žreba, satnice i unosa rezultata kako bismo novi sudijski portal napravili 1:1 (ili bolje), bez pretpostavki.</div></div>
+
+        <div class="grid g2">
+          <div class="card">
+            <h4 style="margin-bottom:10px">❓ Pravila i takmičenje</h4>
+            <ul class="chk x" style="gap:8px">
+              <li>Pune tablice bodovanja za sve kosture (8/16/32/64/128) — potvrda iz pravilnika</li>
+              <li>Da li dubl i miks imaju zasebne rang liste i bodovanje?</li>
+              <li>Da li <b>gostujući/strani igrači</b> osvajaju bodove za TVS rang ili igraju van konkurencije?</li>
+              <li><b>✓ Rešeno:</b> nošenje i broj nosilaca po ITF Reg. 35–38 (8→2, 16→4, 32→8, 64→16) — ugrađeno u sekciju 09</li>
+              <li>Kvalifikacija za Master (ko i kako ulazi)</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="margin-bottom:10px">⚙️ Sistem i podaci</h4>
+            <ul class="chk x" style="gap:8px">
+              <li><b>Bekend (potvrđeno):</b> odvojena veteranska Supabaza + odvojen Next.js; CourtNomad koristi veteransku bazu preko kontrolisanog pristupa</li>
+              <li>Način integracije: ograničena role/ključ (direktan pristup) ili zaseban integracioni API?</li>
+              <li>Povezivanje naloga: CourtNomad ↔ veteranski član (kako član „preuzme" profil)</li>
+              <li>Format i sadržaj postojeće baze (igrači, rezultati) za migraciju</li>
+              <li>Članarina Teniskom savezu (1500 din) — samo evidencija ili i potvrda?</li>
+              <li>Domen (kad bude poznat → povezivanje na Vercel)</li>
+              <li>Timski format (World Team Cup stil) — da li u Fazi 2 ili kasnije?</li>
+              <li>Postupanje sa JMBG-om i zaštita ličnih podataka</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="eyebrow-line">Predlog sledećih koraka</div>
+        <ol style="padding-left:20px;color:var(--slate)">
+          <li style="margin-bottom:7px">✓ Pregledan sudijski portal (ulogovanjem); ostaje pristup <b>bazi podataka</b> radi migracije.</li>
+          <li style="margin-bottom:7px">Usaglasimo otvorena pitanja iznad i potvrdimo prioritete.</li>
+          <li style="margin-bottom:7px">Krećemo sa Fazom 0 (temelj) i Fazom 1 (migracija + javni sajt).</li>
+          <li>Sudijski portal (Faza 3) razvijamo paralelno čim potvrdimo tok rada.</li>
+        </ol>
+      </section>
+
+      <!-- ::SECTIONS:: -->
+    </div>
+
+    <div class="wrap">
+      <footer class="end">
+        <b>TVS Redizajn — radni dokument za diskusiju</b><br>
+        Sledeći korak: pristup bazi podataka (migracija igrača i istorije) i potvrda načina integracije s CourtNomad-om.
+      </footer>
+    </div>
+  </main>
+</div>
+
+<script>
+const NAV=[
+ ["01","Pregled i cilj","pregled"],
+ ["02","Postojeći sistem (TVS)","postojeci"],
+ ["03","ITF Masters Tour — uzor","itf"],
+ ["04","Kategorije i takmičenja","kategorije"],
+ ["05","Bodovanje i rang liste","bodovanje"],
+ ["06","Arhitektura i tehnologija","arhitektura"],
+ ["07","Portal · Javni sajt","front"],
+ ["08","Portal · Igrački","igraci"],
+ ["09","Portal · Sudijski ★","sudije"],
+ ["10","Portal · Koordinator","admin"],
+ ["11","Baza podataka","baza"],
+ ["12","CourtNomad · mobilna ★","courtnomad"],
+ ["13","Plan izrade (faze)","faze"],
+ ["14","Otvorena pitanja","pitanja"],
+];
+function buildNav(t){return NAV.map(([n,l,id])=>`<a href="#${id}"><span class="n">${n}</span> ${l}</a>`).join("")}
+document.getElementById('navList').innerHTML=buildNav();
+document.getElementById('drawerNav').innerHTML='<div class="kicker" style="color:#7D90AD;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;margin:0 8px 12px;font-weight:600">Sadržaj</div>'+buildNav();
+document.querySelectorAll('.drawer a').forEach(a=>a.addEventListener('click',()=>{document.querySelector('.drawer').classList.remove('open');document.querySelector('.scrim').classList.remove('open')}));
+// scrollspy
+const links=[...document.querySelectorAll('#navList a')];
+const map={}; links.forEach(a=>map[a.getAttribute('href').slice(1)]=a);
+const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('on')); const m=map[e.target.id]; if(m)m.classList.add('on')}})},{rootMargin:"-20% 0px -72% 0px"});
+setTimeout(()=>document.querySelectorAll('section[id]').forEach(s=>obs.observe(s)),60);
+// tabs
+function tabSwitch(group,idx,btn){
+  document.querySelectorAll('[data-grp="'+group+'"] .tab').forEach((t,i)=>t.classList.toggle('on',i===idx));
+  document.querySelectorAll('[data-grp="'+group+'"] .panel').forEach((p,i)=>p.classList.toggle('on',i===idx));
+}
+</script>
+</body>
+</html>
