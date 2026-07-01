@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { getTournaments } from "@/lib/data/tournaments";
 import { formatDateRange, formatDeadline } from "@/lib/format";
 
@@ -15,6 +16,7 @@ const STATUS_STYLE: Record<string, string> = {
 
 type CardVM = {
   id: string;
+  slug: string | null;
   dateRange: string;
   seriesLabel: string;
   systemLabel: string;
@@ -48,6 +50,7 @@ export default async function KalendarPage({
       tr.rok_prijave && (tr.status === "prijave" || tr.status === "najava");
     return {
       id: tr.id,
+      slug: tr.legacy_id,
       dateRange: formatDateRange(tr.datum_od, tr.datum_do, locale),
       seriesLabel: t(`series.${tr.serija}`),
       systemLabel: t(`system.${tr.sistem}`),
@@ -90,8 +93,8 @@ export default async function KalendarPage({
 }
 
 function TournamentCard({ it }: { readonly it: CardVM }) {
-  return (
-    <li className="grid gap-4 rounded-2xl border border-line bg-card p-5 shadow-sm transition hover:border-line2 hover:shadow-[var(--shadow-tvs)] sm:grid-cols-[140px_1fr_auto] sm:items-center">
+  const inner = (
+    <div className="grid gap-4 sm:grid-cols-[140px_1fr_auto] sm:items-center">
       <div className="font-display text-lg font-bold leading-tight text-navy">
         {it.dateRange}
       </div>
@@ -119,6 +122,21 @@ function TournamentCard({ it }: { readonly it: CardVM }) {
           <span className="text-xs text-muted">{it.deadlineLabel}</span>
         ) : null}
       </div>
+    </div>
+  );
+
+  const cls =
+    "block rounded-2xl border border-line bg-card p-5 shadow-sm transition hover:border-line2 hover:shadow-[var(--shadow-tvs)]";
+
+  return (
+    <li>
+      {it.slug ? (
+        <Link href={`/turnir/${it.slug}`} className={cls}>
+          {inner}
+        </Link>
+      ) : (
+        <div className={cls}>{inner}</div>
+      )}
     </li>
   );
 }

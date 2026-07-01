@@ -97,5 +97,31 @@
       "zavrsen": "Završen",
       "ponovo_otvoren": "Ponovo otvoren"
     }
+  },
+  "tournament": {
+    "backToCalendar": "← Kalendar",
+    "info": "Informacije",
+    "host": "Domaćin",
+    "director": "Direktor",
+    "dates": "Datumi",
+    "deadline": "Rok prijave",
+    "location": "Lokacija",
+    "system": "Sistem",
+    "events": "Konkurencije",
+    "eventsSub": "Kategorije i discipline u okviru turnira.",
+    "noEvents": "Konkurencije još nisu definisane.",
+    "tabs": {
+      "draw": "Žreb",
+      "schedule": "Satnica",
+      "entries": "Prijavljeni",
+      "results": "Rezultati"
+    },
+    "soon": "Žreb, satnica i rezultati biće dostupni kada direktor otvori turnir (sudijski portal — Faza 3).",
+    "discipline": {
+      "singl": "Singl",
+      "dubl": "Dubl",
+      "miks": "Miks"
+    },
+    "notFound": "Turnir nije pronađen."
   }
 }

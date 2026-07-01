@@ -97,5 +97,31 @@
       "zavrsen": "Finished",
       "ponovo_otvoren": "Reopened"
     }
+  },
+  "tournament": {
+    "backToCalendar": "← Calendar",
+    "info": "Information",
+    "host": "Host",
+    "director": "Director",
+    "dates": "Dates",
+    "deadline": "Entry deadline",
+    "location": "Location",
+    "system": "System",
+    "events": "Events",
+    "eventsSub": "Categories and disciplines within the tournament.",
+    "noEvents": "Events have not been defined yet.",
+    "tabs": {
+      "draw": "Draw",
+      "schedule": "Schedule",
+      "entries": "Entries",
+      "results": "Results"
+    },
+    "soon": "Draws, schedule and results will be available once the director opens the tournament (referee portal — Phase 3).",
+    "discipline": {
+      "singl": "Singles",
+      "dubl": "Doubles",
+      "miks": "Mixed"
+    },
+    "notFound": "Tournament not found."
   }
 }

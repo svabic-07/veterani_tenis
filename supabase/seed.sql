@@ -52,3 +52,18 @@ from (values
   ('dani-grozdja-2026',      'Dani Grožđa',         'kvalitativni', 'tk-vrsac',      'dir-goran-lonec',        'Vršac',            '2026-09-26','2026-09-27','2026-09-24 20:00+02','najava')
 ) as v(legacy_id, naziv, sistem, club_legacy, dir_legacy, mesto, datum_od, datum_do, rok, status)
 on conflict (legacy_id) do nothing;
+
+-- ---------- Konkurencije (kategorija × disciplina) ----------
+insert into public.tournament_events (turnir_id, kategorija, disciplina)
+select t.id, e.kategorija, e.disciplina::public.discipline
+from public.tournaments t
+cross join (values ('I','singl'),('II','singl'),('III','singl'),('I','dubl')) as e(kategorija, disciplina)
+where t.sistem = 'kvalitativni'
+on conflict (turnir_id, kategorija, disciplina) do nothing;
+
+insert into public.tournament_events (turnir_id, kategorija, disciplina)
+select t.id, e.kategorija, e.disciplina::public.discipline
+from public.tournaments t
+cross join (values ('45+','singl'),('55+','singl'),('45+','dubl')) as e(kategorija, disciplina)
+where t.sistem = 'starosni'
+on conflict (turnir_id, kategorija, disciplina) do nothing;
