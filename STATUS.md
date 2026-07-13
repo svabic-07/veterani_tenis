@@ -80,7 +80,9 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 8. `…110000_revoke_anon_definer_exec` — advisor 0028 čišćenje
 9. `…120000_draws` — **`entries`, `draws`, `matches`, `match_sets`** + enumi (`draw_type`, `draw_status`) + `can_manage_event()`; RLS: javno vidi samo objavljen/zaključan žreb, piše staff/direktor turnira
 
-**Još nije kreirano (Faza 3/4):** `scoring_tables`, `payments`, `sanctions`, `news`/`gallery`, `audit_log`.
+10. `…0714090000_scoring` — **`scoring_tables`** (140 redova, klasični model) + **`finish_tournament()`** (obračun + nedeljni rang)
+
+**Još nije kreirano (Faza 4):** `payments`, `sanctions`, `news`/`gallery`, `audit_log`.
 
 ---
 
@@ -116,7 +118,12 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 - Bezbednost verifikovano SQL simulacijom (rollback): igrač bez uloge ❌ · koordinator ✅ · direktor svog turnira ✅ · direktor tuđeg ❌. UI gating: anon → prijava. 27 vitest testova.
 - ⚠️ Dodela uloga (koordinator/sudija) je zasad ručna (SQL u `user_roles`) — UI stiže u Fazi 4.
 
-**Ostaje u Fazi 3:** satnica (tereni × termini + štampanje), „ZAVRŠI TURNIR" → obračun bodova (bodovna tablica — Faza 4 deli logiku), ručno doterivanje žreba (drag-and-drop), evidencija loptica, offline tolerancija.
+**„ZAVRŠI TURNIR" + obračun bodova (2026-07-14):**
+- Migracija `…0714090000_scoring`: **`scoring_tables`** (model × kostur × serija × dostignuto kolo → bodovi; podatak, ne hardkod — 140 redova; kostur 32 tačno iz spec-a, ostali izvedeni istim obrascem ⚠️ koordinator da pregleda pre prve sezone) + **`finish_tournament()`** SECURITY DEFINER funkcija: autorizacija (staff/direktor), validacija (bez radnih žrebova, svi mečevi rešeni), obračun po dostignutom kolu (predkolo/1. kolo bez pobede → utešni; grupe: finalista/PF/eliminisan u grupi), upis `ranking_points` (aktivno 52 nedelje), status `zavrsen`, **nedeljni rang** (N najboljih iz aktivne sezone, rank po kategoriji × disciplini). Sve u jednoj transakciji, idempotentno po turniru.
+- UI: sekcija „ZAVRŠI TURNIR" na `/sudija/[slug]` (checkbox potvrda; dostupno tek kad su svi žrebovi objavljeni i mečevi rešeni).
+- Testirano SQL simulacijom (rollback): grupa od 5, serija 1000 → pobednik 1000 · finalista 600 · PF 360 · grupa 180; rang #1 upisan; forbidden za korisnika bez prava. ⚠️ Pojednostavljenja v1: čista grupa 3–4 rangira se po pobedama (bez h2h u obračunu); Master serija nema tablicu (poseban obračun — Faza 4); `svi_boduju` model još nema tablicu.
+
+**Ostaje u Fazi 3:** satnica (tereni × termini + štampanje), ručno doterivanje žreba (drag-and-drop), evidencija loptica, offline tolerancija.
 
 ### 🟢 Sitnice (Faza 5/6)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
@@ -139,6 +146,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-13 | `Faza 2: aktivacija naloga` | Magic link prijava + povezivanje naloga sa igračem + session refresh u proxy |
 | 2026-07-14 | `Faza 3: žreb engine` | ITF nošenje/bye/predkolo/grupe + 26 testova + javni prikaz žreba |
 | 2026-07-14 | `Faza 3: sudijski portal` | Kreiraj/objavi žreb + unos rezultata sa auto-napredovanjem |
+| 2026-07-14 | `Faza 3: ZAVRŠI TURNIR` | Bodovne tablice + obračun + nedeljni rang (finish_tournament) |
 
 ---
 

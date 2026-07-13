@@ -10,6 +10,7 @@ import {
   publishDrawAction,
   discardDrawAction,
   enterResultAction,
+  finishTournamentAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -153,6 +154,14 @@ export default async function SudijaTurnirPage({
   const playerName = (p: { ime: string; prezime: string } | null) =>
     p ? `${p.ime[0]}. ${p.prezime}` : "—";
 
+  // ZAVRŠI TURNIR: bar jedan objavljen žreb, nijedan radni, svi mečevi rešeni
+  const published = draws.filter((d) => d.status === "objavljen" || d.status === "zakljucan");
+  const canFinish =
+    tr.status !== "zavrsen" &&
+    published.length > 0 &&
+    !draws.some((d) => d.status === "radna") &&
+    published.every((d) => d.matches.every((m) => m.winner_slot !== null));
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <Link href="/sudija" className="text-sm font-semibold text-muted transition hover:text-navy">
@@ -289,6 +298,36 @@ export default async function SudijaTurnirPage({
           );
         })}
       </div>
+
+      {tr.status === "zavrsen" ? (
+        <p className="mt-8 rounded-2xl border border-court/30 bg-court/8 p-5 text-sm font-semibold text-court-dark">
+          🏆 {t("finished")}
+        </p>
+      ) : (
+        <section className="mt-8 rounded-2xl border border-clay/30 bg-card p-5 shadow-sm">
+          <h2 className="font-display text-lg font-bold text-navy">{t("finishTitle")}</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-slate">{t("finishBody")}</p>
+          {canFinish ? (
+            <form action={finishTournamentAction} className="mt-4 flex flex-wrap items-center gap-4">
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="tournamentId" value={tr.id} />
+              <label className="flex items-center gap-2 text-sm text-navy">
+                <input type="checkbox" name="potvrda" required className="accent-clay" />
+                {t("finishConfirm")}
+              </label>
+              <button
+                type="submit"
+                className="rounded-xl bg-clay px-5 py-2.5 text-sm font-bold text-white transition hover:bg-clay-dark"
+              >
+                {t("finishButton")}
+              </button>
+            </form>
+          ) : (
+            <p className="mt-3 text-sm text-muted">{t("finishBlocked")}</p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

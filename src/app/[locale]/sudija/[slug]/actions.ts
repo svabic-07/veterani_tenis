@@ -77,6 +77,35 @@ export async function discardDrawAction(formData: FormData) {
   back("ok=ponisten");
 }
 
+export async function finishTournamentAction(formData: FormData) {
+  const tournamentId = String(formData.get("tournamentId") ?? "");
+  const back = backTo(formData, "");
+  try {
+    if (formData.get("potvrda") !== "on") throw new DrawError("confirm_required");
+    const supabase = await guard(formData, tournamentId);
+    const { error } = await supabase.rpc("finish_tournament", {
+      _tournament_id: tournamentId,
+    });
+    if (error) {
+      // poruke iz SQL funkcije (forbidden, unresolved_matches, ...)
+      const known = [
+        "forbidden",
+        "already_finished",
+        "working_draw_exists",
+        "unresolved_matches",
+        "no_published_draws",
+        "tournament_not_found",
+      ].find((k) => error.message.includes(k));
+      throw new DrawError(known ?? "server");
+    }
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  revalidatePath("/rang-liste");
+  back("ok=zavrsen");
+}
+
 export async function enterResultAction(formData: FormData) {
   const matchId = String(formData.get("matchId") ?? "");
   const eventId = String(formData.get("eventId") ?? "");

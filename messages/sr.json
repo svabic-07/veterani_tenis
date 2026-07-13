@@ -206,13 +206,27 @@
       "predaja": "Predaja",
       "retiranje": "Retiranje"
     },
+    "finishTitle": "ZAVRŠI TURNIR",
+    "finishBody": "Završava turnir i obračunava bodove svim igračima po dostignutom kolu (bodovna tablica po seriji i kosturu). Bodovi ulaze u rang liste. Ispravke posle završetka radi koordinator.",
+    "finishConfirm": "Potvrđujem — svi rezultati su tačno uneti",
+    "finishButton": "🏁 ZAVRŠI TURNIR",
+    "finishBlocked": "Dostupno kad svi žrebovi budu objavljeni i svi mečevi rešeni (bez radnih žrebova).",
+    "finished": "Turnir je završen — bodovi su obračunati i rang liste ažurirane.",
     "ok": {
       "kreiran": "Radni žreb je kreiran. Pregledajte ga pa objavite.",
       "objavljen": "Žreb je objavljen i vidljiv na javnoj stranici turnira.",
       "ponisten": "Radni žreb je poništen.",
-      "rezultat": "Rezultat je sačuvan — pobednik je prošao u sledeće kolo."
+      "rezultat": "Rezultat je sačuvan — pobednik je prošao u sledeće kolo.",
+      "zavrsen": "Turnir je završen — bodovi su obračunati i rang liste ažurirane."
     },
     "err": {
+      "confirm_required": "Označite potvrdu pre završetka turnira.",
+      "forbidden": "Nemate pravo da završite ovaj turnir.",
+      "already_finished": "Turnir je već završen.",
+      "working_draw_exists": "Postoji radni (neobjavljen) žreb — objavite ga ili poništite.",
+      "unresolved_matches": "Svi mečevi moraju biti rešeni pre završetka.",
+      "no_published_draws": "Nema objavljenih žrebova.",
+      "tournament_not_found": "Turnir nije pronađen.",
       "not_enough_entries": "Premalo prijava za žreb (minimum 3).",
       "draw_published": "Žreb je već objavljen — opoziv radi koordinator.",
       "not_working_draw": "Žreb nije u radnom statusu.",

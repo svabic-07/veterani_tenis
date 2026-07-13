@@ -185,13 +185,27 @@
       "predaja": "Retired",
       "retiranje": "Withdrawn"
     },
+    "finishTitle": "FINISH TOURNAMENT",
+    "finishBody": "Finishes the tournament and awards points to all players by round reached (scoring table by series and draw size). Points feed the rankings. Post-finish corrections are done by the coordinator.",
+    "finishConfirm": "I confirm — all results are entered correctly",
+    "finishButton": "🏁 FINISH TOURNAMENT",
+    "finishBlocked": "Available once all draws are published and all matches resolved (no working draws).",
+    "finished": "The tournament is finished — points calculated and rankings updated.",
     "ok": {
       "kreiran": "Working draw created. Review it, then publish.",
       "objavljen": "The draw is published and visible on the public tournament page.",
       "ponisten": "Working draw discarded.",
-      "rezultat": "Result saved — the winner advanced to the next round."
+      "rezultat": "Result saved — the winner advanced to the next round.",
+      "zavrsen": "The tournament is finished — points calculated and rankings updated."
     },
     "err": {
+      "confirm_required": "Tick the confirmation before finishing the tournament.",
+      "forbidden": "You are not allowed to finish this tournament.",
+      "already_finished": "The tournament is already finished.",
+      "working_draw_exists": "There is a working (unpublished) draw — publish or discard it.",
+      "unresolved_matches": "All matches must be resolved before finishing.",
+      "no_published_draws": "There are no published draws.",
+      "tournament_not_found": "Tournament not found.",
       "not_enough_entries": "Not enough entries for a draw (minimum 3).",
       "draw_published": "The draw is already published — revoking is done by the coordinator.",
       "not_working_draw": "The draw is not in working status.",

@@ -698,6 +698,7 @@ export type Database = {
     Functions: {
       can_manage_event: { Args: { _event_id: string }; Returns: boolean }
       claim_player: { Args: { p_player_id: string }; Returns: undefined }
+      finish_tournament: { Args: { _tournament_id: string }; Returns: undefined }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
