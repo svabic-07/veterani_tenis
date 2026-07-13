@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
-> **Poslednje ažurirano:** 2026-07-02
-> **Faza:** 0 ✅ završena · 1 🔶 u toku (javni read-sloj gotov)
+> **Poslednje ažurirano:** 2026-07-13
+> **Faza:** 0 ✅ završena · 1 🔶 u toku (javni read-sloj gotov + **pravi podaci uvezeni**)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -10,7 +10,7 @@
 
 Informacioni sistem „Teniski Veterani Srbije" — 4 portala (javni, igrački, sudijski★, koordinatorski) nad jednom Supabase bazom. Dvojezično (SR default, EN). Model: ITF World Tennis Masters Tour + TVS pravila (kategorije I–V, starosne 20–90, serije 2000–250 + Master).
 
-**Javni deo sajta je izgrađen, verifikovan i deployovan.** Sve je vezano na bazu i „upali se" čim stignu migrirani podaci.
+**Javni deo sajta je izgrađen, verifikovan i deployovan.** Podaci sa starog sajta su **migrirani** (2.831 igrača, 427 klubova, kontakti) — direktorijum, profili i filteri rade nad pravim podacima.
 
 ---
 
@@ -69,6 +69,8 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 
 **Seed** (`supabase/seed.sql`): sezona 2026, 8 klubova, 8 direktora (kao igrači), 8 turnira, 31 konkurencija.
 
+**Migrirani podaci sa starog sajta (2026-07-13):** ✅ uvezeno **2.831 igrača** (od 2.834 — 3 placeholder zapisa preskočena), **427 klubova** (normalizovano od 572 varijante naziva), **2.176 kontakata** (email/telefon u `player_private`), **950 TVS kategorija** (poslednja poznata godina po igraču). Izvor: `migration-data_2/` (gitignored, PII). Generator: `scripts/generate-import-sql.py` → `scripts/out/*.sql` (gitignored) → primenjeno preko Supabase MCP. Idempotentno (upsert po `legacy_id`; stari numerički ID = `players.legacy_id`). Upozorenja i ~17 mogućih duplikata (isto ime+godište pod dva ID-ja): `scripts/out/warnings.txt` — za ručnu proveru koordinatora.
+
 **RLS:** javno čitanje (`clubs/players/seasons/tournaments/tournament_events/ranking_points/rankings`); `player_private` samo staff/vlasnik; sve mutacije preko `is_staff()`/direktora. ✅ provereno (anon čita javno, PII blokiran).
 
 **Još nije kreirano (Faza 2/3/4):** `entries`, `draws`, `matches`, `match_sets`, `scoring_tables`, `payments`, `sanctions`, `news`/`gallery`, `audit_log`.
@@ -77,13 +79,11 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 
 ## 6. Šta čeka tebe / sledeći koraci
 
-### 🔴 Blokira dublju Fazu 1 — izvoz stare baze
-Za migraciju **~2.600 igrača** treba izvoz sa aktuelnog sajta: igrači, klubovi, istorija turnira, bodovi (CSV / Excel / SQL). Tada: idempotentna migracija + validacija → rang liste, direktorijum i profili se pune pravim podacima.
+### ✅ Rešeno — izvoz stare baze je stigao i migriran (2026-07-13)
+Igrači + klubovi + kontakti + TVS kategorije su u bazi. **Još nije migrirano** (čeka tabele Faza 3/4): istorija mečeva (`mecevi.jsonl`, 13.371), učešća na turnirima sa poenima (`turniri_ucesce.jsonl`, 7.722), istorija rangiranja po godinama. Izvor ostaje u `migration-data_2/`.
 
-### 🟡 Odluka — sledeći veliki korak (ne zavisi od podataka)
-- **A) Auth (Faza 2)** — igrački nalozi; dira `proxy.ts` (jedini rizik po i18n rutiranje).
-- **B) Žreb engine (Faza 3)** — ITF nošenje/bracket/bye/grupa od 5; testabilno sintetičkim igračima, ne dira proxy. *(preporuka)*
-- **C) Pauza** dok ne stigne izvoz.
+### 🟡 Sledeći veliki korak — Auth (Faza 2), odlučeno
+Tok **„Aktivacija naloga"**: igrači postoje u bazi bez naloga → na `/prijava` unesu email → poklapanje sa `player_private.email` → Supabase magic link + OTP kod → nalog se veže za igrački profil (`profiles.player_id`). Bez lozinki unapred. Posebni slučajevi: deljeni klupski emailovi (56) → izbor igrača + potvrda koordinatora; bez kontakta (656) → aktivacioni kod preko koordinatora. Nalog nije obavezan za javni deo; koordinator može prijavljivati igrače u njihovo ime. Rizik: `proxy.ts` (i18n rutiranje) — pažljivo.
 
 ### 🟢 Sitnice (Faza 5/6)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
@@ -102,6 +102,7 @@ Za migraciju **~2.600 igrača** treba izvoz sa aktuelnog sajta: igrači, klubovi
 | 2026-07-02 | `Faza 1: početna + footer` | Naredni turniri na početnoj + o-savezu/kontakt/sudija |
 | 2026-07-02 | `Faza 1: igrači + rang` | Direktorijum, profil, rang liste + rang tabele |
 | 2026-07-02 | `Faza 1: PWA + SEO` | Ikonica + manifest + naslovi stranica |
+| 2026-07-13 | `Faza 1: migracija podataka` | Uvoz 2.831 igrača + 427 klubova + kontakti sa starog sajta |
 
 ---
 

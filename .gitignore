@@ -37,6 +37,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# scraped migration data (licni podaci clanova - ne komituje se)
+/migration-data*/
+/scripts/out/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
