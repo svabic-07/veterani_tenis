@@ -48,7 +48,8 @@ Dizajn tokeni (`src/app/globals.css` `@theme`): boje `clay/court/ball/navy`, fon
 | `/rang-liste` | dinamička | ✅ (prazno) | `rankings` (kat × disc), čeka obračun |
 | `/pravilnik` | statička | ✅ | sadržaj iz spec-a (dvojezično) |
 | `/o-savezu`, `/kontakt` | statička | ✅ | statički sadržaj |
-| `/sudija` | statička | 🔶 WIP | Faza 3 |
+| `/sudija` | dinamička | ✅ | lista turnira koje nalog vodi (staff/direktor) |
+| `/sudija/[slug]` | dinamička | ✅ | kreiraj/objavi žreb, unos rezultata (auth + RLS) |
 | `/prijava` | dinamička | ✅ | magic link prijava (Supabase OTP) |
 | `/nalog` | dinamička | ✅ | profil naloga + povezivanje sa igračem |
 | `/api/auth/confirm` | route handler | ✅ | potvrda email linka (PKCE `code` + `token_hash`) |
@@ -109,7 +110,13 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 
 **Javni prikaz:** stranica turnira renderuje objavljene žrebove (bracket kolone po kolima + grupe + predkolo, rezultati po setovima, nosioci `[N]`). Demo žreb: Oktagon Open · I · singl (12 sintetičkih prijava; regenerisanje: `pnpm tsx scripts/demo-draw.ts` → SQL). Verifikovano u browseru.
 
-**Sledeće u Fazi 3 (sudijski portal):** UI za direktora — zatvaranje prijava, generisanje/objava žreba (server actions nad `can_manage_event`), ručno doterivanje (drag-and-drop), unos rezultata na telefonu, satnica, „ZAVRŠI TURNIR" → obračun bodova.
+**Sudijski portal — jezgro gotovo (2026-07-14):**
+- `/sudija` — lista turnira koje nalog vodi (koordinator/admin vidi sve; direktor svoje — preko `profiles.player_id` = `tournaments.direktor_id`, tj. direktor prvo aktivira nalog kao igrač).
+- `/sudija/[slug]` — po konkurenciji: broj prijava, **Kreiraj žreb** (radna verzija iz `entries` kroz engine), pregled, **Objavi** (tek tada javno vidljiv) / **Poništi** / **Ponovi žreb**; **unos rezultata** (pobednik + „6:3 7:5" + regularno/walkover/predaja/retiranje) sa auto-napredovanjem i automatskim punjenjem polufinala kad se grupe završe (`src/lib/draw/db.ts`).
+- Bezbednost verifikovano SQL simulacijom (rollback): igrač bez uloge ❌ · koordinator ✅ · direktor svog turnira ✅ · direktor tuđeg ❌. UI gating: anon → prijava. 27 vitest testova.
+- ⚠️ Dodela uloga (koordinator/sudija) je zasad ručna (SQL u `user_roles`) — UI stiže u Fazi 4.
+
+**Ostaje u Fazi 3:** satnica (tereni × termini + štampanje), „ZAVRŠI TURNIR" → obračun bodova (bodovna tablica — Faza 4 deli logiku), ručno doterivanje žreba (drag-and-drop), evidencija loptica, offline tolerancija.
 
 ### 🟢 Sitnice (Faza 5/6)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
@@ -131,6 +138,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-13 | `Faza 1: migracija podataka` | Uvoz 2.831 igrača + 427 klubova + kontakti sa starog sajta |
 | 2026-07-13 | `Faza 2: aktivacija naloga` | Magic link prijava + povezivanje naloga sa igračem + session refresh u proxy |
 | 2026-07-14 | `Faza 3: žreb engine` | ITF nošenje/bye/predkolo/grupe + 26 testova + javni prikaz žreba |
+| 2026-07-14 | `Faza 3: sudijski portal` | Kreiraj/objavi žreb + unos rezultata sa auto-napredovanjem |
 
 ---
 

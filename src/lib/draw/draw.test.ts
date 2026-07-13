@@ -287,6 +287,17 @@ describe("advanceWinner — auto-napredovanje", () => {
   });
 });
 
+describe("parseSets — parsiranje unosa rezultata", () => {
+  it("parsira uobičajene oblike", async () => {
+    const { parseSets } = await import("./db");
+    expect(parseSets("6:3 7:5")).toEqual([{ g1: 6, g2: 3 }, { g1: 7, g2: 5 }]);
+    expect(parseSets("6-3, 7-6")).toEqual([{ g1: 6, g2: 3 }, { g1: 7, g2: 6 }]);
+    expect(parseSets("9:8")).toEqual([{ g1: 9, g2: 8 }]);
+    expect(parseSets("")).toEqual([]);
+    expect(parseSets("nije rezultat")).toEqual([]);
+  });
+});
+
 describe("generateDraw — izbor formata", () => {
   it("3–4 grupa · 5 grupa5 · 6–7 dve grupe · 8+ eliminacija", () => {
     expect(generateDraw(makeEntries(4), "f").tip).toBe("grupa");

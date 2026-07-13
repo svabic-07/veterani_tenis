@@ -158,6 +158,53 @@
     "errorClaim": "Linking failed. Please try again or contact your coordinator.",
     "signOut": "Sign out"
   },
+  "referee": {
+    "title": "Referee portal",
+    "subtitle": "Tournament management — draw, result entry, publishing. For tournament directors and coordinators.",
+    "loginNeeded": "To access the referee portal, sign in with an account linked to your player profile (tournament director) or with coordinator rights.",
+    "loginCta": "Sign in",
+    "noTournaments": "Your account currently manages no tournaments. If you are a tournament director, make sure your account is linked to your player profile (My account) or contact the coordinator.",
+    "entriesCount": "{n, plural, =0 {no entries} one {# entry} other {# entries}}",
+    "drawStatus": {
+      "radna": "Working draw",
+      "objavljen": "Published",
+      "zakljucan": "Locked",
+      "opozvan": "Revoked"
+    },
+    "createDraw": "Create draw",
+    "redraw": "Redraw",
+    "publishDraw": "Publish draw",
+    "discardDraw": "Discard",
+    "needEntries": "A draw requires at least 3 entries in this event.",
+    "enterResults": "Enter results",
+    "resultPlaceholder": "6:3 7:5",
+    "saveResult": "Save",
+    "result": {
+      "zavrsen": "Completed",
+      "walkover": "Walkover",
+      "predaja": "Retired",
+      "retiranje": "Withdrawn"
+    },
+    "ok": {
+      "kreiran": "Working draw created. Review it, then publish.",
+      "objavljen": "The draw is published and visible on the public tournament page.",
+      "ponisten": "Working draw discarded.",
+      "rezultat": "Result saved — the winner advanced to the next round."
+    },
+    "err": {
+      "not_enough_entries": "Not enough entries for a draw (minimum 3).",
+      "draw_published": "The draw is already published — revoking is done by the coordinator.",
+      "not_working_draw": "The draw is not in working status.",
+      "match_resolved": "This match is already resolved — corrections are done by the coordinator.",
+      "match_incomplete": "The match does not have both participants yet.",
+      "sets_required": "For a completed match enter the score by sets (e.g. 6:3 7:5).",
+      "winner_required": "Select the winner.",
+      "match_not_found": "Match not found.",
+      "auth_required": "Please sign in again.",
+      "bad_request": "Invalid request.",
+      "server": "Server error. Please try again."
+    }
+  },
   "draw": {
     "title": "Draw",
     "bracketOf": "draw of {n}",
