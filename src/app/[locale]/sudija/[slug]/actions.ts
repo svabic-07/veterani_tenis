@@ -3,11 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { belgradeInputToIso } from "@/lib/format";
 import {
   createDrawForEvent,
   publishDraw,
   discardDraw,
   enterResult,
+  addEntry,
+  removeEntry,
+  scheduleMatch,
+  swapSlots,
   parseSets,
   DrawError,
 } from "@/lib/draw/db";
@@ -75,6 +80,74 @@ export async function discardDrawAction(formData: FormData) {
     return;
   }
   back("ok=ponisten");
+}
+
+export async function addEntryAction(formData: FormData) {
+  const eventId = String(formData.get("eventId") ?? "");
+  const playerId = String(formData.get("playerId") ?? "");
+  const back = backTo(formData, `event-${eventId}`);
+  try {
+    if (!UUID_RE.test(playerId)) throw new DrawError("bad_request");
+    const supabase = await guard(formData, eventId);
+    await addEntry(supabase, eventId, playerId);
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=prijava");
+}
+
+export async function removeEntryAction(formData: FormData) {
+  const entryId = String(formData.get("entryId") ?? "");
+  const eventId = String(formData.get("eventId") ?? "");
+  const back = backTo(formData, `event-${eventId}`);
+  try {
+    const supabase = await guard(formData, entryId);
+    await removeEntry(supabase, entryId);
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=odjava");
+}
+
+export async function scheduleMatchAction(formData: FormData) {
+  const matchId = String(formData.get("matchId") ?? "");
+  const eventId = String(formData.get("eventId") ?? "");
+  const termin = String(formData.get("termin") ?? "").trim();
+  const teren = String(formData.get("teren") ?? "").trim();
+  const back = backTo(formData, `event-${eventId}`);
+  try {
+    const supabase = await guard(formData, matchId);
+    await scheduleMatch(supabase, matchId, termin ? belgradeInputToIso(termin) : null, teren || null);
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=satnica");
+}
+
+export async function swapSlotsAction(formData: FormData) {
+  const drawId = String(formData.get("drawId") ?? "");
+  const eventId = String(formData.get("eventId") ?? "");
+  const slotA = String(formData.get("slotA") ?? "");
+  const slotB = String(formData.get("slotB") ?? "");
+  const back = backTo(formData, `event-${eventId}`);
+  try {
+    const parse = (s: string) => {
+      const [matchId, slot] = s.split("|");
+      if (!UUID_RE.test(matchId) || (slot !== "1" && slot !== "2")) {
+        throw new DrawError("bad_request");
+      }
+      return { matchId, slot: Number(slot) as 1 | 2 };
+    };
+    const supabase = await guard(formData, drawId);
+    await swapSlots(supabase, drawId, parse(slotA), parse(slotB));
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=zamena");
 }
 
 export async function finishTournamentAction(formData: FormData) {

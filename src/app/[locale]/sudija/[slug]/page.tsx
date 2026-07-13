@@ -4,13 +4,17 @@ import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getDrawsForTournament, type TournamentDraw } from "@/lib/data/draws";
 import { DrawBracket } from "@/components/draw-bracket";
-import { formatDateRange } from "@/lib/format";
+import { formatDateRange, isoToBelgradeInput } from "@/lib/format";
 import {
   createDrawAction,
   publishDrawAction,
   discardDrawAction,
   enterResultAction,
   finishTournamentAction,
+  addEntryAction,
+  removeEntryAction,
+  scheduleMatchAction,
+  swapSlotsAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -135,13 +139,37 @@ export default async function SudijaTurnirPage({
   const { data: entryRows } = eventIds.length
     ? await supabase
         .from("entries")
-        .select("event_id, status")
+        .select(
+          "id, event_id, status, seed, bodovi_snapshot, players!entries_player_id_fkey ( id, ime, prezime, clubs ( naziv ) )",
+        )
         .in("event_id", eventIds)
         .in("status", ["prijavljen", "gost"])
-    : { data: [] };
-  const entryCount = new Map<string, number>();
-  for (const r of entryRows ?? []) {
-    entryCount.set(r.event_id, (entryCount.get(r.event_id) ?? 0) + 1);
+        .order("bodovi_snapshot", { ascending: false, nullsFirst: false })
+    : { data: null };
+  const allEntries = entryRows ?? [];
+  const entriesByEvent = new Map<string, typeof allEntries>();
+  for (const r of allEntries) {
+    const list = entriesByEvent.get(r.event_id) ?? [];
+    list.push(r);
+    entriesByEvent.set(r.event_id, list);
+  }
+
+  // pretraga igrača za dodavanje prijave (?ev=<eventId>&q=<ime>)
+  const searchEvent = typeof sp.ev === "string" ? sp.ev : "";
+  const searchQ = typeof sp.q === "string" ? sp.q.replace(/[,()%*]/g, "").trim() : "";
+  let candidates: { id: string; ime: string; prezime: string; clubs: { naziv: string } | null }[] = [];
+  if (searchEvent && searchQ) {
+    const entered = (entriesByEvent.get(searchEvent) ?? []).map((e) => e.players!.id);
+    let cq = supabase
+      .from("players")
+      .select("id, ime, prezime, clubs ( naziv )")
+      .eq("is_active", true)
+      .or(`ime.ilike.%${searchQ}%,prezime.ilike.%${searchQ}%`)
+      .order("prezime")
+      .limit(8);
+    if (entered.length) cq = cq.not("id", "in", `(${entered.join(",")})`);
+    const { data } = await cq;
+    candidates = data ?? [];
   }
 
   const resultStatuses = {
@@ -189,10 +217,28 @@ export default async function SudijaTurnirPage({
       <div className="space-y-6">
         {tr.tournament_events.map((ev) => {
           const draw = drawByEvent.get(ev.id);
-          const n = entryCount.get(ev.id) ?? 0;
+          const entries = entriesByEvent.get(ev.id) ?? [];
+          const n = entries.length;
+          const canEditEntries = !draw || draw.status === "radna";
           const playable = (draw?.matches ?? []).filter(
             (m) => m.winner_slot === null && m.p1 && m.p2,
           );
+          const swapSlotOptions =
+            draw?.status === "radna" && draw.tip === "eliminacija"
+              ? draw.matches
+                  .filter((m) => m.kolo <= 1)
+                  .flatMap((m) =>
+                    ([1, 2] as const).map((slot) => ({
+                      value: `${m.id}|${slot}`,
+                      label: `${m.kolo === 0 ? t("prelimShort") : `M${m.pozicija}`} · ${
+                        playerName(slot === 1 ? m.p1 : m.p2) === "—" &&
+                        m.status === "bye"
+                          ? "bye"
+                          : playerName(slot === 1 ? m.p1 : m.p2)
+                      }`,
+                    })),
+                  )
+              : [];
           return (
             <section
               key={ev.id}
@@ -263,10 +309,173 @@ export default async function SudijaTurnirPage({
                 <p className="mt-3 text-sm text-muted">{t("needEntries")}</p>
               )}
 
+              {/* Prijave: lista + dodavanje (dok žreb nije objavljen) */}
+              {canEditEntries && (
+                <details className="mt-4 rounded-xl border border-line2 bg-bg2 p-3" open={n < 3}>
+                  <summary className="cursor-pointer text-sm font-semibold text-navy">
+                    {t("entriesTitle", { n })}
+                  </summary>
+                  {n > 0 && (
+                    <ul className="mt-3 space-y-1.5">
+                      {entries.map((e) => (
+                        <li key={e.id} className="flex items-center gap-2 text-sm">
+                          <span className="min-w-0 flex-1 truncate text-navy">
+                            {e.players!.ime} {e.players!.prezime}
+                            <span className="text-xs text-muted">
+                              {e.players!.clubs?.naziv ? ` · ${e.players!.clubs.naziv}` : ""}
+                              {e.bodovi_snapshot !== null ? ` · ${e.bodovi_snapshot}` : ""}
+                            </span>
+                          </span>
+                          <form action={removeEntryAction}>
+                            <input type="hidden" name="locale" value={locale} />
+                            <input type="hidden" name="slug" value={slug} />
+                            <input type="hidden" name="eventId" value={ev.id} />
+                            <input type="hidden" name="entryId" value={e.id} />
+                            <button
+                              type="submit"
+                              className="rounded-md px-2 py-1 text-xs font-semibold text-clay transition hover:bg-clay/10"
+                            >
+                              {t("removeEntry")}
+                            </button>
+                          </form>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <form method="get" className="mt-3 flex gap-2">
+                    <input type="hidden" name="ev" value={ev.id} />
+                    <input
+                      type="search"
+                      name="q"
+                      defaultValue={searchEvent === ev.id ? searchQ : ""}
+                      placeholder={t("searchPlayer")}
+                      className="min-w-0 flex-1 rounded-lg border border-line2 bg-card px-3 py-2 text-sm outline-none focus:border-clay"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-lg border border-line2 px-3.5 py-2 text-sm font-semibold text-navy transition hover:border-clay hover:text-clay"
+                    >
+                      {t("search")}
+                    </button>
+                  </form>
+                  {searchEvent === ev.id && searchQ && (
+                    <ul className="mt-2 space-y-1.5">
+                      {candidates.length === 0 && (
+                        <li className="text-sm text-muted">{t("noCandidates")}</li>
+                      )}
+                      {candidates.map((c) => (
+                        <li key={c.id} className="flex items-center gap-2 text-sm">
+                          <span className="min-w-0 flex-1 truncate text-navy">
+                            {c.ime} {c.prezime}
+                            <span className="text-xs text-muted">
+                              {c.clubs?.naziv ? ` · ${c.clubs.naziv}` : ""}
+                            </span>
+                          </span>
+                          <form action={addEntryAction}>
+                            <input type="hidden" name="locale" value={locale} />
+                            <input type="hidden" name="slug" value={slug} />
+                            <input type="hidden" name="eventId" value={ev.id} />
+                            <input type="hidden" name="playerId" value={c.id} />
+                            <button
+                              type="submit"
+                              className="rounded-md bg-court px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-court-dark"
+                            >
+                              {t("addEntry")}
+                            </button>
+                          </form>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </details>
+              )}
+
               {draw && (
                 <div className="mt-4">
                   <DrawBracket draw={draw} />
                 </div>
+              )}
+
+              {/* Ručno doterivanje radnog žreba: zamena dve pozicije */}
+              {swapSlotOptions.length > 0 && (
+                <form
+                  action={swapSlotsAction}
+                  className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-line2 bg-bg2 p-3"
+                >
+                  <span className="text-sm font-semibold text-navy">{t("swapTitle")}</span>
+                  <input type="hidden" name="locale" value={locale} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <input type="hidden" name="eventId" value={ev.id} />
+                  <input type="hidden" name="drawId" value={draw!.id} />
+                  {(["slotA", "slotB"] as const).map((name) => (
+                    <select
+                      key={name}
+                      name={name}
+                      required
+                      className="min-w-0 flex-1 basis-44 rounded-lg border border-line2 bg-card px-2 py-2 text-sm outline-none focus:border-clay"
+                    >
+                      <option value="">{name === "slotA" ? t("swapA") : t("swapB")}</option>
+                      {swapSlotOptions.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  ))}
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-line2 px-3.5 py-2 text-sm font-semibold text-navy transition hover:border-clay hover:text-clay"
+                  >
+                    {t("swapDo")}
+                  </button>
+                </form>
+              )}
+
+              {/* Satnica: termin + teren po meču */}
+              {draw && (
+                <details className="mt-4 rounded-xl border border-line2 bg-bg2 p-3">
+                  <summary className="cursor-pointer text-sm font-semibold text-navy">
+                    {t("scheduleTitle")}
+                  </summary>
+                  <div className="mt-3 space-y-2">
+                    {draw.matches
+                      .filter((m) => m.status !== "bye")
+                      .map((m) => (
+                        <form
+                          key={m.id}
+                          action={scheduleMatchAction}
+                          className="flex flex-wrap items-center gap-2 text-sm"
+                        >
+                          <input type="hidden" name="locale" value={locale} />
+                          <input type="hidden" name="slug" value={slug} />
+                          <input type="hidden" name="eventId" value={ev.id} />
+                          <input type="hidden" name="matchId" value={m.id} />
+                          <span className="min-w-0 flex-1 basis-48 truncate text-navy">
+                            {playerName(m.p1)} — {playerName(m.p2)}
+                          </span>
+                          <input
+                            type="datetime-local"
+                            name="termin"
+                            defaultValue={isoToBelgradeInput(m.termin)}
+                            className="rounded-lg border border-line2 bg-card px-2 py-1.5 text-sm outline-none focus:border-clay"
+                          />
+                          <input
+                            type="text"
+                            name="teren"
+                            defaultValue={m.teren ?? ""}
+                            placeholder={t("court")}
+                            className="w-24 rounded-lg border border-line2 bg-card px-2 py-1.5 text-sm outline-none focus:border-clay"
+                          />
+                          <button
+                            type="submit"
+                            className="rounded-lg border border-line2 px-3 py-1.5 text-xs font-semibold text-navy transition hover:border-clay hover:text-clay"
+                          >
+                            {t("scheduleSave")}
+                          </button>
+                        </form>
+                      ))}
+                  </div>
+                </details>
               )}
 
               {draw && draw.status !== "radna" && playable.length > 0 && (

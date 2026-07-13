@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { getTournamentBySlug } from "@/lib/data/tournaments";
 import { getDrawsForTournament } from "@/lib/data/draws";
 import { DrawBracket } from "@/components/draw-bracket";
-import { formatDateRange, formatDeadline } from "@/lib/format";
+import { formatDateRange, formatDeadline, formatMatchTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -115,6 +115,50 @@ export default async function TurnirPage({
             </span>
           ))}
         </div>
+
+        {(() => {
+          const scheduled = draws
+            .flatMap((d) =>
+              d.matches
+                .filter((m) => m.termin)
+                .map((m) => ({ ...m, kategorija: d.event.kategorija, disciplina: d.event.disciplina })),
+            )
+            .sort((a, b) => (a.termin! < b.termin! ? -1 : 1));
+          if (scheduled.length === 0) return null;
+          return (
+            <section className="mb-8">
+              <h3 className="mb-3 font-display text-lg font-bold text-navy">
+                {td("scheduleTitle")}
+              </h3>
+              <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+                {scheduled.map((m, i) => (
+                  <li
+                    key={m.id}
+                    className={`flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-sm ${
+                      i % 2 ? "bg-[#FBF8F3]" : ""
+                    }`}
+                  >
+                    <span className="font-mono text-xs font-semibold text-clay">
+                      {formatMatchTime(m.termin, locale)}
+                    </span>
+                    {m.teren && (
+                      <span className="rounded bg-court/12 px-1.5 py-0.5 text-xs font-semibold text-court-dark">
+                        {m.teren}
+                      </span>
+                    )}
+                    <span className="min-w-0 flex-1 truncate text-navy">
+                      {m.p1 ? `${m.p1.ime[0]}. ${m.p1.prezime}` : "—"} —{" "}
+                      {m.p2 ? `${m.p2.ime[0]}. ${m.p2.prezime}` : "—"}
+                    </span>
+                    <span className="text-xs text-muted">
+                      {t(`discipline.${m.disciplina}`)} · {m.kategorija}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })()}
 
         {draws.length > 0 ? (
           <div className="space-y-8">

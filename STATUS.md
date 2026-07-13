@@ -123,7 +123,12 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 - UI: sekcija „ZAVRŠI TURNIR" na `/sudija/[slug]` (checkbox potvrda; dostupno tek kad su svi žrebovi objavljeni i mečevi rešeni).
 - Testirano SQL simulacijom (rollback): grupa od 5, serija 1000 → pobednik 1000 · finalista 600 · PF 360 · grupa 180; rang #1 upisan; forbidden za korisnika bez prava. ⚠️ Pojednostavljenja v1: čista grupa 3–4 rangira se po pobedama (bez h2h u obračunu); Master serija nema tablicu (poseban obračun — Faza 4); `svi_boduju` model još nema tablicu.
 
-**Ostaje u Fazi 3:** satnica (tereni × termini + štampanje), ručno doterivanje žreba (drag-and-drop), evidencija loptica, offline tolerancija.
+**Prijave + satnica + doterivanje (2026-07-14):**
+- **Prijave** na `/sudija/[slug]`: po konkurenciji lista prijavljenih (klub + bodovi za nošenje iz poslednje rang liste), pretraga igrača + „Dodaj", „Ukloni" — sve dok žreb nije objavljen.
+- **Satnica**: termin (datetime, čuva se kao pravi trenutak — unos/prikaz po beogradskom vremenu) + teren po meču; javna stranica turnira prikazuje sortiranu satnicu.
+- **Zamena pozicija** u radnom eliminacionom žrebu (dva select-a → zameni; bye se ponovo propagira). Za grupe: ponovni žreb.
+
+**Ostaje u Fazi 3 (niži prioritet):** evidencija loptica + izveštaj koordinatoru, offline tolerancija, štampanje satnice.
 
 ### 🟢 Sitnice (Faza 5/6)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
@@ -147,6 +152,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-14 | `Faza 3: žreb engine` | ITF nošenje/bye/predkolo/grupe + 26 testova + javni prikaz žreba |
 | 2026-07-14 | `Faza 3: sudijski portal` | Kreiraj/objavi žreb + unos rezultata sa auto-napredovanjem |
 | 2026-07-14 | `Faza 3: ZAVRŠI TURNIR` | Bodovne tablice + obračun + nedeljni rang (finish_tournament) |
+| 2026-07-14 | `Faza 3: prijave + satnica` | Upravljanje prijavama, satnica po meču (javno), zamena pozicija |
 
 ---
 

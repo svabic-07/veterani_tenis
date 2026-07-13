@@ -206,6 +206,20 @@
       "predaja": "Predaja",
       "retiranje": "Retiranje"
     },
+    "entriesTitle": "Prijave ({n})",
+    "searchPlayer": "Pretraga igrača po imenu…",
+    "search": "Traži",
+    "noCandidates": "Nema igrača za taj upit (ili su svi već prijavljeni).",
+    "addEntry": "Dodaj",
+    "removeEntry": "Ukloni",
+    "scheduleTitle": "Satnica",
+    "scheduleSave": "Sačuvaj",
+    "court": "Teren",
+    "prelimShort": "Predkolo",
+    "swapTitle": "Zamena pozicija:",
+    "swapA": "— prva pozicija —",
+    "swapB": "— druga pozicija —",
+    "swapDo": "Zameni",
     "finishTitle": "ZAVRŠI TURNIR",
     "finishBody": "Završava turnir i obračunava bodove svim igračima po dostignutom kolu (bodovna tablica po seriji i kosturu). Bodovi ulaze u rang liste. Ispravke posle završetka radi koordinator.",
     "finishConfirm": "Potvrđujem — svi rezultati su tačno uneti",
@@ -217,7 +231,11 @@
       "objavljen": "Žreb je objavljen i vidljiv na javnoj stranici turnira.",
       "ponisten": "Radni žreb je poništen.",
       "rezultat": "Rezultat je sačuvan — pobednik je prošao u sledeće kolo.",
-      "zavrsen": "Turnir je završen — bodovi su obračunati i rang liste ažurirane."
+      "zavrsen": "Turnir je završen — bodovi su obračunati i rang liste ažurirane.",
+      "prijava": "Igrač je prijavljen.",
+      "odjava": "Prijava je uklonjena.",
+      "satnica": "Satnica je sačuvana.",
+      "zamena": "Pozicije su zamenjene."
     },
     "err": {
       "confirm_required": "Označite potvrdu pre završetka turnira.",
@@ -235,6 +253,8 @@
       "sets_required": "Za regularan meč unesite rezultat po setovima (npr. 6:3 7:5).",
       "winner_required": "Označite pobednika.",
       "match_not_found": "Meč nije pronađen.",
+      "already_entered": "Taj igrač je već prijavljen u ovoj konkurenciji.",
+      "swap_elimination_only": "Zamena pozicija radi samo za eliminacione žrebove (za grupe ponovite žreb).",
       "auth_required": "Prijavite se ponovo.",
       "bad_request": "Neispravan zahtev.",
       "server": "Greška na serveru. Pokušajte ponovo."
@@ -242,6 +262,7 @@
   },
   "draw": {
     "title": "Žreb",
+    "scheduleTitle": "Satnica",
     "bracketOf": "kostur {n}",
     "seedsCount": "{n, plural, one {# nosilac} few {# nosioca} other {# nosilaca}}",
     "final": "Finale",

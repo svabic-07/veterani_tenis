@@ -38,5 +38,47 @@ export function formatDeadline(ts: string | null, locale: string): string {
     month: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Europe/Belgrade",
   }).format(new Date(ts));
+}
+
+const TZ = "Europe/Belgrade";
+
+/** "sub 18.07. 09:00" — termin meča (satnica). */
+export function formatMatchTime(ts: string | null, locale: string): string {
+  if (!ts) return "";
+  return new Intl.DateTimeFormat(localeTag(locale), {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: TZ,
+  }).format(new Date(ts));
+}
+
+/** datetime-local vrednost ("2026-07-18T09:00") iz ISO — po beogradskom zidnom satu. */
+export function isoToBelgradeInput(iso: string | null): string {
+  if (!iso) return "";
+  const s = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(iso));
+  return s.replace(" ", "T");
+}
+
+/** Beogradsko zidno vreme ("2026-07-18T09:00") → tačan UTC trenutak (ISO). */
+export function belgradeInputToIso(local: string): string {
+  const guess = new Date(`${local}:00Z`);
+  const wall = new Date(
+    guess.toLocaleString("en-US", { timeZone: TZ, hour12: false }),
+  );
+  const utcView = new Date(guess.toLocaleString("en-US", { timeZone: "UTC", hour12: false }));
+  const offsetMs = wall.getTime() - utcView.getTime();
+  return new Date(guess.getTime() - offsetMs).toISOString();
 }

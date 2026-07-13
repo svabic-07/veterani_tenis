@@ -241,6 +241,139 @@ async function resolveGroupsIfComplete(supabase: Db, drawId: string) {
   }
 }
 
+/** Dodaje prijavu; bodovi za nošenje iz poslednje rang liste (ako postoji). */
+export async function addEntry(supabase: Db, eventId: string, playerId: string) {
+  const { data: existingDraw } = await supabase
+    .from("draws")
+    .select("status")
+    .eq("event_id", eventId)
+    .maybeSingle();
+  if (existingDraw && existingDraw.status !== "radna" && existingDraw.status !== "opozvan") {
+    throw new DrawError("draw_published");
+  }
+
+  const { data: event } = await supabase
+    .from("tournament_events")
+    .select("kategorija, disciplina")
+    .eq("id", eventId)
+    .maybeSingle();
+  if (!event) throw new DrawError("bad_request");
+
+  const { data: rank } = await supabase
+    .from("rankings")
+    .select("bodovi")
+    .eq("player_id", playerId)
+    .eq("kategorija", event.kategorija)
+    .eq("disciplina", event.disciplina)
+    .order("nedelja", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("entries").insert({
+    event_id: eventId,
+    player_id: playerId,
+    status: "prijavljen",
+    bodovi_snapshot: rank?.bodovi ?? null,
+  });
+  if (error) {
+    if (error.code === "23505") throw new DrawError("already_entered");
+    throw error;
+  }
+}
+
+/** Uklanja prijavu (samo dok žreb nije objavljen). */
+export async function removeEntry(supabase: Db, entryId: string) {
+  const { data: entry } = await supabase
+    .from("entries")
+    .select("id, event_id")
+    .eq("id", entryId)
+    .maybeSingle();
+  if (!entry) throw new DrawError("bad_request");
+
+  const { data: existingDraw } = await supabase
+    .from("draws")
+    .select("status")
+    .eq("event_id", entry.event_id)
+    .maybeSingle();
+  if (existingDraw && existingDraw.status !== "radna" && existingDraw.status !== "opozvan") {
+    throw new DrawError("draw_published");
+  }
+
+  const { error } = await supabase.from("entries").delete().eq("id", entryId);
+  if (error) throw error;
+}
+
+/** Satnica: termin i teren jednog meča. */
+export async function scheduleMatch(
+  supabase: Db,
+  matchId: string,
+  termin: string | null,
+  teren: string | null,
+) {
+  const { data, error } = await supabase
+    .from("matches")
+    .update({ termin, teren })
+    .eq("id", matchId)
+    .select("id");
+  if (error) throw error;
+  if (!data?.length) throw new DrawError("match_not_found");
+}
+
+/**
+ * Ručno doterivanje RADNOG eliminacionog žreba: zamena igrača na dve
+ * pozicije 1. kola/predkola (nosioci i bodovi idu sa pozicijom — menjaju
+ * se samo igrači). Bye mečevi se ponovo propagiraju u 2. kolo.
+ */
+export async function swapSlots(
+  supabase: Db,
+  drawId: string,
+  a: { matchId: string; slot: 1 | 2 },
+  b: { matchId: string; slot: 1 | 2 },
+) {
+  if (a.matchId === b.matchId && a.slot === b.slot) throw new DrawError("bad_request");
+
+  const { data: draw } = await supabase
+    .from("draws")
+    .select("id, status, tip, matches ( id, kolo, pozicija, player1_id, player2_id, status, next_match_id, next_slot )")
+    .eq("id", drawId)
+    .maybeSingle();
+  if (!draw) throw new DrawError("bad_request");
+  if (draw.status !== "radna") throw new DrawError("not_working_draw");
+  if (draw.tip !== "eliminacija") throw new DrawError("swap_elimination_only");
+
+  const mA = draw.matches.find((m) => m.id === a.matchId);
+  const mB = draw.matches.find((m) => m.id === b.matchId);
+  if (!mA || !mB || mA.kolo > 1 || mB.kolo > 1) throw new DrawError("bad_request");
+
+  const get = (m: typeof mA, slot: 1 | 2) => (slot === 1 ? m.player1_id : m.player2_id);
+  const pA = get(mA, a.slot);
+  const pB = get(mB, b.slot);
+  if (!pA && !pB) throw new DrawError("bad_request"); // bye ↔ bye nema smisla
+
+  const set = async (m: typeof mA, slot: 1 | 2, playerId: string | null) => {
+    const patch = slot === 1 ? { player1_id: playerId } : { player2_id: playerId };
+    const { error } = await supabase.from("matches").update(patch).eq("id", m.id);
+    if (error) throw error;
+  };
+  await set(mA, a.slot, pB);
+  await set(mB, b.slot, pA);
+
+  // bye mečevi: ponovo propagiraj igrača (sveže stanje posle zamene) u 2. kolo
+  for (const m of [mA, mB]) {
+    if (m.status !== "bye" || !m.next_match_id || !m.next_slot) continue;
+    const { data: fresh } = await supabase
+      .from("matches")
+      .select("player1_id, player2_id, winner_slot")
+      .eq("id", m.id)
+      .single();
+    if (!fresh) continue;
+    const byeWinner = fresh.winner_slot === 1 ? fresh.player1_id : fresh.player2_id;
+    const patch = m.next_slot === 1 ? { player1_id: byeWinner } : { player2_id: byeWinner };
+    const { error } = await supabase.from("matches").update(patch).eq("id", m.next_match_id);
+    if (error) throw error;
+  }
+}
+
 /** Parsira rezultat "6:3 7:5" (ili "6-3, 7-6") u setove. */
 export function parseSets(text: string): { g1: number; g2: number }[] {
   const sets: { g1: number; g2: number }[] = [];
