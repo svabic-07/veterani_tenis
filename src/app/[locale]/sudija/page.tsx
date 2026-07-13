@@ -34,9 +34,11 @@ export default async function SudijaPage({
     mesto: string | null;
   }[] = [];
   let isManager = false;
+  let isStaff = false;
 
   if (claims) {
     const { data: staff } = await supabase.rpc("is_staff");
+    isStaff = !!staff;
     const { data: profile } = await supabase
       .from("profiles")
       .select("player_id")
@@ -63,6 +65,14 @@ export default async function SudijaPage({
           {t("title")}
         </h1>
         <p className="mt-2 max-w-2xl text-slate">{t("subtitle")}</p>
+        {isStaff && (
+          <Link
+            href="/koordinator"
+            className="mt-3 inline-block rounded-xl border border-line2 px-4 py-2 text-sm font-semibold text-navy transition hover:border-clay hover:text-clay"
+          >
+            🛠️ {t("coordinatorLink")}
+          </Link>
+        )}
       </header>
 
       {!claims ? (

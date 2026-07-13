@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
 > **Poslednje ažurirano:** 2026-07-14
-> **Faza:** 0 ✅ · 1 🔶 (javni sloj + pravi podaci) · 2 🔶 (aktivacija naloga, čeka email konfig.) · 3 🔶 (žreb engine + javni prikaz gotovi; sudijski UI sledi)
+> **Faza:** 0 ✅ · 1 🔶 (javni sloj + pravi podaci) · 2 🔶 (aktivacija naloga, čeka email konfig.) · 3 ✅ (žreb → rezultati → obračun, sudijski portal) · 4 🔶 (koordinatorski panel — jezgro)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -81,8 +81,9 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 9. `…120000_draws` — **`entries`, `draws`, `matches`, `match_sets`** + enumi (`draw_type`, `draw_status`) + `can_manage_event()`; RLS: javno vidi samo objavljen/zaključan žreb, piše staff/direktor turnira
 
 10. `…0714090000_scoring` — **`scoring_tables`** (140 redova, klasični model) + **`finish_tournament()`** (obračun + nedeljni rang)
+11. `…0714110000_koordinator` — **`audit_log`** + `revoke_draw`/`clear_match_result`/`reopen_tournament`/`admin_list_users`
 
-**Još nije kreirano (Faza 4):** `payments`, `sanctions`, `news`/`gallery`, `audit_log`.
+**Još nije kreirano (Faza 4):** `payments`, `sanctions`, `news`/`gallery`.
 
 ---
 
@@ -130,6 +131,13 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 
 **Ostaje u Fazi 3 (niži prioritet):** evidencija loptica + izveštaj koordinatoru, offline tolerancija, štampanje satnice.
 
+### 🔶 Faza 4 — koordinatorski panel, jezgro (2026-07-14)
+- Migracija `…0714110000_koordinator`: **`audit_log`** (upis samo kroz funkcije) + korekcije kao SECURITY DEFINER funkcije sa auditom: **`revoke_draw`** (opoziv objavljenog žreba), **`clear_match_result`** (poništavanje rezultata + čišćenje propagacije; blokira ako je nizvodni meč rešen; grupni mečevi prazne PF), **`reopen_tournament`** (završen → ponovo otvoren: briše bodove turnira + preračun ranga), **`admin_list_users`** (pregled naloga sa ulogama). Sve staff-only. Testirano SQL simulacijom (rollback).
+- **`/koordinator`**: novi turnir (naziv/serija/sistem/klub/direktor po imenu/datumi/rok), lista turnira, **korisnici i uloge** (admin klikom dodeljuje/oduzima; zaštita da admin sebi ne skine admin), audit trag (poslednjih 15).
+- **`/sudija/[slug]`** za staff: „Opozovi žreb", „Korekcije rezultata" (poništavanje po meču), „Ponovo otvori turnir" (checkbox potvrda); **konkurencije**: dodavanje (kategorija × disciplina) i brisanje praznih.
+
+**Ostaje u Fazi 4:** bodovne tablice kroz UI (sada samo u bazi), model `svi_boduju` + Master tablica, nedeljni cron obračun (sada se rang računa na „ZAVRŠI TURNIR"), evidencija uplata, disciplinska, spajanje duplikata igrača (17 iz migracije), CMS vesti.
+
 ### 🟢 Sitnice (Faza 5/6)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
 - Vercel region `iad1` → `fra1` (baza je u Frankfurtu) radi latencije.
@@ -153,6 +161,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-14 | `Faza 3: sudijski portal` | Kreiraj/objavi žreb + unos rezultata sa auto-napredovanjem |
 | 2026-07-14 | `Faza 3: ZAVRŠI TURNIR` | Bodovne tablice + obračun + nedeljni rang (finish_tournament) |
 | 2026-07-14 | `Faza 3: prijave + satnica` | Upravljanje prijavama, satnica po meču (javno), zamena pozicija |
+| 2026-07-14 | `Faza 4: koordinatorski panel` | Audit + korekcije (opoziv/poništavanje/reopen) + uloge + novi turnir |
 
 ---
 

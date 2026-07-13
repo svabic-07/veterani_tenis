@@ -150,6 +150,115 @@ export async function swapSlotsAction(formData: FormData) {
   back("ok=zamena");
 }
 
+/** Koordinator: opoziv objavljenog žreba (audit u bazi). */
+export async function revokeDrawAction(formData: FormData) {
+  const drawId = String(formData.get("drawId") ?? "");
+  const eventId = String(formData.get("eventId") ?? "");
+  const back = backTo(formData, `event-${eventId}`);
+  try {
+    const supabase = await guard(formData, drawId);
+    const { error } = await supabase.rpc("revoke_draw", { _draw_id: drawId });
+    if (error) throw new DrawError(pickKnown(error.message));
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=opozvan");
+}
+
+/** Koordinator: poništavanje unetog rezultata (audit u bazi). */
+export async function clearResultAction(formData: FormData) {
+  const matchId = String(formData.get("matchId") ?? "");
+  const eventId = String(formData.get("eventId") ?? "");
+  const back = backTo(formData, `event-${eventId}`);
+  try {
+    const supabase = await guard(formData, matchId);
+    const { error } = await supabase.rpc("clear_match_result", { _match_id: matchId });
+    if (error) throw new DrawError(pickKnown(error.message));
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=rezultat_ponisten");
+}
+
+/** Koordinator: ponovno otvaranje završenog turnira (briše bodove + rang). */
+export async function reopenTournamentAction(formData: FormData) {
+  const tournamentId = String(formData.get("tournamentId") ?? "");
+  const back = backTo(formData, "");
+  try {
+    if (formData.get("potvrda") !== "on") throw new DrawError("confirm_required");
+    const supabase = await guard(formData, tournamentId);
+    const { error } = await supabase.rpc("reopen_tournament", { _tournament_id: tournamentId });
+    if (error) throw new DrawError(pickKnown(error.message));
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  revalidatePath("/rang-liste");
+  back("ok=otvoren");
+}
+
+/** Nova konkurencija (kategorija × disciplina). */
+export async function addEventAction(formData: FormData) {
+  const tournamentId = String(formData.get("tournamentId") ?? "");
+  const kategorija = String(formData.get("kategorija") ?? "").trim();
+  const disciplina = String(formData.get("disciplina") ?? "");
+  const back = backTo(formData, "");
+  try {
+    if (!kategorija || kategorija.length > 8) throw new DrawError("bad_request");
+    if (!["singl", "dubl", "miks"].includes(disciplina)) throw new DrawError("bad_request");
+    const supabase = await guard(formData, tournamentId);
+    const { error } = await supabase.from("tournament_events").insert({
+      turnir_id: tournamentId,
+      kategorija,
+      disciplina: disciplina as "singl" | "dubl" | "miks",
+    });
+    if (error) throw new DrawError(error.code === "23505" ? "event_exists" : "server");
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=konkurencija");
+}
+
+/** Brisanje konkurencije (samo bez žreba; prijave se brišu kaskadno). */
+export async function removeEventAction(formData: FormData) {
+  const eventId = String(formData.get("eventId") ?? "");
+  const back = backTo(formData, "");
+  try {
+    const supabase = await guard(formData, eventId);
+    const { data: draw } = await supabase
+      .from("draws")
+      .select("id")
+      .eq("event_id", eventId)
+      .maybeSingle();
+    if (draw) throw new DrawError("draw_published");
+    const { error } = await supabase.from("tournament_events").delete().eq("id", eventId);
+    if (error) throw error;
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=konkurencija_obrisana");
+}
+
+function pickKnown(message: string): string {
+  return (
+    [
+      "forbidden",
+      "not_published",
+      "draw_not_found",
+      "tournament_finished",
+      "match_not_found",
+      "match_unresolved",
+      "bye_match",
+      "downstream_resolved",
+      "not_finished",
+    ].find((k) => message.includes(k)) ?? "server"
+  );
+}
+
 export async function finishTournamentAction(formData: FormData) {
   const tournamentId = String(formData.get("tournamentId") ?? "");
   const back = backTo(formData, "");

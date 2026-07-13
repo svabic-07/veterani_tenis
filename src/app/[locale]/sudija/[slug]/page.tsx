@@ -15,6 +15,11 @@ import {
   removeEntryAction,
   scheduleMatchAction,
   swapSlotsAction,
+  revokeDrawAction,
+  clearResultAction,
+  reopenTournamentAction,
+  addEventAction,
+  removeEventAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -274,6 +279,33 @@ export default async function SudijaTurnirPage({
                       </button>
                     </form>
                   )}
+                  {staff && draw && (draw.status === "objavljen" || draw.status === "zakljucan") && tr.status !== "zavrsen" && (
+                    <form action={revokeDrawAction}>
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="eventId" value={ev.id} />
+                      <input type="hidden" name="drawId" value={draw.id} />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-clay/40 px-3.5 py-2 text-sm font-semibold text-clay-dark transition hover:bg-clay/10"
+                      >
+                        {t("revokeDraw")}
+                      </button>
+                    </form>
+                  )}
+                  {staff && !draw && n === 0 && (
+                    <form action={removeEventAction}>
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="eventId" value={ev.id} />
+                      <button
+                        type="submit"
+                        className="rounded-lg border border-line2 px-3.5 py-2 text-sm font-semibold text-muted transition hover:border-clay hover:text-clay"
+                      >
+                        {t("removeEvent")}
+                      </button>
+                    </form>
+                  )}
                   {draw?.status === "radna" && (
                     <>
                       <form action={publishDrawAction}>
@@ -431,6 +463,48 @@ export default async function SudijaTurnirPage({
                 </form>
               )}
 
+              {/* Koordinator: poništavanje unetih rezultata */}
+              {staff &&
+                tr.status !== "zavrsen" &&
+                draw &&
+                (() => {
+                  const resolved = draw.matches.filter(
+                    (m) => m.winner_slot !== null && m.status !== "bye",
+                  );
+                  if (resolved.length === 0) return null;
+                  return (
+                    <details className="mt-4 rounded-xl border border-clay/30 bg-bg2 p-3">
+                      <summary className="cursor-pointer text-sm font-semibold text-clay-dark">
+                        {t("correctionsTitle", { n: resolved.length })}
+                      </summary>
+                      <div className="mt-3 space-y-1.5">
+                        {resolved.map((m) => (
+                          <form
+                            key={m.id}
+                            action={clearResultAction}
+                            className="flex items-center gap-2 text-sm"
+                          >
+                            <input type="hidden" name="locale" value={locale} />
+                            <input type="hidden" name="slug" value={slug} />
+                            <input type="hidden" name="eventId" value={ev.id} />
+                            <input type="hidden" name="matchId" value={m.id} />
+                            <span className="min-w-0 flex-1 truncate text-navy">
+                              {playerName(m.p1)} — {playerName(m.p2)}
+                            </span>
+                            <button
+                              type="submit"
+                              className="rounded-md px-2.5 py-1 text-xs font-semibold text-clay transition hover:bg-clay/10"
+                            >
+                              {t("clearResult")}
+                            </button>
+                          </form>
+                        ))}
+                      </div>
+                      <p className="mt-2 text-xs text-muted">{t("correctionsHint")}</p>
+                    </details>
+                  );
+                })()}
+
               {/* Satnica: termin + teren po meču */}
               {draw && (
                 <details className="mt-4 rounded-xl border border-line2 bg-bg2 p-3">
@@ -508,10 +582,63 @@ export default async function SudijaTurnirPage({
         })}
       </div>
 
+      {/* Nova konkurencija (staff/direktor, dok turnir nije završen) */}
+      {tr.status !== "zavrsen" && (
+        <form
+          action={addEventAction}
+          className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border border-line bg-card p-4 shadow-sm"
+        >
+          <span className="text-sm font-semibold text-navy">{t("newEvent")}</span>
+          <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="slug" value={slug} />
+          <input type="hidden" name="tournamentId" value={tr.id} />
+          <input
+            type="text"
+            name="kategorija"
+            required
+            maxLength={8}
+            placeholder={t("eventCategory")}
+            className="w-28 rounded-lg border border-line2 bg-bg px-3 py-2 text-sm outline-none focus:border-clay"
+          />
+          <select
+            name="disciplina"
+            defaultValue="singl"
+            className="rounded-lg border border-line2 bg-bg px-2 py-2 text-sm outline-none focus:border-clay"
+          >
+            <option value="singl">{tt("discipline.singl")}</option>
+            <option value="dubl">{tt("discipline.dubl")}</option>
+            <option value="miks">{tt("discipline.miks")}</option>
+          </select>
+          <button
+            type="submit"
+            className="rounded-lg border border-line2 px-3.5 py-2 text-sm font-semibold text-navy transition hover:border-clay hover:text-clay"
+          >
+            {t("addEvent")}
+          </button>
+        </form>
+      )}
+
       {tr.status === "zavrsen" ? (
-        <p className="mt-8 rounded-2xl border border-court/30 bg-court/8 p-5 text-sm font-semibold text-court-dark">
-          🏆 {t("finished")}
-        </p>
+        <div className="mt-8 rounded-2xl border border-court/30 bg-court/8 p-5">
+          <p className="text-sm font-semibold text-court-dark">🏆 {t("finished")}</p>
+          {staff && (
+            <form action={reopenTournamentAction} className="mt-3 flex flex-wrap items-center gap-3">
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="tournamentId" value={tr.id} />
+              <label className="flex items-center gap-2 text-sm text-navy">
+                <input type="checkbox" name="potvrda" required className="accent-clay" />
+                {t("reopenConfirm")}
+              </label>
+              <button
+                type="submit"
+                className="rounded-xl border border-clay/40 px-4 py-2 text-sm font-semibold text-clay-dark transition hover:bg-clay/10"
+              >
+                {t("reopenButton")}
+              </button>
+            </form>
+          )}
+        </div>
       ) : (
         <section className="mt-8 rounded-2xl border border-clay/30 bg-card p-5 shadow-sm">
           <h2 className="font-display text-lg font-bold text-navy">{t("finishTitle")}</h2>

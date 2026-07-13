@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          details: Json | null
+          entity: string
+          entity_id: string | null
+          id: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          details?: Json | null
+          entity: string
+          entity_id?: string | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          details?: Json | null
+          entity?: string
+          entity_id?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
       clubs: {
         Row: {
           created_at: string
@@ -696,9 +726,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_users: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          user_id: string
+          email: string
+          full_name: string | null
+          player_ime: string | null
+          roles: string[]
+          created_at: string
+        }[]
+      }
       can_manage_event: { Args: { _event_id: string }; Returns: boolean }
       claim_player: { Args: { p_player_id: string }; Returns: undefined }
+      clear_match_result: { Args: { _match_id: string }; Returns: undefined }
       finish_tournament: { Args: { _tournament_id: string }; Returns: undefined }
+      reopen_tournament: { Args: { _tournament_id: string }; Returns: undefined }
+      revoke_draw: { Args: { _draw_id: string }; Returns: undefined }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
