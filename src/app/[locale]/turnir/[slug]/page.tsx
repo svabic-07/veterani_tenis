@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getTournamentBySlug } from "@/lib/data/tournaments";
+import { getDrawsForTournament } from "@/lib/data/draws";
+import { DrawBracket } from "@/components/draw-bracket";
 import { formatDateRange, formatDeadline } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +35,11 @@ export default async function TurnirPage({
 
   const t = await getTranslations("tournament");
   const tc = await getTranslations("calendar");
+  const td = await getTranslations("draw");
   const tr = await getTournamentBySlug(slug);
   if (!tr) notFound();
+
+  const draws = await getDrawsForTournament(tr.id);
 
   const club = tr.clubs;
   const dir = tr.direktor;
@@ -111,9 +116,29 @@ export default async function TurnirPage({
           ))}
         </div>
 
-        <div className="rounded-2xl border border-dashed border-line2 bg-card p-6 text-sm text-slate">
-          {t("soon")}
-        </div>
+        {draws.length > 0 ? (
+          <div className="space-y-8">
+            {draws.map((d) => (
+              <section key={d.id}>
+                <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h3 className="font-display text-lg font-bold text-navy">
+                    {td("title")} · {t(`discipline.${d.event.disciplina}`)} ·{" "}
+                    {d.event.kategorija}
+                  </h3>
+                  <span className="text-xs text-muted">
+                    {d.kostur ? td("bracketOf", { n: d.kostur }) : null}
+                    {d.broj_nosilaca > 0 ? ` · ${td("seedsCount", { n: d.broj_nosilaca })}` : null}
+                  </span>
+                </div>
+                <DrawBracket draw={d} />
+              </section>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-line2 bg-card p-6 text-sm text-slate">
+            {t("soon")}
+          </div>
+        )}
 
         <div className="mt-8 grid gap-8 md:grid-cols-[1fr_1.4fr]">
           {/* Info */}

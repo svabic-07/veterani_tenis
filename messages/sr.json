@@ -101,6 +101,7 @@
   "tournament": {
     "backToCalendar": "← Kalendar",
     "info": "Informacije",
+    "series": "Serija",
     "host": "Domaćin",
     "director": "Direktor",
     "dates": "Datumi",
@@ -177,6 +178,25 @@
     "errorTaken": "Taj igrač je već povezan sa drugim nalogom. Ako je to greška, kontaktirajte koordinatora.",
     "errorClaim": "Povezivanje nije uspelo. Pokušajte ponovo ili kontaktirajte koordinatora.",
     "signOut": "Odjavi se"
+  },
+  "draw": {
+    "title": "Žreb",
+    "bracketOf": "kostur {n}",
+    "seedsCount": "{n, plural, one {# nosilac} few {# nosioca} other {# nosilaca}}",
+    "final": "Finale",
+    "semifinal": "Polufinale",
+    "quarterfinal": "Četvrtfinale",
+    "round": "{n}. kolo",
+    "prelim": "Predkolo",
+    "group": "Grupa {g}",
+    "bye": "bye",
+    "tbd": "—",
+    "status": {
+      "walkover": "Walkover",
+      "predaja": "Predaja",
+      "retiranje": "Retiranje",
+      "u_toku": "U toku"
+    }
   },
   "rankings": {
     "title": "Rang liste",

@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
-> **Poslednje ažurirano:** 2026-07-13
-> **Faza:** 0 ✅ · 1 🔶 (javni sloj + pravi podaci) · 2 🔶 (aktivacija naloga izgrađena, čeka produkcionu email konfiguraciju)
+> **Poslednje ažurirano:** 2026-07-14
+> **Faza:** 0 ✅ · 1 🔶 (javni sloj + pravi podaci) · 2 🔶 (aktivacija naloga, čeka email konfig.) · 3 🔶 (žreb engine + javni prikaz gotovi; sudijski UI sledi)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -75,7 +75,11 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 
 **RLS:** javno čitanje (`clubs/players/seasons/tournaments/tournament_events/ranking_points/rankings`); `player_private` samo staff/vlasnik; sve mutacije preko `is_staff()`/direktora. ✅ provereno (anon čita javno, PII blokiran).
 
-**Još nije kreirano (Faza 2/3/4):** `entries`, `draws`, `matches`, `match_sets`, `scoring_tables`, `payments`, `sanctions`, `news`/`gallery`, `audit_log`.
+7. `…100000_auth_activation` — unique `profiles.player_id`, guard trigger, `claim_player()`/`my_player_candidates()`
+8. `…110000_revoke_anon_definer_exec` — advisor 0028 čišćenje
+9. `…120000_draws` — **`entries`, `draws`, `matches`, `match_sets`** + enumi (`draw_type`, `draw_status`) + `can_manage_event()`; RLS: javno vidi samo objavljen/zaključan žreb, piše staff/direktor turnira
+
+**Još nije kreirano (Faza 3/4):** `scoring_tables`, `payments`, `sanctions`, `news`/`gallery`, `audit_log`.
 
 ---
 
@@ -93,6 +97,19 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 3. *(Opciono, preporučeno za starije korisnike)* U email šablon „Magic Link" dodati `{{ .Token }}` (6-cifreni kod) i link na `{{ .SiteURL }}/api/auth/confirm?token_hash={{ .TokenHash }}&type=email` — kod rešava slučaj „link se otvorio u drugom browseru" (PKCE ograničenje); tada dodati i UI polje za unos koda na `/prijava`.
 
 **Ostaje za kasnije u Fazi 2:** aktivacioni kod preko koordinatora za 656 članova bez kontakta (deo koordinatorskog portala, Faza 4); unos koda na `/prijava` (posle izmene šablona).
+
+### 🔶 Faza 3 — žreb engine + javni prikaz gotovi (2026-07-14)
+**Engine** (`src/lib/draw/`, čist TS, bez I/O, **26 vitest testova** — `pnpm test`):
+- Kostur po TVS tabeli (do 10 → 8 · 11–20 → 16 · 21–40 → 32 · 41–80 → 64 · 81–128 → 128) — fiksni rasponi jer bodovi zavise od kostura; **višak igra predkolo** (kolo 0).
+- ITF nošenje: anchor pozicije po kosturu (N1 vrh, N2 dno, N3–4 četvrtine, N5–8 osmine…), nasumična dodela unutar grupe nosilaca, nerangirani se ne nose.
+- Bye nosiocima po opadajućem redu, ostatak žrebom, nikad bye vs bye; bye auto-napreduje.
+- Meko razdvajanje kluba (nosioci: polovina/četvrtina; 1. kolo: izbegavanje klupskih parova).
+- Grupe: 3–4 jedna grupa · **grupa od 5** (N1/N2 u PF; 2. iz grupe vs N1, 1. vs N2) · 6–7 dve grupe + ukrštena PF; plasman (pobede → h2h → setovi → gemovi); `resolveGroupsIntoSemis`.
+- `advanceWinner` — auto-napredovanje kroz bracket (walkover/predaja/retiranje statusi); reproduktivnost: seedovan PRNG (`rng_seed`) + `seed_izvor` snapshot u bazi.
+
+**Javni prikaz:** stranica turnira renderuje objavljene žrebove (bracket kolone po kolima + grupe + predkolo, rezultati po setovima, nosioci `[N]`). Demo žreb: Oktagon Open · I · singl (12 sintetičkih prijava; regenerisanje: `pnpm tsx scripts/demo-draw.ts` → SQL). Verifikovano u browseru.
+
+**Sledeće u Fazi 3 (sudijski portal):** UI za direktora — zatvaranje prijava, generisanje/objava žreba (server actions nad `can_manage_event`), ručno doterivanje (drag-and-drop), unos rezultata na telefonu, satnica, „ZAVRŠI TURNIR" → obračun bodova.
 
 ### 🟢 Sitnice (Faza 5/6)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
@@ -113,6 +130,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-02 | `Faza 1: PWA + SEO` | Ikonica + manifest + naslovi stranica |
 | 2026-07-13 | `Faza 1: migracija podataka` | Uvoz 2.831 igrača + 427 klubova + kontakti sa starog sajta |
 | 2026-07-13 | `Faza 2: aktivacija naloga` | Magic link prijava + povezivanje naloga sa igračem + session refresh u proxy |
+| 2026-07-14 | `Faza 3: žreb engine` | ITF nošenje/bye/predkolo/grupe + 26 testova + javni prikaz žreba |
 
 ---
 

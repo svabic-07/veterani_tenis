@@ -41,6 +41,258 @@ export type Database = {
         }
         Relationships: []
       }
+      draws: {
+        Row: {
+          broj_nosilaca: number
+          created_at: string
+          event_id: string
+          id: string
+          kostur: number | null
+          rng_seed: string | null
+          seed_izvor: Json | null
+          status: Database["public"]["Enums"]["draw_status"]
+          tip: Database["public"]["Enums"]["draw_type"]
+          updated_at: string
+        }
+        Insert: {
+          broj_nosilaca?: number
+          created_at?: string
+          event_id: string
+          id?: string
+          kostur?: number | null
+          rng_seed?: string | null
+          seed_izvor?: Json | null
+          status?: Database["public"]["Enums"]["draw_status"]
+          tip: Database["public"]["Enums"]["draw_type"]
+          updated_at?: string
+        }
+        Update: {
+          broj_nosilaca?: number
+          created_at?: string
+          event_id?: string
+          id?: string
+          kostur?: number | null
+          rng_seed?: string | null
+          seed_izvor?: Json | null
+          status?: Database["public"]["Enums"]["draw_status"]
+          tip?: Database["public"]["Enums"]["draw_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "draws_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
+            referencedRelation: "tournament_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entries: {
+        Row: {
+          bodovi_snapshot: number | null
+          created_at: string
+          event_id: string
+          id: string
+          partner_id: string | null
+          player_id: string
+          seed: number | null
+          status: Database["public"]["Enums"]["entry_status"]
+          updated_at: string
+        }
+        Insert: {
+          bodovi_snapshot?: number | null
+          created_at?: string
+          event_id: string
+          id?: string
+          partner_id?: string | null
+          player_id: string
+          seed?: number | null
+          status?: Database["public"]["Enums"]["entry_status"]
+          updated_at?: string
+        }
+        Update: {
+          bodovi_snapshot?: number | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          partner_id?: string | null
+          player_id?: string
+          seed?: number | null
+          status?: Database["public"]["Enums"]["entry_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entries_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "tournament_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entries_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_sets: {
+        Row: {
+          gem1: number
+          gem2: number
+          id: string
+          match_id: string
+          set_no: number
+          tb1: number | null
+          tb2: number | null
+        }
+        Insert: {
+          gem1: number
+          gem2: number
+          id?: string
+          match_id: string
+          set_no: number
+          tb1?: number | null
+          tb2?: number | null
+        }
+        Update: {
+          gem1?: number
+          gem2?: number
+          id?: string
+          match_id?: string
+          set_no?: number
+          tb1?: number | null
+          tb2?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_sets_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          created_at: string
+          draw_id: string
+          grupa: string | null
+          id: string
+          kolo: number
+          next_match_id: string | null
+          next_slot: number | null
+          partner1_id: string | null
+          partner2_id: string | null
+          player1_id: string | null
+          player2_id: string | null
+          pozicija: number
+          seed1: number | null
+          seed2: number | null
+          status: Database["public"]["Enums"]["match_status"]
+          teren: string | null
+          termin: string | null
+          updated_at: string
+          winner_slot: number | null
+        }
+        Insert: {
+          created_at?: string
+          draw_id: string
+          grupa?: string | null
+          id?: string
+          kolo: number
+          next_match_id?: string | null
+          next_slot?: number | null
+          partner1_id?: string | null
+          partner2_id?: string | null
+          player1_id?: string | null
+          player2_id?: string | null
+          pozicija: number
+          seed1?: number | null
+          seed2?: number | null
+          status?: Database["public"]["Enums"]["match_status"]
+          teren?: string | null
+          termin?: string | null
+          updated_at?: string
+          winner_slot?: number | null
+        }
+        Update: {
+          created_at?: string
+          draw_id?: string
+          grupa?: string | null
+          id?: string
+          kolo?: number
+          next_match_id?: string | null
+          next_slot?: number | null
+          partner1_id?: string | null
+          partner2_id?: string | null
+          player1_id?: string | null
+          player2_id?: string | null
+          pozicija?: number
+          seed1?: number | null
+          seed2?: number | null
+          status?: Database["public"]["Enums"]["match_status"]
+          teren?: string | null
+          termin?: string | null
+          updated_at?: string
+          winner_slot?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_draw_id_fkey"
+            columns: ["draw_id"]
+            isOneToOne: false
+            referencedRelation: "draws"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_next_match_id_fkey"
+            columns: ["next_match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_partner1_id_fkey"
+            columns: ["partner1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_partner2_id_fkey"
+            columns: ["partner2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player1_id_fkey"
+            columns: ["player1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_player2_id_fkey"
+            columns: ["player2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_private: {
         Row: {
           created_at: string
@@ -444,6 +696,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_event: { Args: { _event_id: string }; Returns: boolean }
       claim_player: { Args: { p_player_id: string }; Returns: undefined }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
@@ -473,6 +726,8 @@ export type Database = {
       app_role: "igrac" | "sudija" | "koordinator" | "admin"
       competition_system: "kvalitativni" | "starosni"
       discipline: "singl" | "dubl" | "miks"
+      draw_status: "radna" | "objavljen" | "zakljucan" | "opozvan"
+      draw_type: "eliminacija" | "grupa" | "grupa5"
       entry_status:
         | "prijavljen"
         | "na_cekanju"
@@ -630,7 +885,15 @@ export const Constants = {
       app_role: ["igrac", "sudija", "koordinator", "admin"],
       competition_system: ["kvalitativni", "starosni"],
       discipline: ["singl", "dubl", "miks"],
-      entry_status: ["prijavljen", "na_cekanju", "odjavljen", "gost", "odbijen"],
+      draw_status: ["radna", "objavljen", "zakljucan", "opozvan"],
+      draw_type: ["eliminacija", "grupa", "grupa5"],
+      entry_status: [
+        "prijavljen",
+        "na_cekanju",
+        "odjavljen",
+        "gost",
+        "odbijen",
+      ],
       gender: ["m", "z"],
       match_status: [
         "zakazan",

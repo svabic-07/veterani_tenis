@@ -101,6 +101,7 @@
   "tournament": {
     "backToCalendar": "← Calendar",
     "info": "Information",
+    "series": "Series",
     "host": "Host",
     "director": "Director",
     "dates": "Dates",
@@ -156,6 +157,25 @@
     "errorTaken": "That player is already linked to another account. If this is a mistake, contact your coordinator.",
     "errorClaim": "Linking failed. Please try again or contact your coordinator.",
     "signOut": "Sign out"
+  },
+  "draw": {
+    "title": "Draw",
+    "bracketOf": "draw of {n}",
+    "seedsCount": "{n, plural, one {# seed} other {# seeds}}",
+    "final": "Final",
+    "semifinal": "Semifinal",
+    "quarterfinal": "Quarterfinal",
+    "round": "Round {n}",
+    "prelim": "Preliminary round",
+    "group": "Group {g}",
+    "bye": "bye",
+    "tbd": "—",
+    "status": {
+      "walkover": "Walkover",
+      "predaja": "Retired",
+      "retiranje": "Withdrawn",
+      "u_toku": "In progress"
+    }
   },
   "players": {
     "title": "Players",
