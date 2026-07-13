@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
 > **Poslednje ažurirano:** 2026-07-13
-> **Faza:** 0 ✅ završena · 1 🔶 u toku (javni read-sloj gotov + **pravi podaci uvezeni**)
+> **Faza:** 0 ✅ · 1 🔶 (javni sloj + pravi podaci) · 2 🔶 (aktivacija naloga izgrađena, čeka produkcionu email konfiguraciju)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -49,7 +49,9 @@ Dizajn tokeni (`src/app/globals.css` `@theme`): boje `clay/court/ball/navy`, fon
 | `/pravilnik` | statička | ✅ | sadržaj iz spec-a (dvojezično) |
 | `/o-savezu`, `/kontakt` | statička | ✅ | statički sadržaj |
 | `/sudija` | statička | 🔶 WIP | Faza 3 |
-| `/prijava` | statička | 🔶 WIP | Faza 2 (Auth) |
+| `/prijava` | dinamička | ✅ | magic link prijava (Supabase OTP) |
+| `/nalog` | dinamička | ✅ | profil naloga + povezivanje sa igračem |
+| `/api/auth/confirm` | route handler | ✅ | potvrda email linka (PKCE `code` + `token_hash`) |
 | `/vesti` | statička | 🔶 WIP | Faza 1/4 (CMS) |
 
 Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetadata` naslovi.
@@ -82,8 +84,15 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 ### ✅ Rešeno — izvoz stare baze je stigao i migriran (2026-07-13)
 Igrači + klubovi + kontakti + TVS kategorije su u bazi. **Još nije migrirano** (čeka tabele Faza 3/4): istorija mečeva (`mecevi.jsonl`, 13.371), učešća na turnirima sa poenima (`turniri_ucesce.jsonl`, 7.722), istorija rangiranja po godinama. Izvor ostaje u `migration-data_2/`.
 
-### 🟡 Sledeći veliki korak — Auth (Faza 2), odlučeno
-Tok **„Aktivacija naloga"**: igrači postoje u bazi bez naloga → na `/prijava` unesu email → poklapanje sa `player_private.email` → Supabase magic link + OTP kod → nalog se veže za igrački profil (`profiles.player_id`). Bez lozinki unapred. Posebni slučajevi: deljeni klupski emailovi (56) → izbor igrača + potvrda koordinatora; bez kontakta (656) → aktivacioni kod preko koordinatora. Nalog nije obavezan za javni deo; koordinator može prijavljivati igrače u njihovo ime. Rizik: `proxy.ts` (i18n rutiranje) — pažljivo.
+### ✅ Auth (Faza 2) — aktivacija naloga izgrađena (2026-07-13)
+Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/confirm` (PKCE `code` i `token_hash` oblik) → `/nalog` (kandidati po `player_private.email` preko `my_player_candidates()`, povezivanje preko `claim_player()`; deljeni klupski emailovi dobijaju picker „Ko ste vi?"). Migracija `20260713100000_auth_activation`: unique `profiles.player_id`, guard trigger (RLS self-update rupa za `player_id` zatvorena), SECURITY DEFINER funkcije testirane u bazi (poklapanje ✓, tuđi igrač ✗, direktan update ✗, zauzet igrač ✗). `proxy.ts` sada radi i Supabase session refresh (statične stranice ostale statične). Header prikazuje „Moj nalog" kad je korisnik prijavljen (klijentski, ne kvari ISR).
+
+**Pre puštanja u javnost — ručna Supabase Auth konfiguracija (dashboard):**
+1. **Site URL** → produkcioni domen; dodati i Vercel preview domen u Additional Redirect URLs (sada je `http://localhost:3000`, pa magic linkovi vode na localhost).
+2. **Custom SMTP** — ugrađeni Supabase mailer šalje **max 2 emaila/sat** (samo za dev). Resend/Postmark/Brevo + SPF/DKIM na domenu.
+3. *(Opciono, preporučeno za starije korisnike)* U email šablon „Magic Link" dodati `{{ .Token }}` (6-cifreni kod) i link na `{{ .SiteURL }}/api/auth/confirm?token_hash={{ .TokenHash }}&type=email` — kod rešava slučaj „link se otvorio u drugom browseru" (PKCE ograničenje); tada dodati i UI polje za unos koda na `/prijava`.
+
+**Ostaje za kasnije u Fazi 2:** aktivacioni kod preko koordinatora za 656 članova bez kontakta (deo koordinatorskog portala, Faza 4); unos koda na `/prijava` (posle izmene šablona).
 
 ### 🟢 Sitnice (Faza 5/6)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
@@ -103,6 +112,7 @@ Tok **„Aktivacija naloga"**: igrači postoje u bazi bez naloga → na `/prijav
 | 2026-07-02 | `Faza 1: igrači + rang` | Direktorijum, profil, rang liste + rang tabele |
 | 2026-07-02 | `Faza 1: PWA + SEO` | Ikonica + manifest + naslovi stranica |
 | 2026-07-13 | `Faza 1: migracija podataka` | Uvoz 2.831 igrača + 427 klubova + kontakti sa starog sajta |
+| 2026-07-13 | `Faza 2: aktivacija naloga` | Magic link prijava + povezivanje naloga sa igračem + session refresh u proxy |
 
 ---
 

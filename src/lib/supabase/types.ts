@@ -444,6 +444,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_player: { Args: { p_player_id: string }; Returns: undefined }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
@@ -455,6 +456,17 @@ export type Database = {
       is_tournament_director: {
         Args: { _tournament_id: string }
         Returns: boolean
+      }
+      my_player_candidates: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          godiste: number
+          ime: string
+          klub: string
+          player_id: string
+          prezime: string
+          zauzet: boolean
+        }[]
       }
     }
     Enums: {

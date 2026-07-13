@@ -145,6 +145,39 @@
       "noHistory": "Nema zabeleženih nastupa."
     }
   },
+  "auth": {
+    "title": "Prijava",
+    "intro": "Bez lozinke — unesite email adresu i poslaćemo vam link za prijavu. Klik na link u poruci vas prijavljuje.",
+    "emailLabel": "Email adresa",
+    "emailPlaceholder": "npr. ime.prezime@gmail.com",
+    "submit": "Pošalji mi link za prijavu",
+    "noPassword": "Prvi put? Isti postupak — ako je vaš email u bazi članova, nalog se automatski povezuje sa vašim igračkim profilom.",
+    "sentTitle": "Proverite email",
+    "sentBody": "Poslali smo link za prijavu na {email}. Otvorite poruku i kliknite na link.",
+    "sentHint": "Poruka može da završi u folderu Promotions/Spam. Link važi ograničeno vreme — ako istekne, zatražite novi.",
+    "errorEmail": "Unesite ispravnu email adresu.",
+    "errorLimit": "Previše pokušaja — sačekajte malo pa pokušajte ponovo.",
+    "errorSend": "Slanje nije uspelo. Pokušajte ponovo za koji minut.",
+    "errorLink": "Link nije važeći ili je istekao. Zatražite novi.",
+    "helpTitle": "Treba vam pomoć?",
+    "helpBody": "Ako nemate email u bazi članova ili se ne snalazite, javite se koordinatoru svog kluba — može da vas prijavi na turnir i u vaše ime."
+  },
+  "account": {
+    "title": "Moj nalog",
+    "linkedSuccess": "Nalog je povezan sa vašim igračkim profilom.",
+    "linkedPlayer": "Vaš igrački profil",
+    "category": "Kategorija",
+    "viewProfile": "Pogledaj javni profil",
+    "pickTitle": "Ko ste vi?",
+    "pickBody": "Ovaj email je u bazi povezan sa sledećim igračima. Izaberite svoj profil.",
+    "thisIsMe": "Ovo sam ja",
+    "taken": "već povezan",
+    "noMatchTitle": "Email nije pronađen u bazi članova",
+    "noMatchBody": "Nalog vam je aktivan, ali nije povezan ni sa jednim igračem. Ako ste član TVS, javite se koordinatoru da vam ažurira email u evidenciji.",
+    "errorTaken": "Taj igrač je već povezan sa drugim nalogom. Ako je to greška, kontaktirajte koordinatora.",
+    "errorClaim": "Povezivanje nije uspelo. Pokušajte ponovo ili kontaktirajte koordinatora.",
+    "signOut": "Odjavi se"
+  },
   "rankings": {
     "title": "Rang liste",
     "subtitle": "Kvalitativne kategorije (I–V) po disciplini. Zbir N najboljih rezultata u poslednjih 52 nedelje.",

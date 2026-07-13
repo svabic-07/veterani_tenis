@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Logo } from "./logo";
 import { LocaleSwitcher } from "./locale-switcher";
 
@@ -19,6 +20,20 @@ export function SiteHeader() {
   const tb = useTranslations("brand");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  // Stanje prijave se čita u browseru da bi statične stranice ostale statične.
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => setLoggedIn(!!data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) =>
+      setLoggedIn(!!session),
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const authHref = loggedIn ? "/nalog" : "/prijava";
+  const authLabel = loggedIn ? t("myAccount") : t("login");
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-navy/95 text-white backdrop-blur">
@@ -55,10 +70,10 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2 lg:ml-3">
           <LocaleSwitcher />
           <Link
-            href="/prijava"
+            href={authHref}
             className="hidden rounded-lg bg-clay px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-clay-dark sm:inline-block"
           >
-            {t("login")}
+            {authLabel}
           </Link>
           <button
             type="button"
@@ -92,11 +107,11 @@ export function SiteHeader() {
               </Link>
             ))}
             <Link
-              href="/prijava"
+              href={authHref}
               onClick={() => setOpen(false)}
               className="mt-1 rounded-lg bg-clay px-3 py-2.5 text-center text-sm font-semibold text-white"
             >
-              {t("login")}
+              {authLabel}
             </Link>
           </div>
         </nav>
