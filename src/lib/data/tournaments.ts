@@ -58,6 +58,29 @@ export async function getUpcomingTournaments(limit = 3) {
 
 export type UpcomingTournament = Awaited<ReturnType<typeof getUpcomingTournaments>>[number];
 
+/** Brojači za hero statistiku (igrači, odigrani turniri). Keširano (anon). */
+export async function getSiteStats() {
+  const supabase = createPublicClient();
+  const [players, tournaments] = await Promise.all([
+    supabase.from("players").select("id", { count: "exact", head: true }).eq("is_active", true),
+    supabase.from("tournaments").select("id", { count: "exact", head: true }).eq("status", "zavrsen"),
+  ]);
+  return { players: players.count ?? 0, tournaments: tournaments.count ?? 0 };
+}
+
+/** Nedavno odigrani turniri (završeni) — za početnu, sa šampionima na kartici. */
+export async function getRecentTournaments(limit = 3) {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("tournaments")
+    .select("id, legacy_id, naziv, serija, sistem, mesto, datum_od, datum_do, clubs ( naziv, grad )")
+    .eq("status", "zavrsen")
+    .order("datum_od", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
 export type TournamentWinner = {
   turnirId: string;
   kategorija: string;
@@ -77,7 +100,7 @@ export async function getWinnersForTournaments(
   const map = new Map<string, TournamentWinner[]>();
   if (ids.length === 0) return map;
 
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data: pod, error } = await supabase
     .from("player_podiums")
     .select("turnir_id, kategorija, disciplina, player_id")

@@ -23,15 +23,20 @@
     "ctaRankings": "Rankings",
     "stats": {
       "players": "players in the database",
+      "tournaments": "tournaments played",
       "categories": "qualitative + age categories",
-      "series": "tournament series + Masters",
+      "series": "tournament series",
       "disciplines": "disciplines: singles, doubles, mixed"
     },
     "sections": {
       "upcoming": "Upcoming tournaments",
       "upcomingSub": "Entries and draws for upcoming events.",
-      "rankings": "Rankings",
-      "rankingsSub": "Qualitative (I–V) and age categories, by discipline.",
+      "recent": "Recently played",
+      "recentSub": "Latest finished tournaments and their champions.",
+      "rankingsTop": "Rankings — top",
+      "rankingsTopSub": "Category I · singles",
+      "allRankings": "Full rankings",
+      "wholeCalendar": "Full calendar",
       "explore": "Explore the system"
     },
     "cards": {

@@ -44,6 +44,10 @@ yarn-error.log*
 # playwright (lokalni artefakti smoke testova)
 /.playwright-mcp/
 
+# referentni dizajn materijal (mockup, skice) - teski binari, ostaju lokalno
+/Sajt_Design/
+/docs/CHATGPT/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

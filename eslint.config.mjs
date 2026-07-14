@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Referentni materijal (dizajn mockup, ChatGPT skice) — ne lintuje se.
+    "Sajt_Design/**",
+    "docs/**",
+    "scripts/out/**",
   ]),
 ]);
 

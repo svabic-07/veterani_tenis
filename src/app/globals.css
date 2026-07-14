@@ -83,3 +83,15 @@ h1, h2, h3, h4, h5 {
   outline: 2px solid var(--color-clay);
   outline-offset: 2px;
 }
+
+/* Live indikator (pill sa pulsirajućom tačkicom) */
+@keyframes tvs-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.7); }
+}
+.tvs-pulse { animation: tvs-pulse 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .tvs-pulse { animation: none; }
+}

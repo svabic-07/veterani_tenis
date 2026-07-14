@@ -33,6 +33,31 @@ export async function searchPlayers(opts: {
 
 export type PlayerListItem = Awaited<ReturnType<typeof searchPlayers>>["players"][number];
 
+/** Top N rang liste za kat × disc (poslednja obračunska nedelja) — za početnu/preglede. */
+export async function getTopRankings(kategorija: string, disciplina: string, limit = 5) {
+  const supabase = createPublicClient();
+  const { data: last } = await supabase
+    .from("rankings")
+    .select("nedelja")
+    .eq("kategorija", kategorija)
+    .eq("disciplina", disciplina as Database["public"]["Enums"]["discipline"])
+    .order("nedelja", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!last) return [];
+
+  const { data, error } = await supabase
+    .from("rankings")
+    .select("mesto, bodovi, broj_turnira, players ( id, ime, prezime, clubs ( naziv ) )")
+    .eq("kategorija", kategorija)
+    .eq("disciplina", disciplina as Database["public"]["Enums"]["discipline"])
+    .eq("nedelja", last.nedelja)
+    .order("mesto", { ascending: true })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
 /** Aktuelne rang pozicije igrača (poslednja obračunska nedelja po kat × disc). */
 export async function getPlayerRankings(playerId: string) {
   const supabase = createPublicClient();

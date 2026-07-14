@@ -28,6 +28,29 @@ export function formatDateRange(
     : `${dayMonth.format(start)} – ${full.format(end)}`;
 }
 
+/** Datum turnira u dva dela za karticu: { big: "18–19", small: "JUL 2026" }. */
+export function formatDateParts(
+  od: string | null,
+  doo: string | null,
+  locale: string,
+): { big: string; small: string } {
+  if (!od) return { big: "", small: "" };
+  const tag = localeTag(locale);
+  const start = new Date(`${od}T00:00:00`);
+  const end = doo ? new Date(`${doo}T00:00:00`) : null;
+  const day = (d: Date) => new Intl.DateTimeFormat(tag, { day: "numeric" }).format(d);
+  const mon = new Intl.DateTimeFormat(tag, { month: "short" }).format(start).replace(".", "");
+  const year = start.getFullYear();
+  const sameDay = !end || od === doo;
+  const sameMonth =
+    end?.getMonth() === start.getMonth() && end?.getFullYear() === start.getFullYear();
+  let big: string;
+  if (sameDay) big = day(start);
+  else if (sameMonth) big = `${day(start)}–${day(end!)}`;
+  else big = `${day(start)}.–${day(end!)}.`;
+  return { big, small: `${mon.toUpperCase()} ${year}` };
+}
+
 /** "čet 16.07. 20:00" — rok prijave. */
 export function formatDeadline(ts: string | null, locale: string): string {
   if (!ts) return "";

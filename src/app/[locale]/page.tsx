@@ -1,161 +1,234 @@
-import { setRequestLocale } from "next-intl/server";
-import { useTranslations } from "next-intl";
+import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { getUpcomingTournaments, type UpcomingTournament } from "@/lib/data/tournaments";
-import { formatDateRange } from "@/lib/format";
+import {
+  getUpcomingTournaments,
+  getRecentTournaments,
+  getWinnersForTournaments,
+  getSiteStats,
+} from "@/lib/data/tournaments";
+import { getTopRankings } from "@/lib/data/players";
+import { formatDateParts } from "@/lib/format";
+import { PageHero } from "@/components/ui/page-hero";
+import { TournamentCard } from "@/components/ui/tournament-card";
+import { Icon } from "@/components/ui/icon";
+import { TOURNAMENT_STATUS_TONE } from "@/components/ui/pill";
 
 export const revalidate = 600;
 
-const STATS = [
-  { value: "~2.600", key: "players" },
-  { value: "5 + 11", key: "categories" },
-  { value: "4 + 1", key: "series" },
-  { value: "S · D · X", key: "disciplines" },
+const MODULES = [
+  { key: "calendar", href: "/kalendar", icon: "calendar", tone: "border-t-navy" },
+  { key: "players", href: "/igraci", icon: "users", tone: "border-t-court" },
+  { key: "referee", href: "/sudija", icon: "flag", tone: "border-t-clay" },
+  { key: "rules", href: "/pravilnik", icon: "book", tone: "border-t-ball-deep" },
 ] as const;
 
-const CARDS = [
-  { key: "calendar", href: "/kalendar", icon: "📅", tone: "navy" },
-  { key: "players", href: "/igraci", icon: "👤", tone: "green" },
-  { key: "referee", href: "/sudija", icon: "⚖️", tone: "clay" },
-  { key: "rules", href: "/pravilnik", icon: "📖", tone: "ball" },
-] as const;
+const MEDAL: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+const initials = (ime: string, prezime: string) => `${ime[0] ?? ""}. ${prezime}`;
 
-const TONE: Record<string, string> = {
-  navy: "border-t-navy",
-  green: "border-t-court",
-  clay: "border-t-clay",
-  ball: "border-t-ball-deep",
-};
-
-export default async function HomePage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const upcoming = await getUpcomingTournaments(3);
-  return <Home locale={locale} upcoming={upcoming} />;
-}
+  const t = await getTranslations("home");
+  const tc = await getTranslations("calendar");
 
-function Home({
-  locale,
-  upcoming,
-}: {
-  readonly locale: string;
-  readonly upcoming: UpcomingTournament[];
-}) {
-  const t = useTranslations("home");
-  const tc = useTranslations("calendar");
+  const [stats, upcoming, recent, topRank] = await Promise.all([
+    getSiteStats(),
+    getUpcomingTournaments(3),
+    getRecentTournaments(3),
+    getTopRankings("I", "singl", 5),
+  ]);
+  const winners = await getWinnersForTournaments(recent.map((r) => r.id));
+
+  const heroStats = [
+    { value: stats.players.toLocaleString("sr-RS"), label: t("stats.players") },
+    { value: String(stats.tournaments), label: t("stats.tournaments") },
+    { value: "I–V · 20–90", label: t("stats.categories") },
+    { value: "4 + Master", label: t("stats.series") },
+  ];
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden text-white">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(1100px 460px at 88% -8%, rgba(214,232,75,.20), transparent 60%)," +
-              "radial-gradient(760px 420px at 6% 16%, rgba(200,85,61,.40), transparent 62%)," +
-              "linear-gradient(135deg,#16263E 0%, #13314A 52%, #1C5340 100%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.13em] backdrop-blur">
-            <i className="h-2 w-2 rounded-full bg-ball" />
-            {t("eyebrow")}
-          </span>
-          <h1 className="mt-5 max-w-3xl font-display text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">
-            {t("title")}
-          </h1>
-          <p className="mt-5 max-w-xl text-lg text-white/80">{t("lead")}</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/kalendar"
-              className="rounded-xl bg-clay px-5 py-3 font-semibold text-white transition hover:bg-clay-dark"
-            >
-              {t("ctaCalendar")}
-            </Link>
-            <Link
-              href="/rang-liste"
-              className="rounded-xl border border-white/25 bg-white/10 px-5 py-3 font-semibold text-white transition hover:bg-white/20"
-            >
-              {t("ctaRankings")}
-            </Link>
-          </div>
+      <PageHero
+        eyebrow={t("eyebrow")}
+        image="/tvs-hero-veterani.webp"
+        title={t("title")}
+        lead={t("lead")}
+        stats={heroStats}
+      >
+        <Link
+          href="/kalendar"
+          className="rounded-xl bg-clay px-5 py-3 font-semibold text-white transition hover:bg-clay-dark"
+        >
+          {t("ctaCalendar")}
+        </Link>
+        <Link
+          href="/rang-liste"
+          className="rounded-xl border border-white/25 bg-white/10 px-5 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
+        >
+          {t("ctaRankings")}
+        </Link>
+      </PageHero>
 
-          <dl className="mt-12 grid grid-cols-2 gap-6 border-t border-white/15 pt-8 sm:grid-cols-4">
-            {STATS.map((s) => (
-              <div key={s.key}>
-                <dt className="font-display text-2xl font-bold text-white">{s.value}</dt>
-                <dd className="mt-1 text-sm text-white/60">{t(`stats.${s.key}`)}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
-
-      {/* NAREDNI TURNIRI */}
-      {upcoming.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-extrabold sm:text-3xl">{t("sections.upcoming")}</h2>
-              <p className="mt-1 text-slate">{t("sections.upcomingSub")}</p>
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        {/* Naredni turniri */}
+        {upcoming.length > 0 && (
+          <section className="mb-14">
+            <SectionHead
+              title={t("sections.upcoming")}
+              sub={t("sections.upcomingSub")}
+              action={
+                <Link href="/kalendar" className="text-sm font-semibold text-clay-dark hover:underline">
+                  {t("sections.wholeCalendar")} →
+                </Link>
+              }
+            />
+            <div className="space-y-3">
+              {upcoming.map((tr) => {
+                const d = formatDateParts(tr.datum_od, tr.datum_do, locale);
+                return (
+                  <TournamentCard
+                    key={tr.id}
+                    slug={tr.legacy_id}
+                    dateBig={d.big}
+                    dateSmall={d.small}
+                    seriesLabel={tc(`series.${tr.serija}`)}
+                    name={tr.naziv}
+                    host={[tr.clubs?.naziv, tr.clubs?.grad].filter(Boolean).join(" · ")}
+                    statusTone={TOURNAMENT_STATUS_TONE[tr.status]}
+                    statusLabel={tc(`status.${tr.status}`)}
+                  />
+                );
+              })}
             </div>
-            <Link href="/kalendar" className="hidden shrink-0 text-sm font-semibold text-clay-dark hover:underline sm:block">
-              {t("ctaCalendar")} →
-            </Link>
+          </section>
+        )}
+
+        {/* Nedavno odigrano — sa šampionima */}
+        {recent.length > 0 && (
+          <section className="mb-14">
+            <SectionHead
+              title={t("sections.recent")}
+              sub={t("sections.recentSub")}
+              action={
+                <Link href="/kalendar" className="text-sm font-semibold text-clay-dark hover:underline">
+                  {t("sections.wholeCalendar")} →
+                </Link>
+              }
+            />
+            <div className="space-y-3">
+              {recent.map((tr) => {
+                const d = formatDateParts(tr.datum_od, tr.datum_do, locale);
+                const champs = (winners.get(tr.id) ?? [])
+                  .slice(0, 6)
+                  .map((w) => ({ cat: w.kategorija, name: initials(w.ime, w.prezime) }));
+                return (
+                  <TournamentCard
+                    key={tr.id}
+                    slug={tr.legacy_id}
+                    dateBig={d.big}
+                    dateSmall={d.small}
+                    seriesLabel={tc(`series.${tr.serija}`)}
+                    name={tr.naziv}
+                    host={[tr.clubs?.naziv, tr.clubs?.grad].filter(Boolean).join(" · ")}
+                    champions={champs}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Rang vrh + Istraži */}
+        <section className="mb-6 grid gap-8 lg:grid-cols-[1.2fr_1fr]">
+          <div>
+            <SectionHead
+              title={t("sections.rankingsTop")}
+              sub={t("sections.rankingsTopSub")}
+              action={
+                <Link href="/rang-liste" className="text-sm font-semibold text-clay-dark hover:underline">
+                  {t("sections.allRankings")} →
+                </Link>
+              }
+            />
+            {topRank.length > 0 ? (
+              <div className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
+                {topRank.map((r, i) => (
+                  <Link
+                    key={r.players?.id ?? i}
+                    href={`/igraci/${r.players?.id}`}
+                    className={`flex items-center gap-3 px-4 py-3 transition hover:bg-bg2 ${
+                      i > 0 ? "border-t border-line" : ""
+                    }`}
+                  >
+                    <span className="w-8 shrink-0 text-center font-mono text-lg font-extrabold text-navy">
+                      {MEDAL[r.mesto ?? 0] ?? `${r.mesto}`}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-semibold text-navy">
+                        {r.players?.ime} {r.players?.prezime}
+                      </span>
+                      <span className="block truncate text-xs text-muted">
+                        {r.players?.clubs?.naziv ?? "—"}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      <span className="block font-mono font-bold text-court-dark">{r.bodovi}</span>
+                      <span className="block text-xs text-muted">{r.broj_turnira} tur.</span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-dashed border-line2 bg-card p-6 text-sm text-muted">
+                {tc("empty")}
+              </p>
+            )}
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {upcoming.map((tr) => (
-              <Link
-                key={tr.id}
-                href={tr.legacy_id ? `/turnir/${tr.legacy_id}` : "/kalendar"}
-                className="group rounded-2xl border border-line bg-card p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-[var(--shadow-tvs)]"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center rounded-full bg-clay/12 px-2.5 py-0.5 text-xs font-bold text-clay-dark">
-                    {tc(`series.${tr.serija}`)}
+
+          <div>
+            <SectionHead title={t("sections.explore")} />
+            <div className="grid grid-cols-2 gap-3">
+              {MODULES.map((m) => (
+                <Link
+                  key={m.key}
+                  href={m.href}
+                  className={`flex flex-col gap-2 rounded-2xl border border-line ${m.tone} border-t-[3px] bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-tvs)]`}
+                >
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-clay/10 text-clay-dark">
+                    <Icon name={m.icon} size={20} />
                   </span>
-                  <span className="font-mono text-xs text-muted">
-                    {formatDateRange(tr.datum_od, tr.datum_do, locale)}
+                  <span className="mt-1 font-display text-base font-extrabold text-navy">
+                    {t(`cards.${m.key}.title`)}
                   </span>
-                </div>
-                <h3 className="mt-3 font-display text-lg font-bold text-navy">{tr.naziv}</h3>
-                <p className="mt-1 text-sm text-slate">
-                  {tr.clubs?.naziv}
-                  {tr.clubs?.grad ? ` · ${tr.clubs.grad}` : ""}
-                </p>
-              </Link>
-            ))}
+                  <span className="text-[13px] leading-snug text-slate">
+                    {t(`cards.${m.key}.desc`)}
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
-      )}
-
-      {/* EXPLORE */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-        <div className="mb-8 flex items-baseline gap-3">
-          <span className="font-mono text-sm text-clay">/ tvs</span>
-          <h2 className="text-2xl font-extrabold sm:text-3xl">{t("sections.explore")}</h2>
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {CARDS.map((c) => (
-            <Link
-              key={c.key}
-              href={c.href}
-              className={`group rounded-2xl border border-line border-t-[3px] ${TONE[c.tone]} bg-card p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-[var(--shadow-tvs)]`}
-            >
-              <div className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-bg2 text-xl">
-                {c.icon}
-              </div>
-              <h3 className="text-base font-bold text-navy">{t(`cards.${c.key}.title`)}</h3>
-              <p className="mt-1.5 text-sm text-slate">{t(`cards.${c.key}.desc`)}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+      </div>
     </>
+  );
+}
+
+function SectionHead({
+  title,
+  sub,
+  action,
+}: {
+  readonly title: string;
+  readonly sub?: string;
+  readonly action?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-4 flex items-end justify-between gap-4">
+      <div>
+        <h2 className="font-display text-2xl font-extrabold text-navy sm:text-[26px]">{title}</h2>
+        {sub && <p className="mt-0.5 text-sm text-muted">{sub}</p>}
+      </div>
+      {action}
+    </div>
   );
 }

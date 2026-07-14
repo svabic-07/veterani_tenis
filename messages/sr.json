@@ -23,15 +23,20 @@
     "ctaRankings": "Rang liste",
     "stats": {
       "players": "igrača u bazi",
-      "categories": "kvalitativnih + starosnih kategorija",
-      "series": "serije turnira + Master",
+      "tournaments": "odigranih turnira",
+      "categories": "kvalitativne + starosne kategorije",
+      "series": "serije turnira",
       "disciplines": "discipline: singl, dubl, miks"
     },
     "sections": {
       "upcoming": "Naredni turniri",
       "upcomingSub": "Prijave i žreb za predstojeća takmičenja.",
-      "rankings": "Rang liste",
-      "rankingsSub": "Kvalitativne (I–V) i starosne kategorije, po disciplini.",
+      "recent": "Nedavno odigrano",
+      "recentSub": "Poslednji završeni turniri i njihovi šampioni.",
+      "rankingsTop": "Rang liste — vrh",
+      "rankingsTopSub": "Kategorija I · singl",
+      "allRankings": "Pune liste",
+      "wholeCalendar": "Ceo kalendar",
       "explore": "Istraži sistem"
     },
     "cards": {
