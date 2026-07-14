@@ -57,3 +57,65 @@ export async function getUpcomingTournaments(limit = 3) {
 }
 
 export type UpcomingTournament = Awaited<ReturnType<typeof getUpcomingTournaments>>[number];
+
+export type TournamentWinner = {
+  turnirId: string;
+  kategorija: string;
+  disciplina: string;
+  ime: string;
+  prezime: string;
+  playerId: string;
+};
+
+/**
+ * Pobednici (1. mesto) po konkurenciji za zadate turnire — za prikaz na
+ * kartici turnira bez ulaska. Vraća mapu turnir_id → lista pobednika.
+ */
+export async function getWinnersForTournaments(
+  ids: string[],
+): Promise<Map<string, TournamentWinner[]>> {
+  const map = new Map<string, TournamentWinner[]>();
+  if (ids.length === 0) return map;
+
+  const supabase = await createClient();
+  const { data: pod, error } = await supabase
+    .from("player_podiums")
+    .select("turnir_id, kategorija, disciplina, player_id")
+    .eq("mesto", 1)
+    .in("turnir_id", ids);
+  if (error) throw error;
+
+  const rows = pod ?? [];
+  const pids = [...new Set(rows.map((r) => r.player_id).filter((x): x is string => !!x))];
+  const nameById = new Map<string, { ime: string; prezime: string }>();
+  if (pids.length) {
+    const { data: pl } = await supabase.from("players").select("id, ime, prezime").in("id", pids);
+    for (const p of pl ?? []) nameById.set(p.id, { ime: p.ime, prezime: p.prezime });
+  }
+
+  const KAT_ORDER = ["I", "II", "III", "IV", "V"];
+  const rank = (k: string) => {
+    const i = KAT_ORDER.indexOf(k);
+    return i >= 0 ? i : 100 + (Number.parseInt(k, 10) || 99);
+  };
+
+  for (const r of rows) {
+    if (!r.turnir_id || !r.player_id || !r.kategorija || !r.disciplina) continue;
+    const n = nameById.get(r.player_id);
+    if (!n) continue;
+    const list = map.get(r.turnir_id) ?? [];
+    list.push({
+      turnirId: r.turnir_id,
+      kategorija: r.kategorija,
+      disciplina: r.disciplina,
+      ime: n.ime,
+      prezime: n.prezime,
+      playerId: r.player_id,
+    });
+    map.set(r.turnir_id, list);
+  }
+  for (const list of map.values()) {
+    list.sort((a, b) => rank(a.kategorija) - rank(b.kategorija) || a.disciplina.localeCompare(b.disciplina));
+  }
+  return map;
+}

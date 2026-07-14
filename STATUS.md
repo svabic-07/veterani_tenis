@@ -41,10 +41,10 @@ Dizajn tokeni (`src/app/globals.css` `@theme`): boje `clay/court/ball/navy`, fon
 | Ruta | Tip | Status | Izvor podataka |
 |---|---|---|---|
 | `/` (početna) | ISR 10m | ✅ | naredni turniri iz baze |
-| `/kalendar` | dinamička | ✅ | `tournaments` + `clubs` + direktor |
+| `/kalendar` | dinamička | ✅ | **predstojeći + arhiva po godinama + pobednici po kategoriji** |
 | `/turnir/[slug]` | dinamička | ✅ | turnir + konkurencije |
 | `/igraci` | dinamička | ✅ | `players` (pretraga + filter kategorije) |
-| `/igraci/[id]` | dinamička | ✅ | profil igrača: rang + istorija turnira + poslednji mečevi |
+| `/igraci/[id]` | dinamička | ✅ | profil: **trofeji (🥇🥈🥉)** + rang + istorija turnira + poslednji mečevi |
 | `/rang-liste` | dinamička | ✅ | `rankings` (kat × disc) — **popunjeno iz istorije** |
 | `/pravilnik` | statička | ✅ | sadržaj iz spec-a (dvojezično) |
 | `/o-savezu`, `/kontakt` | statička | ✅ | statički sadržaj |
@@ -84,6 +84,7 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 
 10. `…0714090000_scoring` — **`scoring_tables`** (140 redova, klasični model) + **`finish_tournament()`** (obračun + nedeljni rang)
 11. `…0714110000_koordinator` — **`audit_log`** + `revoke_draw`/`clear_match_result`/`reopen_tournament`/`admin_list_users`
+12. `…0714130000_podiums` — **`player_podiums`** view (plasman 1/2/3 po konkurenciji; `security_invoker`) za pobednike turnira i trofeje igrača
 
 **Još nije kreirano (Faza 4):** `payments`, `sanctions`, `news`/`gallery`.
 
@@ -173,6 +174,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-14 | `Faza 4: koordinatorski panel` | Audit + korekcije (opoziv/poništavanje/reopen) + uloge + novi turnir |
 | 2026-07-14 | `Faza 1: istorija` | Uvoz 154 turnira + 6.745 mečeva + bodovi/rang + profil (istorija/mečevi) |
 | 2026-07-14 | `Faza 5: PWA + i18n polish` | Instalabilnost (192/512 maskable, apple-icon, theme-color) + proxy fix + EN audit |
+| 2026-07-14 | `Kalendar + trofeji` | Predstojeći/arhiva po godinama + pobednici po kategoriji na kartici + pehari na profilu |
 
 ---
 

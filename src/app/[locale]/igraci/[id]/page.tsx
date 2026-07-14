@@ -6,10 +6,13 @@ import {
   getPlayerRankings,
   getPlayerHistory,
   getPlayerMatches,
+  getPlayerTrophies,
 } from "@/lib/data/players";
 import { formatDateRange } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
+
+const MEDAL: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
 export async function generateMetadata({
   params,
@@ -34,10 +37,11 @@ export default async function ProfilPage({
   const p = await getPlayerById(id);
   if (!p) notFound();
 
-  const [rankings, history, matches] = await Promise.all([
+  const [rankings, history, matches, trophies] = await Promise.all([
     getPlayerRankings(id),
     getPlayerHistory(id),
     getPlayerMatches(id),
+    getPlayerTrophies(id),
   ]);
 
   const age = p.godiste ? new Date().getFullYear() - p.godiste : null;
@@ -69,6 +73,21 @@ export default async function ProfilPage({
             {p.clubs?.naziv ?? "—"}
             {p.kategorija ? ` · ${t("category")} ${p.kategorija}` : ""}
           </p>
+          {(trophies.brojevi.prvo > 0 ||
+            trophies.brojevi.drugo > 0 ||
+            trophies.brojevi.trece > 0) && (
+            <div className="mt-2 flex flex-wrap gap-3 text-sm font-semibold">
+              {trophies.brojevi.prvo > 0 && (
+                <span className="text-navy">🥇 {trophies.brojevi.prvo}</span>
+              )}
+              {trophies.brojevi.drugo > 0 && (
+                <span className="text-slate">🥈 {trophies.brojevi.drugo}</span>
+              )}
+              {trophies.brojevi.trece > 0 && (
+                <span className="text-slate">🥉 {trophies.brojevi.trece}</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -85,6 +104,40 @@ export default async function ProfilPage({
         </section>
 
         <section className="space-y-6">
+          {trophies.lista.length > 0 && (
+            <div>
+              <h2 className="mb-2 font-display text-lg font-bold text-navy">{t("trophies")}</h2>
+              <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+                {trophies.lista.map((tr, i) => (
+                  <li
+                    key={`${tr.slug}-${tr.kategorija}-${tr.disciplina}-${i}`}
+                    className={`flex items-center gap-3 px-4 py-2.5 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}
+                  >
+                    <span className="shrink-0 text-lg" aria-hidden>
+                      {MEDAL[tr.mesto] ?? "🏅"}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      {tr.slug ? (
+                        <Link
+                          href={`/turnir/${tr.slug}`}
+                          className="block truncate font-medium text-navy hover:text-clay"
+                        >
+                          {tr.naziv}
+                        </Link>
+                      ) : (
+                        <span className="block truncate font-medium text-navy">{tr.naziv}</span>
+                      )}
+                      <span className="block text-xs text-muted">
+                        {t("category")} {tr.kategorija} · {t(`disc.${tr.disciplina}`)}
+                        {tr.datum ? ` · ${tr.datum.slice(0, 4)}` : ""}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div>
             <h2 className="mb-2 font-display text-lg font-bold text-navy">{t("ranking")}</h2>
             {rankings.length === 0 ? (

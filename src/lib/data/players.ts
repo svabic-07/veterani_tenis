@@ -100,6 +100,62 @@ export async function getPlayerMatches(playerId: string, limit = 15) {
     .slice(0, limit);
 }
 
+export type PlayerTrophy = {
+  mesto: number;
+  kategorija: string;
+  disciplina: string;
+  naziv: string;
+  slug: string | null;
+  datum: string | null;
+};
+
+/** Trofeji igrača — plasmani 1/2/3. mesto po turniru (za profil). */
+export async function getPlayerTrophies(playerId: string): Promise<{
+  brojevi: { prvo: number; drugo: number; trece: number };
+  lista: PlayerTrophy[];
+}> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("player_podiums")
+    .select("mesto, kategorija, disciplina, turnir_id")
+    .eq("player_id", playerId);
+  if (error) throw error;
+  const rows = data ?? [];
+
+  const tids = [...new Set(rows.map((r) => r.turnir_id).filter((x): x is string => !!x))];
+  const tourById = new Map<string, { naziv: string; slug: string | null; datum: string | null }>();
+  if (tids.length) {
+    const { data: ts } = await supabase
+      .from("tournaments")
+      .select("id, naziv, legacy_id, datum_od")
+      .in("id", tids);
+    for (const t of ts ?? []) {
+      tourById.set(t.id, { naziv: t.naziv, slug: t.legacy_id, datum: t.datum_od });
+    }
+  }
+
+  const lista: PlayerTrophy[] = [];
+  const brojevi = { prvo: 0, drugo: 0, trece: 0 };
+  for (const r of rows) {
+    if (!r.turnir_id || !r.mesto || !r.kategorija || !r.disciplina) continue;
+    const t = tourById.get(r.turnir_id);
+    if (!t) continue;
+    lista.push({
+      mesto: r.mesto,
+      kategorija: r.kategorija,
+      disciplina: r.disciplina,
+      naziv: t.naziv,
+      slug: t.slug,
+      datum: t.datum,
+    });
+    if (r.mesto === 1) brojevi.prvo++;
+    else if (r.mesto === 2) brojevi.drugo++;
+    else if (r.mesto === 3) brojevi.trece++;
+  }
+  lista.sort((a, b) => a.mesto - b.mesto || (b.datum ?? "").localeCompare(a.datum ?? ""));
+  return { brojevi, lista };
+}
+
 /** Jedan igrač po id-u (uuid). Vraća null ako ne postoji ili id nije validan. */
 export async function getPlayerById(id: string) {
   if (!UUID_RE.test(id)) return null;

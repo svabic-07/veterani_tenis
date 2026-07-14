@@ -723,7 +723,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      player_podiums: {
+        Row: {
+          player_id: string | null
+          turnir_id: string | null
+          event_id: string | null
+          kategorija: string | null
+          disciplina: Database["public"]["Enums"]["discipline"] | null
+          mesto: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_list_users: {
