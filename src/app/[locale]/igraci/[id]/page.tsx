@@ -1,7 +1,13 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { getPlayerById } from "@/lib/data/players";
+import {
+  getPlayerById,
+  getPlayerRankings,
+  getPlayerHistory,
+  getPlayerMatches,
+} from "@/lib/data/players";
+import { formatDateRange } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +28,12 @@ export default async function ProfilPage({
   const t = await getTranslations("players.profile");
   const p = await getPlayerById(id);
   if (!p) notFound();
+
+  const [rankings, history, matches] = await Promise.all([
+    getPlayerRankings(id),
+    getPlayerHistory(id),
+    getPlayerMatches(id),
+  ]);
 
   const age = p.godiste ? new Date().getFullYear() - p.godiste : null;
   const initials = `${p.ime[0] ?? ""}${p.prezime[0] ?? ""}`.toUpperCase();
@@ -70,15 +82,119 @@ export default async function ProfilPage({
         <section className="space-y-6">
           <div>
             <h2 className="mb-2 font-display text-lg font-bold text-navy">{t("ranking")}</h2>
-            <p className="rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-muted">
-              {t("noRanking")}
-            </p>
+            {rankings.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-muted">
+                {t("noRanking")}
+              </p>
+            ) : (
+              <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+                {rankings.map((r, i) => (
+                  <li
+                    key={`${r.kategorija}-${r.disciplina}`}
+                    className={`flex items-center gap-3 px-4 py-2.5 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}
+                  >
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-court/12 font-display text-sm font-bold text-court-dark">
+                      #{r.mesto}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold text-navy">
+                        {t("category")} {r.kategorija} · {t(`disc.${r.disciplina}`)}
+                      </span>
+                      <span className="block text-xs text-muted">
+                        {t("rankingRow", { bodovi: r.bodovi, turnira: r.broj_turnira })}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+
           <div>
             <h2 className="mb-2 font-display text-lg font-bold text-navy">{t("history")}</h2>
-            <p className="rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-muted">
-              {t("noHistory")}
-            </p>
+            {history.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-muted">
+                {t("noHistory")}
+              </p>
+            ) : (
+              <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+                {history.map((h, i) => (
+                  <li
+                    key={`${h.tournaments?.legacy_id}-${h.kategorija}-${h.disciplina}-${i}`}
+                    className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 px-4 py-2 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}
+                  >
+                    {h.tournaments?.legacy_id ? (
+                      <Link
+                        href={`/turnir/${h.tournaments.legacy_id}`}
+                        className="min-w-0 flex-1 truncate font-medium text-navy hover:text-clay"
+                      >
+                        {h.tournaments.naziv}
+                      </Link>
+                    ) : (
+                      <span className="min-w-0 flex-1 truncate font-medium text-navy">—</span>
+                    )}
+                    <span className="text-xs text-muted">
+                      {formatDateRange(h.tournaments?.datum_od ?? null, null, locale)} ·{" "}
+                      {h.kategorija} {t(`disc.${h.disciplina}`)}
+                    </span>
+                    <span className="shrink-0 font-mono text-xs font-bold text-court-dark">
+                      +{h.bodovi}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <h2 className="mb-2 font-display text-lg font-bold text-navy">{t("matches")}</h2>
+            {matches.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-muted">
+                {t("noMatches")}
+              </p>
+            ) : (
+              <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+                {matches.map((m, i) => {
+                  const jaSam1 = m.p1?.id === id;
+                  const protivnik = jaSam1 ? m.p2 : m.p1;
+                  const pobedio = (m.winner_slot === 1) === jaSam1;
+                  const rezultat = m.match_sets
+                    .toSorted((a, b) => a.set_no - b.set_no)
+                    .map((s) => (jaSam1 ? `${s.gem1}:${s.gem2}` : `${s.gem2}:${s.gem1}`))
+                    .join(" ");
+                  return (
+                    <li
+                      key={m.id}
+                      className={`flex flex-wrap items-center gap-x-3 gap-y-0.5 px-4 py-2 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}
+                    >
+                      <span
+                        className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold ${
+                          pobedio ? "bg-court/15 text-court-dark" : "bg-clay/10 text-clay-dark"
+                        }`}
+                      >
+                        {pobedio ? t("winShort") : t("lossShort")}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {protivnik ? (
+                          <Link href={`/igraci/${protivnik.id}`} className="font-medium text-navy hover:text-clay">
+                            {protivnik.ime[0]}. {protivnik.prezime}
+                          </Link>
+                        ) : (
+                          <span className="text-muted">—</span>
+                        )}
+                        <span className="ml-2 text-xs text-muted">
+                          {m.draws.event.turnir.naziv.slice(0, 40)}
+                          {m.draws.event.turnir.naziv.length > 40 ? "…" : ""}
+                        </span>
+                      </span>
+                      <span className="shrink-0 font-mono text-xs">
+                        {m.status === "walkover" ? "w.o." : rezultat || "—"}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </section>
       </div>

@@ -342,8 +342,14 @@
       "birthYear": "Birth year",
       "ranking": "Ranking & points",
       "history": "Tournament history",
+      "matches": "Recent matches",
       "noRanking": "Ranking has not been calculated for this player yet.",
-      "noHistory": "No recorded appearances."
+      "noHistory": "No recorded appearances.",
+      "noMatches": "No recorded matches.",
+      "rankingRow": "{bodovi} points · {turnira, plural, one {# tournament} other {# tournaments}}",
+      "winShort": "W",
+      "lossShort": "L",
+      "disc": { "singl": "Singles", "dubl": "Doubles", "miks": "Mixed" }
     }
   },
   "rankings": {

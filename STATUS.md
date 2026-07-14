@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
 > **Poslednje ažurirano:** 2026-07-14
-> **Faza:** 0 ✅ · 1 🔶 (javni sloj + pravi podaci) · 2 🔶 (aktivacija naloga, čeka email konfig.) · 3 ✅ (žreb → rezultati → obračun, sudijski portal) · 4 🔶 (koordinatorski panel — jezgro)
+> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga, čeka email konfig.) · 3 ✅ (žreb → rezultati → obračun, sudijski portal) · 4 🔶 (koordinatorski panel — jezgro)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -44,8 +44,8 @@ Dizajn tokeni (`src/app/globals.css` `@theme`): boje `clay/court/ball/navy`, fon
 | `/kalendar` | dinamička | ✅ | `tournaments` + `clubs` + direktor |
 | `/turnir/[slug]` | dinamička | ✅ | turnir + konkurencije |
 | `/igraci` | dinamička | ✅ | `players` (pretraga + filter kategorije) |
-| `/igraci/[id]` | dinamička | ✅ | profil igrača |
-| `/rang-liste` | dinamička | ✅ (prazno) | `rankings` (kat × disc), čeka obračun |
+| `/igraci/[id]` | dinamička | ✅ | profil igrača: rang + istorija turnira + poslednji mečevi |
+| `/rang-liste` | dinamička | ✅ | `rankings` (kat × disc) — **popunjeno iz istorije** |
 | `/pravilnik` | statička | ✅ | sadržaj iz spec-a (dvojezično) |
 | `/o-savezu`, `/kontakt` | statička | ✅ | statički sadržaj |
 | `/sudija` | dinamička | ✅ | lista turnira koje nalog vodi (staff/direktor) |
@@ -73,6 +73,8 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 **Seed** (`supabase/seed.sql`): sezona 2026, 8 klubova, 8 direktora (kao igrači), 8 turnira, 31 konkurencija.
 
 **Migrirani podaci sa starog sajta (2026-07-13):** ✅ uvezeno **2.831 igrača** (od 2.834 — 3 placeholder zapisa preskočena), **427 klubova** (normalizovano od 572 varijante naziva), **2.176 kontakata** (email/telefon u `player_private`), **950 TVS kategorija** (poslednja poznata godina po igraču). Izvor: `migration-data_2/` (gitignored, PII). Generator: `scripts/generate-import-sql.py` → `scripts/out/*.sql` (gitignored) → primenjeno preko Supabase MCP. Idempotentno (upsert po `legacy_id`; stari numerički ID = `players.legacy_id`). Upozorenja i ~17 mogućih duplikata (isto ime+godište pod dva ID-ja): `scripts/out/warnings.txt` — za ručnu proveru koordinatora.
+
+**Istorija (mečevi, žrebovi, bodovi) — uvezeno 2026-07-14:** ✅ iz `mecevi.jsonl` (13.371) + `turniri_ucesce.jsonl` (7.722) rekonstruisano: **154 turnira** (legacy `ist-%`), **1.142 konkurencije**, **975 žrebova** (eliminacioni, status `zakljucan`), **6.745 mečeva** + **8.412 setova**, **7.718 prijava**, **5.821 bod** (`ranking_points`), **498 rang-pozicija** za **1.008 igrača**, **57 gostiju** (imena bez kartona, legacy `gost-%`). Generator: `scripts/import-history.ts` (deterministički `md5` UUID-i po `turnir:/event:/draw:/match:` ključu → idempotentno) → `scripts/out/history/*.sql` (gitignored). Rekonstrukcija: kostur iz maks. kola, pozicije od finala unazad, pobednik po (1) progresiji u sledeće kolo, (2) osvojenim poenima, (3) prvi_igrac; setovi iz raznih formata (`6:3`, `62`, `9-5`, `wo`→walkover). Primenjeno preko Supabase MCP (paralelni agenti + direktno). ⚠️ Bodovi su iz `osvojeni_poeni` (kako su bili na starom sajtu), NE preračunati kroz `finish_tournament` — istorijski turniri su `zakljucan`, ne prolaze kroz obračun. Rang lista = zbir N-najboljih (`n_best`=8) iz svih aktivnih `ranking_points`.
 
 **RLS:** javno čitanje (`clubs/players/seasons/tournaments/tournament_events/ranking_points/rankings`); `player_private` samo staff/vlasnik; sve mutacije preko `is_staff()`/direktora. ✅ provereno (anon čita javno, PII blokiran).
 
@@ -162,6 +164,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-14 | `Faza 3: ZAVRŠI TURNIR` | Bodovne tablice + obračun + nedeljni rang (finish_tournament) |
 | 2026-07-14 | `Faza 3: prijave + satnica` | Upravljanje prijavama, satnica po meču (javno), zamena pozicija |
 | 2026-07-14 | `Faza 4: koordinatorski panel` | Audit + korekcije (opoziv/poništavanje/reopen) + uloge + novi turnir |
+| 2026-07-14 | `Faza 1: istorija` | Uvoz 154 turnira + 6.745 mečeva + bodovi/rang + profil (istorija/mečevi) |
 
 ---
 

@@ -142,8 +142,14 @@
       "birthYear": "Godište",
       "ranking": "Rang i bodovi",
       "history": "Istorija turnira",
+      "matches": "Poslednji mečevi",
       "noRanking": "Rang lista još nije obračunata za ovog igrača.",
-      "noHistory": "Nema zabeleženih nastupa."
+      "noHistory": "Nema zabeleženih nastupa.",
+      "noMatches": "Nema zabeleženih mečeva.",
+      "rankingRow": "{bodovi} bodova · {turnira, plural, one {# turnir} few {# turnira} other {# turnira}}",
+      "winShort": "P",
+      "lossShort": "I",
+      "disc": { "singl": "Singl", "dubl": "Dubl", "miks": "Miks" }
     }
   },
   "auth": {
