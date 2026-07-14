@@ -70,7 +70,7 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 5. `…090500_security_hardening` — fiksiran search_path, EXECUTE lockdown (advisors čisti)
 6. `…090600_rankings` — `ranking_points`, `rankings`
 
-**Seed** (`supabase/seed.sql`): sezona 2026, 8 klubova, 8 direktora (kao igrači), 8 turnira, 31 konkurencija.
+**Seed** (`supabase/seed.sql`): sezona 2026 + 8 klubova (spojeni sa migriranim klubovima po slug-u, koriste ih pravi igrači). ⚠️ Demo turniri + fejk direktori (`dir-%`) **obrisani 2026-07-14** (i iz baze i iz seed-a) kad su stigli pravi podaci — sada su svi turniri istorijski (`ist-%`, 154). Novi turniri se prave kroz koordinatorski panel.
 
 **Migrirani podaci sa starog sajta (2026-07-13):** ✅ uvezeno **2.831 igrača** (od 2.834 — 3 placeholder zapisa preskočena), **427 klubova** (normalizovano od 572 varijante naziva), **2.176 kontakata** (email/telefon u `player_private`), **950 TVS kategorija** (poslednja poznata godina po igraču). Izvor: `migration-data_2/` (gitignored, PII). Generator: `scripts/generate-import-sql.py` → `scripts/out/*.sql` (gitignored) → primenjeno preko Supabase MCP. Idempotentno (upsert po `legacy_id`; stari numerički ID = `players.legacy_id`). Upozorenja i ~17 mogućih duplikata (isto ime+godište pod dva ID-ja): `scripts/out/warnings.txt` — za ručnu proveru koordinatora.
 
