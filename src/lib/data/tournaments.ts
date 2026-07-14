@@ -39,16 +39,21 @@ export async function getTournamentBySlug(slug: string) {
 
 export type TournamentDetail = NonNullable<Awaited<ReturnType<typeof getTournamentBySlug>>>;
 
-/** Naredni turniri (koji nisu završeni) — za početnu. Bez cookie-ja → keširano (ISR). */
+/**
+ * Naredni turniri — po datumu (nisu se još završili), za početnu. Bez
+ * cookie-ja → keširano (ISR). Status kolona nije pouzdana (uvezena istorija je
+ * sva `zavrsen`), pa particiju radimo po datumu.
+ */
 export async function getUpcomingTournaments(limit = 3) {
   const supabase = createPublicClient();
+  const today = new Date().toISOString().slice(0, 10);
   const { data, error } = await supabase
     .from("tournaments")
     .select(
       `id, legacy_id, naziv, serija, mesto, datum_od, datum_do, status,
        clubs ( naziv, grad )`,
     )
-    .neq("status", "zavrsen")
+    .or(`datum_do.gte.${today},and(datum_do.is.null,datum_od.gte.${today})`)
     .order("datum_od", { ascending: true })
     .limit(limit);
 
@@ -61,20 +66,28 @@ export type UpcomingTournament = Awaited<ReturnType<typeof getUpcomingTournament
 /** Brojači za hero statistiku (igrači, odigrani turniri). Keširano (anon). */
 export async function getSiteStats() {
   const supabase = createPublicClient();
+  const today = new Date().toISOString().slice(0, 10);
   const [players, tournaments] = await Promise.all([
     supabase.from("players").select("id", { count: "exact", head: true }).eq("is_active", true),
-    supabase.from("tournaments").select("id", { count: "exact", head: true }).eq("status", "zavrsen"),
+    supabase
+      .from("tournaments")
+      .select("id", { count: "exact", head: true })
+      .or(`datum_do.lt.${today},and(datum_do.is.null,datum_od.lt.${today})`),
   ]);
   return { players: players.count ?? 0, tournaments: tournaments.count ?? 0 };
 }
 
-/** Nedavno odigrani turniri (završeni) — za početnu, sa šampionima na kartici. */
+/**
+ * Nedavno odigrani turniri — po datumu (datum je prošao), za početnu, sa
+ * šampionima na kartici. Particija po datumu, ne po statusu (v. gore).
+ */
 export async function getRecentTournaments(limit = 3) {
   const supabase = createPublicClient();
+  const today = new Date().toISOString().slice(0, 10);
   const { data, error } = await supabase
     .from("tournaments")
     .select("id, legacy_id, naziv, serija, sistem, mesto, datum_od, datum_do, clubs ( naziv, grad )")
-    .eq("status", "zavrsen")
+    .or(`datum_do.lt.${today},and(datum_do.is.null,datum_od.lt.${today})`)
     .order("datum_od", { ascending: false })
     .limit(limit);
   if (error) throw error;

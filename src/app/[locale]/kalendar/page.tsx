@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getTournaments, getWinnersForTournaments } from "@/lib/data/tournaments";
 import { formatDateParts, formatDeadline } from "@/lib/format";
+import { statusByDate } from "@/lib/tournament-status";
 import { PageHero } from "@/components/ui/page-hero";
 import { TournamentCard, type Champion } from "@/components/ui/tournament-card";
 import { TOURNAMENT_STATUS_TONE } from "@/components/ui/pill";
@@ -32,11 +33,15 @@ export default async function KalendarPage({
 
   const today = new Date().toISOString().slice(0, 10);
   const endOf = (tr: (typeof all)[number]) => tr.datum_do ?? tr.datum_od ?? "";
+  // Particija po datumu (uvezeni podaci su svi `zavrsen`): predstojeći = nisu se
+  // završili; arhiva = svi ostali (izuzev 3 prikazana), da se ništa ne sakrije.
   const upcoming = all
-    .filter((tr) => tr.status !== "zavrsen" && endOf(tr) >= today)
-    .sort((a, b) => (a.datum_od ?? "").localeCompare(b.datum_od ?? ""));
+    .filter((tr) => endOf(tr) >= today)
+    .sort((a, b) => (a.datum_od ?? "").localeCompare(b.datum_od ?? ""))
+    .slice(0, 3);
+  const featuredIds = new Set(upcoming.map((tr) => tr.id));
   const archive = all
-    .filter((tr) => tr.status === "zavrsen")
+    .filter((tr) => !featuredIds.has(tr.id))
     .sort((a, b) => (b.datum_od ?? "").localeCompare(a.datum_od ?? ""));
 
   const years = [...new Set(archive.map((tr) => (tr.datum_od ?? "").slice(0, 4)).filter(Boolean))];
@@ -75,8 +80,8 @@ export default async function KalendarPage({
             <div className="space-y-3">
               {upcoming.map((tr) => {
                 const d = formatDateParts(tr.datum_od, tr.datum_do, locale);
-                const showDeadline =
-                  tr.rok_prijave && (tr.status === "prijave" || tr.status === "najava");
+                const st = statusByDate(tr.datum_od, tr.datum_do);
+                const showDeadline = Boolean(tr.rok_prijave) && st === "najava";
                 return (
                   <TournamentCard
                     key={tr.id}
@@ -87,8 +92,8 @@ export default async function KalendarPage({
                     systemLabel={t(`system.${tr.sistem}`)}
                     name={tr.naziv}
                     host={hostLine(tr)}
-                    statusTone={TOURNAMENT_STATUS_TONE[tr.status]}
-                    statusLabel={t(`status.${tr.status}`)}
+                    statusTone={TOURNAMENT_STATUS_TONE[st]}
+                    statusLabel={t(`status.${st}`)}
                     deadline={showDeadline ? formatDeadline(tr.rok_prijave, locale) : null}
                     deadlineLabel={t("deadline")}
                   />

@@ -8,6 +8,7 @@ import {
 } from "@/lib/data/tournaments";
 import { getTopRankings } from "@/lib/data/players";
 import { formatDateParts } from "@/lib/format";
+import { statusByDate } from "@/lib/tournament-status";
 import { PageHero } from "@/components/ui/page-hero";
 import { TournamentCard } from "@/components/ui/tournament-card";
 import { Icon } from "@/components/ui/icon";
@@ -85,6 +86,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div className="space-y-3">
               {upcoming.map((tr) => {
                 const d = formatDateParts(tr.datum_od, tr.datum_do, locale);
+                const st = statusByDate(tr.datum_od, tr.datum_do);
                 return (
                   <TournamentCard
                     key={tr.id}
@@ -94,8 +96,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     seriesLabel={tc(`series.${tr.serija}`)}
                     name={tr.naziv}
                     host={[tr.clubs?.naziv, tr.clubs?.grad].filter(Boolean).join(" · ")}
-                    statusTone={TOURNAMENT_STATUS_TONE[tr.status]}
-                    statusLabel={tc(`status.${tr.status}`)}
+                    statusTone={TOURNAMENT_STATUS_TONE[st]}
+                    statusLabel={tc(`status.${st}`)}
                   />
                 );
               })}
