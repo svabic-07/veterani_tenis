@@ -55,27 +55,31 @@
   --foreground: var(--color-ink);
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* Bazni element-stilovi u @layer base — da Tailwind utility-ji (npr.
+   text-white u hero-u) pobede podrazumevanu boju naslova u kaskadi. */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  line-height: 1.62;
-}
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.62;
+  }
 
-h1, h2, h3, h4, h5 {
-  font-family: var(--font-display);
-  line-height: 1.18;
-  color: var(--color-navy);
-}
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    line-height: 1.18;
+    color: var(--color-navy);
+  }
 
-::selection {
-  background: var(--color-ball);
-  color: var(--color-navy);
+  ::selection {
+    background: var(--color-ball);
+    color: var(--color-navy);
+  }
 }
 
 /* Fokus vidljivost (a11y) */
