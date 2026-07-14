@@ -40,6 +40,6 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Sve rute osim API, Next internih fajlova, i fajlova sa ekstenzijom.
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  // Sve rute osim API, Next internih fajlova, metadata/ikonica, i fajlova sa ekstenzijom.
+  matcher: ["/((?!api|_next|_vercel|icon|apple-icon|manifest-icon|manifest|sitemap|robots|.*\\..*).*)"],
 };

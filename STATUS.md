@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
 > **Poslednje ažurirano:** 2026-07-14
-> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga, čeka email konfig.) · 3 ✅ (žreb → rezultati → obračun, sudijski portal) · 4 🔶 (koordinatorski panel — jezgro)
+> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga, čeka email konfig.) · 3 ✅ (žreb → rezultati → obračun, sudijski portal) · 4 🔶 (koordinatorski panel — jezgro) · 5 🔶 (dvojezičnost ✅ + PWA instalabilnost ✅, ostaje offline/E2E)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -140,10 +140,17 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 
 **Ostaje u Fazi 4:** bodovne tablice kroz UI (sada samo u bazi), model `svi_boduju` + Master tablica, nedeljni cron obračun (sada se rang računa na „ZAVRŠI TURNIR"), evidencija uplata, disciplinska, spajanje duplikata igrača (17 iz migracije), CMS vesti.
 
-### 🟢 Sitnice (Faza 5/6)
+### 🔶 Faza 5 — dvojezičnost + PWA + polish (2026-07-14, u toku)
+- **EN prevod:** auditom potvrđena parnost `sr.json`/`en.json` (310 = 310 ključeva), statične stranice (`o-savezu`/`kontakt`/`pravilnik`) kroz `L(sr,en)` helper — prevod je kompletan (sistem građen dvojezično od početka). Sitne popravke: metadata fallback naslovi (`Igrač`/`Player`, `Turnir`/`Tournament`) locale-aware; `o-savezu` statistika ~2.600 → ~2.900.
+- **PWA instalabilnost:** `manifest.ts` proširen (ikonice **192/512** `any`+`maskable`, `orientation`, `categories`), nove rute `/manifest-icon/[size]` (ImageResponse, maskable navy podloga) + `apple-icon` (180); `theme-color` preko `viewport` export-a. ⚠️ **Bug fix:** `proxy.ts` matcher je presretao `/manifest-icon/*` i `/icon` (nema tačku u putanji) i vraćao 404 — dodati u negativni lookahead. Servisni radnik (offline) **ostaje** — zaseban zadatak, loše podešen SW gori od nijednog.
+- **Mobilni QA:** stranica turnira/žreba (najzahtevnija, horizontalni skrol bracket-a) čista na 390px — telo se ne prelama, sekcije pune širine.
+
+**Ostaje u Fazi 5:** servisni radnik za offline (rad na terenu), performanse (Vercel region `iad1` → `fra1`), E2E testovi ključnih tokova, galerija.
+
+### 🟢 Sitnice (Faza 6 / pred go-live)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
-- Vercel region `iad1` → `fra1` (baza je u Frankfurtu) radi latencije.
 - Domen na Vercel + isključiti Deployment Protection kad ide u javnost.
+- Auth: custom SMTP + Site URL (vidi Fazu 2).
 
 ---
 
@@ -165,6 +172,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-14 | `Faza 3: prijave + satnica` | Upravljanje prijavama, satnica po meču (javno), zamena pozicija |
 | 2026-07-14 | `Faza 4: koordinatorski panel` | Audit + korekcije (opoziv/poništavanje/reopen) + uloge + novi turnir |
 | 2026-07-14 | `Faza 1: istorija` | Uvoz 154 turnira + 6.745 mečeva + bodovi/rang + profil (istorija/mečevi) |
+| 2026-07-14 | `Faza 5: PWA + i18n polish` | Instalabilnost (192/512 maskable, apple-icon, theme-color) + proxy fix + EN audit |
 
 ---
 

@@ -41,7 +41,7 @@ export default async function OSavezuPage({
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         {[
-          { v: "~2.600", l: L("igrača", "players") },
+          { v: "~2.900", l: L("igrača", "players") },
           { v: "5 + 11", l: L("kategorija", "categories") },
           { v: "4 + 1", l: L("serije + Master", "series + Masters") },
         ].map((s) => (

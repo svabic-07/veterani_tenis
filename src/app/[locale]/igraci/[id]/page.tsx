@@ -11,10 +11,15 @@ import { formatDateRange } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}) {
+  const { locale, id } = await params;
   const p = await getPlayerById(id);
-  return { title: p ? `${p.ime} ${p.prezime}` : "Igrač" };
+  if (p) return { title: `${p.ime} ${p.prezime}` };
+  return { title: locale === "sr" ? "Igrač" : "Player" };
 }
 
 export default async function ProfilPage({

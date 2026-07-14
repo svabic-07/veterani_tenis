@@ -8,10 +8,14 @@ import { formatDateRange, formatDeadline, formatMatchTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
   const tr = await getTournamentBySlug(slug);
-  return { title: tr?.naziv ?? "Turnir" };
+  return { title: tr?.naziv ?? (locale === "sr" ? "Turnir" : "Tournament") };
 }
 
 const STATUS_STYLE: Record<string, string> = {
