@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PageHero } from "@/components/ui/page-hero";
 import { claimPlayer, signOut } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -56,15 +57,9 @@ export default async function NalogPage({
     : await supabase.rpc("my_player_candidates");
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-14 sm:px-6">
-      <header className="mb-8">
-        <span className="font-mono text-sm text-clay">/ nalog</span>
-        <h1 className="mt-2 font-display text-3xl font-extrabold text-navy sm:text-4xl">
-          {t("title")}
-        </h1>
-        <p className="mt-2 text-sm text-muted">{email}</p>
-      </header>
-
+    <>
+      <PageHero compact crumb="/ nalog" eyebrow={email} title={t("title")} />
+      <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
       {povezan && (
         <p className="mb-5 rounded-xl border border-court/30 bg-court/8 px-4 py-3 text-sm font-semibold text-court-dark">
           ✅ {t("linkedSuccess")}
@@ -146,6 +141,7 @@ export default async function NalogPage({
           {t("signOut")}
         </button>
       </form>
-    </div>
+      </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PageHero } from "@/components/ui/page-hero";
 import { formatDateRange } from "@/lib/format";
 import { toggleRoleAction, createTournamentAction } from "./actions";
 
@@ -63,15 +64,9 @@ export default async function KoordinatorPage({
   const emailByUser = new Map((users ?? []).map((u) => [u.user_id, u.email]));
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <header className="mb-6">
-        <span className="font-mono text-sm text-clay">/ koordinator</span>
-        <h1 className="mt-2 font-display text-3xl font-extrabold text-navy sm:text-4xl">
-          {t("title")}
-        </h1>
-        <p className="mt-2 max-w-2xl text-slate">{t("subtitle")}</p>
-      </header>
-
+    <>
+      <PageHero compact crumb="/ koordinator" eyebrow="🛠️" title={t("title")} lead={t("subtitle")} />
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       {ok && (
         <p className="mb-5 rounded-xl border border-court/30 bg-court/8 px-4 py-3 text-sm font-semibold text-court-dark">
           ✅ {t(`ok.${ok}`)}
@@ -322,6 +317,7 @@ export default async function KoordinatorPage({
           </ul>
         )}
       </section>
-    </div>
+      </div>
+    </>
   );
 }

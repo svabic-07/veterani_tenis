@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { PageHero } from "@/components/ui/page-hero";
 import { sendLoginLink } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -33,15 +34,15 @@ export default async function PrijavaPage({
   const t = await getTranslations("auth");
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-14 sm:px-6">
-      <header className="mb-8">
-        <span className="font-mono text-sm text-clay">/ prijava</span>
-        <h1 className="mt-2 font-display text-3xl font-extrabold text-navy sm:text-4xl">
-          {t("title")}
-        </h1>
-        <p className="mt-3 text-slate">{t("intro")}</p>
-      </header>
-
+    <>
+      <PageHero
+        compact
+        crumb="/ prijava"
+        eyebrow={locale === "sr" ? "Bez lozinke" : "Passwordless"}
+        title={t("title")}
+        lead={t("intro")}
+      />
+      <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
       {poslato ? (
         <div className="rounded-2xl border border-court/30 bg-court/8 p-6">
           <p className="font-display text-lg font-bold text-court-dark">📬 {t("sentTitle")}</p>
@@ -88,6 +89,7 @@ export default async function PrijavaPage({
         <p className="font-semibold text-navy">{t("helpTitle")}</p>
         <p className="mt-1.5 leading-relaxed">{t("helpBody")}</p>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
