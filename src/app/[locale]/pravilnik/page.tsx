@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import { PageHero } from "@/components/ui/page-hero";
 
 export const dynamic = "force-static";
 
@@ -63,19 +64,18 @@ export default async function PravilnikPage({
   ];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <header className="mb-10">
-        <span className="font-mono text-sm text-clay">/ pravilnik</span>
-        <h1 className="mt-2 font-display text-3xl font-extrabold text-navy sm:text-4xl">
-          {L("Pravilnik i propozicije", "Regulations")}
-        </h1>
-        <p className="mt-2 max-w-2xl text-slate">
-          {L(
-            "Kategorije, serije turnira, sistem bodovanja i pravila nošenja.",
-            "Categories, tournament series, scoring system and seeding rules.",
-          )}
-        </p>
-      </header>
+    <>
+      <PageHero
+        compact
+        crumb="/ pravilnik"
+        eyebrow={L("Propozicije", "Regulations")}
+        title={L("Pravilnik i propozicije", "Regulations")}
+        lead={L(
+          "Kategorije, serije turnira, sistem bodovanja i pravila nošenja.",
+          "Categories, tournament series, scoring system and seeding rules.",
+        )}
+      />
+      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
 
       {/* Kvalitativne kategorije */}
       <Section num="01" title={L("Kvalitativne kategorije (I–V)", "Quality categories (I–V)")}>
@@ -247,7 +247,8 @@ export default async function PravilnikPage({
           )}
         </p>
       </Section>
-    </div>
+      </div>
+    </>
   );
 }
 

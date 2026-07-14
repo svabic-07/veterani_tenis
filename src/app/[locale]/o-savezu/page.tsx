@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import { PageHero } from "@/components/ui/page-hero";
 
 export const dynamic = "force-static";
 
@@ -12,13 +13,15 @@ export default async function OSavezuPage({
   const L = (sr: string, en: string) => (locale === "sr" ? sr : en);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
-      <span className="font-mono text-sm text-clay">/ o-savezu</span>
-      <h1 className="mt-2 font-display text-3xl font-extrabold text-navy sm:text-4xl">
-        {L("O savezu", "About the association")}
-      </h1>
-
-      <div className="mt-6 space-y-4 text-slate">
+    <>
+      <PageHero
+        compact
+        crumb="/ o-savezu"
+        eyebrow={L("Teniski Veterani Srbije", "Serbian Tennis Veterans")}
+        title={L("O savezu", "About the association")}
+      />
+      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <div className="space-y-4 text-slate">
         <p>
           {L(
             "Teniski Veterani Srbije okupljaju rekreativne i bivše takmičarske igrače kroz sistem turnira, kvalitativnih (I–V) i starosnih kategorija, u disciplinama singl, dubl i miks.",
@@ -51,6 +54,7 @@ export default async function OSavezuPage({
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

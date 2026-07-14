@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { getTournamentBySlug } from "@/lib/data/tournaments";
 import { getDrawsForTournament } from "@/lib/data/draws";
 import { DrawBracket } from "@/components/draw-bracket";
+import { PageHero } from "@/components/ui/page-hero";
+import { Pill, TOURNAMENT_STATUS_TONE } from "@/components/ui/pill";
 import { formatDateRange, formatDeadline, formatMatchTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -17,15 +18,6 @@ export async function generateMetadata({
   const tr = await getTournamentBySlug(slug);
   return { title: tr?.naziv ?? (locale === "sr" ? "Turnir" : "Tournament") };
 }
-
-const STATUS_STYLE: Record<string, string> = {
-  najava: "bg-white/15 border border-white/25 text-white",
-  prijave: "bg-ball text-navy",
-  zreb: "bg-white/15 text-white",
-  u_toku: "bg-clay text-white",
-  zavrsen: "bg-white/10 text-white/70",
-  ponovo_otvoren: "bg-info text-white",
-};
 
 const DISCIPLINE_ORDER = ["singl", "dubl", "miks"] as const;
 
@@ -67,59 +59,22 @@ export default async function TurnirPage({
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden text-white">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(700px 320px at 90% -20%, rgba(214,232,75,.18), transparent 60%)," +
-              "linear-gradient(135deg,#16263E 0%, #13314A 55%, #1C5340 100%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-          <Link href="/kalendar" className="text-sm font-semibold text-white/70 transition hover:text-white">
-            {t("backToCalendar")}
-          </Link>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-clay px-3 py-1 text-xs font-bold text-white">
-              {tc(`series.${tr.serija}`)}
-            </span>
-            <span
-              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${
-                STATUS_STYLE[tr.status] ?? STATUS_STYLE.najava
-              }`}
-            >
-              {tc(`status.${tr.status}`)}
-            </span>
-          </div>
-          <h1 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {tr.naziv}
-          </h1>
-          <p className="mt-2 text-white/70">
-            {formatDateRange(tr.datum_od, tr.datum_do, locale)}
-            {club ? ` · ${club.naziv}, ${club.grad ?? ""}` : ""}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        compact
+        crumb={t("backToCalendar")}
+        eyebrow={tc(`series.${tr.serija}`)}
+        title={tr.naziv}
+        lead={`${formatDateRange(tr.datum_od, tr.datum_do, locale)}${
+          club ? ` · ${club.naziv}${club.grad ? `, ${club.grad}` : ""}` : ""
+        }`}
+        badge={
+          <Pill tone={TOURNAMENT_STATUS_TONE[tr.status]} live={tr.status === "u_toku"}>
+            {tc(`status.${tr.status}`)}
+          </Pill>
+        }
+      />
 
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-        {/* Tabovi (placeholder do Faze 3) */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          {(["draw", "schedule", "entries", "results"] as const).map((tab, i) => (
-            <span
-              key={tab}
-              className={`rounded-full border px-4 py-2 text-sm font-semibold ${
-                i === 0
-                  ? "border-clay bg-clay text-white"
-                  : "border-line2 bg-card text-muted"
-              }`}
-            >
-              {t(`tabs.${tab}`)}
-            </span>
-          ))}
-        </div>
-
         {(() => {
           const scheduled = draws
             .flatMap((d) =>

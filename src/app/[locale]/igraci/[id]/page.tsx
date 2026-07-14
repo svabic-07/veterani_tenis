@@ -9,6 +9,8 @@ import {
   getPlayerTrophies,
 } from "@/lib/data/players";
 import { formatDateRange } from "@/lib/format";
+import { Avatar } from "@/components/ui/avatar";
+import { Metric } from "@/components/ui/metric";
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +47,8 @@ export default async function ProfilPage({
   ]);
 
   const age = p.godiste ? new Date().getFullYear() - p.godiste : null;
-  const initials = `${p.ime[0] ?? ""}${p.prezime[0] ?? ""}`.toUpperCase();
+  const best = rankings[0];
+  const titula = trophies.brojevi.prvo;
 
   const info: { label: string; value: string }[] = [
     ...(p.kategorija ? [{ label: t("category"), value: p.kategorija }] : []),
@@ -56,42 +59,56 @@ export default async function ProfilPage({
   ];
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <Link href="/igraci" className="text-sm font-semibold text-clay-dark hover:underline">
-        {t("back")}
-      </Link>
-
-      <div className="mt-4 flex items-center gap-4">
-        <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-court/12 font-display text-xl font-bold text-court-dark">
-          {initials}
-        </span>
-        <div>
-          <h1 className="font-display text-2xl font-extrabold text-navy sm:text-3xl">
-            {p.ime} {p.prezime}
-          </h1>
-          <p className="text-sm text-muted">
-            {p.clubs?.naziv ?? "—"}
-            {p.kategorija ? ` · ${t("category")} ${p.kategorija}` : ""}
-          </p>
-          {(trophies.brojevi.prvo > 0 ||
-            trophies.brojevi.drugo > 0 ||
-            trophies.brojevi.trece > 0) && (
-            <div className="mt-2 flex flex-wrap gap-3 text-sm font-semibold">
-              {trophies.brojevi.prvo > 0 && (
-                <span className="text-navy">🥇 {trophies.brojevi.prvo}</span>
-              )}
-              {trophies.brojevi.drugo > 0 && (
-                <span className="text-slate">🥈 {trophies.brojevi.drugo}</span>
-              )}
-              {trophies.brojevi.trece > 0 && (
-                <span className="text-slate">🥉 {trophies.brojevi.trece}</span>
+    <>
+      {/* Profil hero (navy) */}
+      <section className="relative overflow-hidden bg-navy text-white">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(600px 300px at 92% -10%, rgba(214,232,75,.14), transparent 66%)," +
+              "linear-gradient(135deg,#16263E 0%, #13314A 60%, #1C5340 100%)",
+          }}
+        />
+        <div className="relative z-[1] mx-auto max-w-4xl px-4 py-10 sm:px-6">
+          <Link href="/igraci" className="font-mono text-sm font-bold text-ball hover:text-ball-deep">
+            {t("back")}
+          </Link>
+          <div className="mt-4 flex items-center gap-5">
+            <Avatar ime={p.ime} prezime={p.prezime} size={84} onDark />
+            <div className="min-w-0">
+              <h1 className="truncate font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                {p.ime} {p.prezime}
+              </h1>
+              <p className="mt-1 text-white/75">
+                {p.clubs?.naziv ?? "—"}
+                {p.kategorija ? ` · ${t("category")} ${p.kategorija}` : ""}
+                {p.drzava && p.drzava !== "RS" ? ` · ${p.drzava}` : ""}
+              </p>
+              {titula + trophies.brojevi.drugo + trophies.brojevi.trece > 0 && (
+                <div className="mt-2.5 flex flex-wrap gap-4 text-[15px] font-semibold text-white/90">
+                  {trophies.brojevi.prvo > 0 && <span>🥇 {trophies.brojevi.prvo}</span>}
+                  {trophies.brojevi.drugo > 0 && <span>🥈 {trophies.brojevi.drugo}</span>}
+                  {trophies.brojevi.trece > 0 && <span>🥉 {trophies.brojevi.trece}</span>}
+                </div>
               )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="mt-8 grid gap-8 md:grid-cols-[1fr_1.3fr]">
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+        {/* Metric red */}
+        {best && (
+          <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Metric value={`#${best.mesto}`} label={`${t("disc.singl")} ${best.kategorija}`} accent />
+            <Metric value={best.bodovi} label={t("points")} />
+            <Metric value={history.length} label={t("tournaments")} />
+            <Metric value={titula} label={t("titles")} />
+          </div>
+        )}
+
+        <div className="grid gap-8 md:grid-cols-[1fr_1.3fr]">
         <section>
           <dl className="overflow-hidden rounded-2xl border border-line bg-card">
             {info.map((row, i) => (
@@ -255,7 +272,8 @@ export default async function ProfilPage({
             )}
           </div>
         </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
