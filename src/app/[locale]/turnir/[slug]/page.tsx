@@ -1,11 +1,19 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { getTournamentBySlug } from "@/lib/data/tournaments";
+import { getTournamentBySlug, getEntriesForTournament } from "@/lib/data/tournaments";
 import { getDrawsForTournament } from "@/lib/data/draws";
+import { getPlayerById } from "@/lib/data/players";
+import { createClient } from "@/lib/supabase/server";
+import { statusByDate, isUpcoming } from "@/lib/tournament-status";
 import { DrawBracket } from "@/components/draw-bracket";
 import { PageHero } from "@/components/ui/page-hero";
 import { Pill, TOURNAMENT_STATUS_TONE } from "@/components/ui/pill";
 import { formatDateRange, formatDeadline, formatMatchTime } from "@/lib/format";
+import {
+  TournamentEntry,
+  type EntryEvent,
+  type EntryPlayer,
+} from "./entry-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +48,83 @@ export default async function TurnirPage({
   const club = tr.clubs;
   const dir = tr.direktor;
 
+  // Status po datumu (uvezeni podaci su svi `zavrsen`).
+  const status = statusByDate(tr.datum_od, tr.datum_do);
+  const upcoming = isUpcoming(tr.datum_od, tr.datum_do);
+
+  // Panel prijave — samo za predstojeće turnire koji imaju singl konkurencije.
+  const singlEvents = tr.tournament_events.filter((e) => e.disciplina === "singl");
+  let entryProps:
+    | {
+        loggedIn: boolean;
+        hasPlayer: boolean;
+        player: EntryPlayer | null;
+        events: EntryEvent[];
+        deadlineText: string | null;
+      }
+    | null = null;
+
+  if (upcoming && singlEvents.length > 0) {
+    const supabase = await createClient();
+    const { data: claimsData } = await supabase.auth.getClaims();
+    const claims = claimsData?.claims;
+
+    let myPlayerId: string | null = null;
+    let player: EntryPlayer | null = null;
+    if (claims) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("player_id")
+        .eq("id", claims.sub)
+        .maybeSingle();
+      myPlayerId = profile?.player_id ?? null;
+      if (myPlayerId) {
+        const p = await getPlayerById(myPlayerId);
+        if (p) {
+          player = {
+            ime: p.ime,
+            prezime: p.prezime,
+            klub: p.clubs?.naziv ?? null,
+            kategorija: p.kategorija,
+            godiste: p.godiste,
+          };
+        }
+      }
+    }
+
+    const entries = await getEntriesForTournament(tr.id);
+    const publishedEventIds = new Set(draws.map((d) => d.event.id));
+    const withinDeadline =
+      !tr.rok_prijave || new Date().getTime() <= new Date(tr.rok_prijave).getTime();
+    const currYear = new Date().getFullYear();
+    const isRecommended = (kat: string): boolean => {
+      if (!player) return false;
+      if (/^\d+$/.test(kat)) return player.godiste != null && currYear - player.godiste >= Number(kat);
+      if (/^[IVX]+$/.test(kat)) return player.kategorija === kat;
+      return false;
+    };
+
+    const events: EntryEvent[] = singlEvents.map((e) => ({
+      eventId: e.id,
+      kategorija: e.kategorija,
+      isOpen: withinDeadline && !publishedEventIds.has(e.id),
+      recommended: isRecommended(e.kategorija),
+      mine: myPlayerId != null && entries.some((x) => x.eventId === e.id && x.playerId === myPlayerId),
+      entries: entries
+        .filter((x) => x.eventId === e.id)
+        .sort((a, b) => (b.bodovi ?? -1) - (a.bodovi ?? -1))
+        .map((x) => ({ name: `${x.ime} ${x.prezime}`, klub: x.klub, bodovi: x.bodovi })),
+    }));
+
+    entryProps = {
+      loggedIn: !!claims,
+      hasPlayer: !!player,
+      player,
+      events,
+      deadlineText: tr.rok_prijave ? formatDeadline(tr.rok_prijave, locale) : null,
+    };
+  }
+
   // Grupiši konkurencije po disciplini
   const byDiscipline = DISCIPLINE_ORDER.map((disc) => ({
     disc,
@@ -68,13 +153,15 @@ export default async function TurnirPage({
           club ? ` · ${club.naziv}${club.grad ? `, ${club.grad}` : ""}` : ""
         }`}
         badge={
-          <Pill tone={TOURNAMENT_STATUS_TONE[tr.status]} live={tr.status === "u_toku"}>
-            {tc(`status.${tr.status}`)}
+          <Pill tone={TOURNAMENT_STATUS_TONE[status]} live={status === "u_toku"}>
+            {tc(`status.${status}`)}
           </Pill>
         }
       />
 
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+        {entryProps && <TournamentEntry {...entryProps} />}
+
         {(() => {
           const scheduled = draws
             .flatMap((d) =>
@@ -137,11 +224,11 @@ export default async function TurnirPage({
               </section>
             ))}
           </div>
-        ) : (
+        ) : !upcoming ? (
           <div className="rounded-2xl border border-dashed border-line2 bg-card p-6 text-sm text-slate">
             {t("soon")}
           </div>
-        )}
+        ) : null}
 
         <div className="mt-8 grid gap-8 md:grid-cols-[1fr_1.4fr]">
           {/* Info */}

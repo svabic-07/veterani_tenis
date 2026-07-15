@@ -94,6 +94,41 @@ export async function getRecentTournaments(limit = 3) {
   return data ?? [];
 }
 
+export type EventEntry = {
+  eventId: string;
+  playerId: string;
+  ime: string;
+  prezime: string;
+  klub: string | null;
+  bodovi: number | null;
+};
+
+/**
+ * Prijave (status prijavljen/gost) za sve konkurencije jednog turnira — za
+ * javnu listu prijavljenih i panel prijave. Javno čitljivo (RLS), radi i za anon.
+ */
+export async function getEntriesForTournament(turnirId: string): Promise<EventEntry[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("entries")
+    .select(
+      `event_id, player_id, status, bodovi_snapshot,
+       tournament_events!inner ( turnir_id ),
+       players!entries_player_id_fkey ( ime, prezime, clubs ( naziv ) )`,
+    )
+    .eq("tournament_events.turnir_id", turnirId)
+    .in("status", ["prijavljen", "gost"]);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    eventId: r.event_id,
+    playerId: r.player_id,
+    ime: r.players?.ime ?? "",
+    prezime: r.players?.prezime ?? "",
+    klub: r.players?.clubs?.naziv ?? null,
+    bodovi: r.bodovi_snapshot,
+  }));
+}
+
 export type TournamentWinner = {
   turnirId: string;
   kategorija: string;
