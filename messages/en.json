@@ -214,6 +214,7 @@
     "loginNeeded": "To access the referee portal, sign in with an account linked to your player profile (tournament director) or with coordinator rights.",
     "loginCta": "Sign in",
     "noTournaments": "Your account currently manages no tournaments. If you are a tournament director, make sure your account is linked to your player profile (My account) or contact the coordinator.",
+    "tournamentsCount": "{n, plural, one {# tournament} other {# tournaments}}",
     "entriesCount": "{n, plural, =0 {no entries} one {# entry} other {# entries}}",
     "drawStatus": {
       "radna": "Working draw",

@@ -245,6 +245,7 @@
     "loginNeeded": "Za pristup sudijskom portalu prijavite se nalogom koji je povezan sa vašim igračkim profilom (direktor turnira) ili ima koordinatorska prava.",
     "loginCta": "Prijavi se",
     "noTournaments": "Vaš nalog trenutno ne vodi nijedan turnir. Ako ste direktor turnira, proverite da li je vaš nalog povezan sa igračkim profilom (Moj nalog) ili se javite koordinatoru.",
+    "tournamentsCount": "{n, plural, one {# turnir} few {# turnira} other {# turnira}}",
     "entriesCount": "{n, plural, =0 {nema prijava} one {# prijava} few {# prijave} other {# prijava}}",
     "drawStatus": {
       "radna": "Radni žreb",
