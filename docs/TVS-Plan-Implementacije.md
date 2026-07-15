@@ -15,9 +15,9 @@ Legenda: ✅ gotovo · 🟡 delimično · ⬜ nije početo
 |---|:--:|---|
 | 0 · Temelj + dizajn | ✅ | Dizajn sistem + **redizajn svih stranica i portala**; auth/RBAC/RLS; migracije + typegen |
 | 1 · Migracija + javni sajt | ✅ | 154 turnira + igrači/istorija/bodovi/rang uvezeni; kalendar/turnir/profili/rang-liste/pravilnik redizajnirani |
-| 2 · Igrački portal | 🟡 | **Samoprijava/odjava (singl) uživo** + nalog/profil; preostaje: dubl/miks partneri, promena kategorije, uplate |
+| 2 · Igrački portal | 🟡 | **Samoprijava/odjava (singl) uživo** + nalog/profil + **zahtev za promenu kategorije**; preostaje: dubl/miks partneri, uplate |
 | 3 · Sudijski portal | ✅ | Žreb engine (ITF), satnica, rezultati, „Završi turnir"; portal **složen po godinama**; preostaje: štampanje, offline QA |
-| 4 · Koordinatorski panel | 🟡 | Kreiranje turnira, uloge, bodovni obračun, podijumi; preostaje: uređive tablice, disciplinska, uplate |
+| 4 · Koordinatorski panel | 🟡 | Kreiranje turnira, uloge, bodovni obračun, podijumi, **uredive bodovne tablice**, **dodela sudije**, **odobravanje kategorije**; preostaje: model B UI, disciplinska, uplate, odobravanje članova |
 | 5 · EN + PWA | 🟡 | PWA instalabilno, EN prevodi; preostaje: E2E testovi, galerija, finalni polish |
 | 6 · Integracija + domen + produkcija | ⬜ | CourtNomad pristup, domen, go-live, obuka |
 
@@ -27,6 +27,7 @@ Legenda: ✅ gotovo · 🟡 delimično · ⬜ nije početo
 - Kalendar: „Predstojeći" = sledeća 3; početna „Nedavno odigrano" = prošla 3; hero brojač broji odigrane po datumu.
 - **Sudijski portal složen po godinama** (najnoviji prvo) + status oznaka po datumu.
 - **Samostalna prijava igrača (singl)** na predstojeće turnire, inline na stranici turnira: RLS politike (`entries: self enter/withdraw`) + `can_self_enter_event` + trigger za `bodovi_snapshot`, server-akcije, panel sa meko istaknutim konkurencijama i javna lista prijavljenih (migracija `20260715120000_self_entry.sql`).
+- **Koordinatorski alati (Faza 4):** (a) **uredive bodovne tablice** — podstranica `/koordinator/bodovne-tablice`, RPC `update_scoring_points` uz audit; (b) **dodela sudije turniru** — RPC `admin_list_referees` + `assign_tournament_director` uz audit, select u listi turnira; (c) **odobravanje promene kategorije** — tabela `category_change_requests` + `request_status`, RPC `request_category_change` (na `/nalog`) i `resolve_category_change` (panel), uz audit (migracije `20260715140000_category_requests.sql`, `20260715150000_coordinator_tools.sql`).
 
 ---
 
@@ -212,7 +213,7 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 **Cilj:** član sve radi sam.
 **Zadaci:**
 - [x] Auth (prijava bez lozinke) + povezivanje naloga sa igračkim profilom.
-- [~] Profil (lični podaci, klub, foto) — pregled radi; zahtev za promenu kategorije: preostaje.
+- [~] Profil (lični podaci, klub, foto) — pregled radi; **zahtev za promenu kategorije radi** (odobrava koordinator).
 - [~] Prijava/odjava na turnire (do roka) — **singl uživo** (RLS + panel na stranici turnira); izbor discipline: preostaje dubl/miks.
 - [ ] Partneri za dubl/miks (poziv + potvrda).
 - [ ] Status uplata (evidencija), izjava o odgovornosti.
@@ -244,10 +245,10 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 ### Faza 4 — Koordinatorski panel + obračun · `~3 ned.` · **Model: Opus** · 🟡 **Delimično**
 **Cilj:** koordinator vodi celo takmičenje i ispravlja greške bez programera.
 **Zadaci:**
-- [~] **Dva bodovna modela** (klasični + „svi dobijaju bodove"); obračun radi, uređive tablice (`scoring_tables`) UI: preostaje.
+- [~] **Dva bodovna modela** (klasični + „svi dobijaju bodove"); obračun radi, **uređive tablice (`scoring_tables`) UI radi** za klasični (`update_scoring_points` + audit); model B UI: preostaje.
 - [x] Obračun rang liste (bodovi po završetku turnira, podijumi/trofeji).
 - [x] **Korekcije uz audit:** ispravka rezultata (re-propagacija), opoziv/ponovni žreb, „ponovo otvori turnir".
-- [~] Klubovi, kalendar i turniri (kreiranje) — radi; članovi/kategorije odobravanje, dodela sudija: preostaje.
+- [~] Klubovi, kalendar i turniri (kreiranje) — radi; **dodela sudija radi** (`assign_tournament_director`), **odobravanje kategorije radi**; odobravanje članova: preostaje.
 - [ ] Evidencija uplata; disciplinska komisija (opomene/kazne/isključenja).
 - [~] **Tehnički admin:** nalozi/uloge (radi); prevodi (SR/EN) postavljeni; integracije/backup/audit-log UI: preostaje.
 

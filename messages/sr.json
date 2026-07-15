@@ -216,6 +216,20 @@
     "noMatchBody": "Nalog vam je aktivan, ali nije povezan ni sa jednim igračem. Ako ste član TVS, javite se koordinatoru da vam ažurira email u evidenciji.",
     "errorTaken": "Taj igrač je već povezan sa drugim nalogom. Ako je to greška, kontaktirajte koordinatora.",
     "errorClaim": "Povezivanje nije uspelo. Pokušajte ponovo ili kontaktirajte koordinatora.",
+    "catCardTitle": "Promena kategorije",
+    "catCardBody": "Zatražite promenu kvalitativne kategorije. Odluku donosi koordinator.",
+    "catNew": "Željena kategorija",
+    "catChoose": "Izaberite kategoriju",
+    "catReason": "Obrazloženje (opciono)",
+    "catSubmit": "Pošalji zahtev",
+    "catPending": "Zahtev na čekanju:",
+    "catReqSent": "Zahtev za promenu kategorije je poslat.",
+    "catErr": {
+      "vecPodnet": "Već imate zahtev na čekanju.",
+      "istaKat": "To je vaša trenutna kategorija.",
+      "nemaIgraca": "Nalog nije povezan sa igračem.",
+      "kategorija": "Slanje zahteva nije uspelo. Pokušajte ponovo."
+    },
     "signOut": "Odjavi se"
   },
   "coordinator": {
@@ -245,9 +259,40 @@
     "th": { "user": "Nalog", "player": "Igrač", "roles": "Uloge" },
     "audit": "Trag korekcija (audit)",
     "auditEmpty": "Još nema zabeleženih korekcija.",
+    "scoringTables": "Bodovne tablice",
+    "scoringTablesLead": "Uredi vrednosti bodova po dostignutom kolu (model: klasični).",
+    "scoringModelKlasicni": "Model: klasični (napredovanje). Vrednosti su bodovi po dostignutom kolu; „utešni“ = poraz u 1. kolu.",
+    "backToPanel": "Nazad na panel",
+    "skeleton": "Kostur",
+    "save": "Sačuvaj",
+    "series": "Serija",
+    "referee": "Sudija",
+    "noReferee": "— (bez sudije)",
+    "noAccount": "bez naloga",
+    "assign": "Dodeli",
+    "categoryRequests": "Zahtevi za kategoriju",
+    "categoryRequestsHint": "Igrači traže promenu kvalitativne kategorije; vaša odluka je konačna.",
+    "categoryRequestsEmpty": "Nema zahteva na čekanju.",
+    "approve": "Odobri",
+    "reject": "Odbij",
+    "kolo": {
+      "pobednik": "Pobednik",
+      "finale": "Finale",
+      "polufinale": "Polufinale",
+      "cetvrtfinale": "Četvrtfinale",
+      "osmina": "Osmina",
+      "sesnaestina": "Šesnaestina",
+      "tridesetdvojina": "Tridesetdvojina",
+      "sezdesetcetvrtina": "Šezdesetčetvrtina",
+      "utesni": "Utešni"
+    },
     "ok": {
       "uloga": "Uloga je ažurirana.",
-      "turnir": "Turnir je kreiran."
+      "turnir": "Turnir je kreiran.",
+      "sudija": "Sudija je dodeljen.",
+      "kategorijaOdobrena": "Zahtev za kategoriju je odobren.",
+      "kategorijaOdbijena": "Zahtev za kategoriju je odbijen.",
+      "bodovi": "Bodovne tablice su sačuvane."
     },
     "err": {
       "zahtev": "Neispravan zahtev.",
@@ -257,7 +302,10 @@
       "uloga": "Izmena uloge nije uspela (menja samo admin).",
       "direktor": "Direktor nije jednoznačno pronađen — unesite tačnije ime i prezime.",
       "postoji": "Turnir sa tim nazivom već postoji u toj godini.",
-      "turnir": "Kreiranje turnira nije uspelo."
+      "turnir": "Kreiranje turnira nije uspelo.",
+      "sudija": "Dodela sudije nije uspela.",
+      "kategorija": "Rešavanje zahteva nije uspelo.",
+      "bodovi": "Čuvanje bodovnih tablica nije uspelo."
     }
   },
   "referee": {

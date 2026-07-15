@@ -44,6 +44,50 @@ export type Database = {
         }
         Relationships: []
       }
+      category_change_requests: {
+        Row: {
+          created_at: string
+          id: string
+          obrazlozenje: string | null
+          player_id: string
+          reseno_at: string | null
+          resio_by: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          trazena_kat: Database["public"]["Enums"]["quality_category"]
+          trenutna_kat: Database["public"]["Enums"]["quality_category"] | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          obrazlozenje?: string | null
+          player_id: string
+          reseno_at?: string | null
+          resio_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          trazena_kat: Database["public"]["Enums"]["quality_category"]
+          trenutna_kat?: Database["public"]["Enums"]["quality_category"] | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          obrazlozenje?: string | null
+          player_id?: string
+          reseno_at?: string | null
+          resio_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          trazena_kat?: Database["public"]["Enums"]["quality_category"]
+          trenutna_kat?: Database["public"]["Enums"]["quality_category"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "category_change_requests_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clubs: {
         Row: {
           created_at: string
@@ -113,6 +157,13 @@ export type Database = {
             foreignKeyName: "draws_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: true
+            referencedRelation: "player_podiums"
+            referencedColumns: ["event_id"]
+          },
+          {
+            foreignKeyName: "draws_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: true
             referencedRelation: "tournament_events"
             referencedColumns: ["id"]
           },
@@ -153,6 +204,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "entries_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "player_podiums"
+            referencedColumns: ["event_id"]
+          },
           {
             foreignKeyName: "entries_event_id_fkey"
             columns: ["event_id"]
@@ -547,6 +605,39 @@ export type Database = {
           },
         ]
       }
+      scoring_tables: {
+        Row: {
+          bodovi: number
+          created_at: string
+          id: string
+          kolo: string
+          kostur: number
+          model: Database["public"]["Enums"]["scoring_model"]
+          serija: Database["public"]["Enums"]["tournament_series"]
+          updated_at: string
+        }
+        Insert: {
+          bodovi: number
+          created_at?: string
+          id?: string
+          kolo: string
+          kostur: number
+          model?: Database["public"]["Enums"]["scoring_model"]
+          serija: Database["public"]["Enums"]["tournament_series"]
+          updated_at?: string
+        }
+        Update: {
+          bodovi?: number
+          created_at?: string
+          id?: string
+          kolo?: string
+          kostur?: number
+          model?: Database["public"]["Enums"]["scoring_model"]
+          serija?: Database["public"]["Enums"]["tournament_series"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seasons: {
         Row: {
           aktivna: boolean
@@ -725,48 +816,79 @@ export type Database = {
     Views: {
       player_podiums: {
         Row: {
-          player_id: string | null
-          turnir_id: string | null
+          disciplina: Database["public"]["Enums"]["discipline"] | null
           event_id: string | null
           kategorija: string | null
-          disciplina: Database["public"]["Enums"]["discipline"] | null
           mesto: number | null
+          player_id: string | null
+          turnir_id: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tournament_events_turnir_id_fkey"
+            columns: ["turnir_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
-      admin_list_users: {
-        Args: Record<PropertyKey, never>
+      admin_list_referees: {
+        Args: never
         Returns: {
-          user_id: string
           email: string
-          full_name: string | null
-          player_ime: string | null
-          roles: string[]
-          created_at: string
+          ime: string
+          player_id: string
         }[]
       }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          player_ime: string
+          roles: string[]
+          user_id: string
+        }[]
+      }
+      assign_tournament_director: {
+        Args: { _player_id: string; _tournament_id: string }
+        Returns: undefined
+      }
       can_manage_event: { Args: { _event_id: string }; Returns: boolean }
+      can_self_enter_event: { Args: { _event_id: string }; Returns: boolean }
       claim_player: { Args: { p_player_id: string }; Returns: undefined }
       clear_match_result: { Args: { _match_id: string }; Returns: undefined }
-      finish_tournament: { Args: { _tournament_id: string }; Returns: undefined }
-      reopen_tournament: { Args: { _tournament_id: string }; Returns: undefined }
-      revoke_draw: { Args: { _draw_id: string }; Returns: undefined }
+      finish_tournament: {
+        Args: { _tournament_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
-      is_admin: { Args: Record<PropertyKey, never>; Returns: boolean }
-      is_coordinator: { Args: Record<PropertyKey, never>; Returns: boolean }
-      is_referee: { Args: Record<PropertyKey, never>; Returns: boolean }
-      is_staff: { Args: Record<PropertyKey, never>; Returns: boolean }
+      is_admin: { Args: never; Returns: boolean }
+      is_coordinator: { Args: never; Returns: boolean }
+      is_referee: { Args: never; Returns: boolean }
+      is_staff: { Args: never; Returns: boolean }
       is_tournament_director: {
         Args: { _tournament_id: string }
         Returns: boolean
       }
+      log_audit: {
+        Args: {
+          _action: string
+          _details?: Json
+          _entity: string
+          _entity_id: string
+        }
+        Returns: undefined
+      }
       my_player_candidates: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           godiste: number
           ime: string
@@ -776,6 +898,24 @@ export type Database = {
           zauzet: boolean
         }[]
       }
+      my_player_id: { Args: never; Returns: string }
+      reopen_tournament: {
+        Args: { _tournament_id: string }
+        Returns: undefined
+      }
+      request_category_change: {
+        Args: {
+          _obrazlozenje?: string
+          _trazena: Database["public"]["Enums"]["quality_category"]
+        }
+        Returns: undefined
+      }
+      resolve_category_change: {
+        Args: { _approve: boolean; _request_id: string }
+        Returns: undefined
+      }
+      revoke_draw: { Args: { _draw_id: string }; Returns: undefined }
+      update_scoring_points: { Args: { _updates: Json }; Returns: number }
     }
     Enums: {
       app_role: "igrac" | "sudija" | "koordinator" | "admin"
@@ -800,6 +940,7 @@ export type Database = {
         | "bye"
       payment_type: "clanarina" | "kotizacija"
       quality_category: "I" | "II" | "III" | "IV" | "V"
+      request_status: "na_cekanju" | "odobren" | "odbijen"
       sanction_type: "opomena" | "oduzimanje_bodova" | "iskljucenje"
       scoring_model: "klasicni" | "svi_boduju"
       tournament_series: "s2000" | "s1000" | "s500" | "s250" | "master"
@@ -961,6 +1102,7 @@ export const Constants = {
       ],
       payment_type: ["clanarina", "kotizacija"],
       quality_category: ["I", "II", "III", "IV", "V"],
+      request_status: ["na_cekanju", "odobren", "odbijen"],
       sanction_type: ["opomena", "oduzimanje_bodova", "iskljucenje"],
       scoring_model: ["klasicni", "svi_boduju"],
       tournament_series: ["s2000", "s1000", "s500", "s250", "master"],

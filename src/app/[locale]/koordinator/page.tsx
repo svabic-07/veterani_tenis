@@ -3,7 +3,12 @@ import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHero } from "@/components/ui/page-hero";
 import { formatDateRange } from "@/lib/format";
-import { toggleRoleAction, createTournamentAction } from "./actions";
+import {
+  toggleRoleAction,
+  createTournamentAction,
+  assignRefereeAction,
+  resolveCategoryAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -46,20 +51,36 @@ export default async function KoordinatorPage({
   }
   const { data: isAdmin } = await supabase.rpc("is_admin");
 
-  const [{ data: users }, { data: tournaments }, { data: clubs }, { data: audit }] =
-    await Promise.all([
-      supabase.rpc("admin_list_users"),
-      supabase
-        .from("tournaments")
-        .select("id, legacy_id, naziv, serija, status, datum_od, datum_do, mesto")
-        .order("datum_od", { ascending: true }),
-      supabase.from("clubs").select("id, naziv").order("naziv"),
-      supabase
-        .from("audit_log")
-        .select("id, action, entity, entity_id, created_at, actor")
-        .order("created_at", { ascending: false })
-        .limit(15),
-    ]);
+  const [
+    { data: users },
+    { data: tournaments },
+    { data: clubs },
+    { data: audit },
+    { data: referees },
+    { data: catRequests },
+  ] = await Promise.all([
+    supabase.rpc("admin_list_users"),
+    supabase
+      .from("tournaments")
+      .select(
+        "id, legacy_id, naziv, serija, status, datum_od, datum_do, mesto, direktor_id, direktor:players ( ime, prezime )",
+      )
+      .order("datum_od", { ascending: true }),
+    supabase.from("clubs").select("id, naziv").order("naziv"),
+    supabase
+      .from("audit_log")
+      .select("id, action, entity, entity_id, created_at, actor")
+      .order("created_at", { ascending: false })
+      .limit(15),
+    supabase.rpc("admin_list_referees"),
+    supabase
+      .from("category_change_requests")
+      .select(
+        "id, player_id, trenutna_kat, trazena_kat, obrazlozenje, created_at, players ( ime, prezime )",
+      )
+      .eq("status", "na_cekanju")
+      .order("created_at", { ascending: true }),
+  ]);
 
   const emailByUser = new Map((users ?? []).map((u) => [u.user_id, u.email]));
 
@@ -193,33 +214,126 @@ export default async function KoordinatorPage({
         </form>
       </section>
 
-      {/* Turniri */}
+      {/* Turniri + dodela sudije */}
       <section className="mb-8">
-        <h2 className="mb-3 font-display text-lg font-bold text-navy">{t("tournaments")}</h2>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-bold text-navy">{t("tournaments")}</h2>
+          <Link
+            href="/koordinator/bodovne-tablice"
+            className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+          >
+            {t("scoringTables")} →
+          </Link>
+        </div>
         <ul className="overflow-hidden rounded-2xl border border-line bg-card">
-          {(tournaments ?? []).map((tr, i) => (
-            <li
-              key={tr.id}
-              className={`flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-sm ${
-                i % 2 ? "bg-[#FBF8F3]" : ""
-              }`}
-            >
-              <Link
-                href={`/sudija/${tr.legacy_id}`}
-                className="min-w-0 flex-1 truncate font-semibold text-navy hover:text-clay"
+          {(tournaments ?? []).map((tr, i) => {
+            const inList = (referees ?? []).some((r) => r.player_id === tr.direktor_id);
+            return (
+              <li
+                key={tr.id}
+                className={`px-4 py-2.5 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}
               >
-                {tr.naziv}
-              </Link>
-              <span className="text-xs text-muted">
-                {formatDateRange(tr.datum_od, tr.datum_do, locale)}
-                {tr.mesto ? ` · ${tr.mesto}` : ""}
-              </span>
-              <span className="rounded-full bg-bg2 px-2 py-0.5 text-xs font-semibold text-slate">
-                {tc(`status.${tr.status}`)}
-              </span>
-            </li>
-          ))}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <Link
+                    href={`/sudija/${tr.legacy_id}`}
+                    className="min-w-0 flex-1 truncate font-semibold text-navy hover:text-clay"
+                  >
+                    {tr.naziv}
+                  </Link>
+                  <span className="text-xs text-muted">
+                    {formatDateRange(tr.datum_od, tr.datum_do, locale)}
+                    {tr.mesto ? ` · ${tr.mesto}` : ""}
+                  </span>
+                  <span className="rounded-full bg-bg2 px-2 py-0.5 text-xs font-semibold text-slate">
+                    {tc(`status.${tr.status}`)}
+                  </span>
+                </div>
+                <form action={assignRefereeAction} className="mt-2 flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="locale" value={locale} />
+                  <input type="hidden" name="turnirId" value={tr.id} />
+                  <span className="text-xs font-semibold text-muted">{t("referee")}:</span>
+                  <select
+                    name="playerId"
+                    defaultValue={tr.direktor_id ?? ""}
+                    className="rounded-lg border border-line2 bg-bg px-2 py-1 text-xs outline-none focus:border-clay"
+                  >
+                    <option value="">{t("noReferee")}</option>
+                    {(referees ?? []).map((r) => (
+                      <option key={r.player_id} value={r.player_id}>
+                        {r.ime}
+                      </option>
+                    ))}
+                    {tr.direktor_id && !inList && tr.direktor && (
+                      <option value={tr.direktor_id}>
+                        {tr.direktor.ime} {tr.direktor.prezime} ({t("noAccount")})
+                      </option>
+                    )}
+                  </select>
+                  <button
+                    type="submit"
+                    className="rounded-lg border border-line2 px-2.5 py-1 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+                  >
+                    {t("assign")}
+                  </button>
+                </form>
+              </li>
+            );
+          })}
         </ul>
+      </section>
+
+      {/* Zahtevi za promenu kategorije */}
+      <section className="mb-8">
+        <h2 className="mb-1 font-display text-lg font-bold text-navy">{t("categoryRequests")}</h2>
+        <p className="mb-3 text-sm text-muted">{t("categoryRequestsHint")}</p>
+        {(catRequests ?? []).length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-muted">
+            {t("categoryRequestsEmpty")}
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {(catRequests ?? []).map((r) => (
+              <li
+                key={r.id}
+                className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-line bg-card px-4 py-3 text-sm"
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold text-navy">
+                    {r.players?.ime} {r.players?.prezime}
+                  </span>
+                  <span className="block text-xs text-slate">
+                    {(r.trenutna_kat ?? "—") + " → " + r.trazena_kat}
+                    {r.obrazlozenje ? ` · ${r.obrazlozenje}` : ""}
+                  </span>
+                </span>
+                <div className="flex shrink-0 gap-2">
+                  <form action={resolveCategoryAction}>
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="requestId" value={r.id} />
+                    <input type="hidden" name="approve" value="1" />
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-court px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-court-dark"
+                    >
+                      {t("approve")}
+                    </button>
+                  </form>
+                  <form action={resolveCategoryAction}>
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="requestId" value={r.id} />
+                    <input type="hidden" name="approve" value="0" />
+                    <button
+                      type="submit"
+                      className="rounded-lg border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+                    >
+                      {t("reject")}
+                    </button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* Korisnici i uloge */}

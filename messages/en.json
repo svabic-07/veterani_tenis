@@ -185,6 +185,20 @@
     "noMatchBody": "Your account is active but not linked to any player. If you are a TVS member, ask your coordinator to update your email in the records.",
     "errorTaken": "That player is already linked to another account. If this is a mistake, contact your coordinator.",
     "errorClaim": "Linking failed. Please try again or contact your coordinator.",
+    "catCardTitle": "Category change",
+    "catCardBody": "Request a change of your quality category. The coordinator makes the decision.",
+    "catNew": "Desired category",
+    "catChoose": "Choose a category",
+    "catReason": "Reason (optional)",
+    "catSubmit": "Send request",
+    "catPending": "Request pending:",
+    "catReqSent": "Your category change request has been sent.",
+    "catErr": {
+      "vecPodnet": "You already have a pending request.",
+      "istaKat": "That is your current category.",
+      "nemaIgraca": "Account is not linked to a player.",
+      "kategorija": "Sending the request failed. Please try again."
+    },
     "signOut": "Sign out"
   },
   "coordinator": {
@@ -214,9 +228,40 @@
     "th": { "user": "Account", "player": "Player", "roles": "Roles" },
     "audit": "Corrections audit trail",
     "auditEmpty": "No corrections recorded yet.",
+    "scoringTables": "Scoring tables",
+    "scoringTablesLead": "Edit point values by round reached (model: classic).",
+    "scoringModelKlasicni": "Model: classic (progression). Values are points by round reached; “consolation” = loss in the 1st round.",
+    "backToPanel": "Back to panel",
+    "skeleton": "Draw size",
+    "save": "Save",
+    "series": "Series",
+    "referee": "Referee",
+    "noReferee": "— (no referee)",
+    "noAccount": "no account",
+    "assign": "Assign",
+    "categoryRequests": "Category requests",
+    "categoryRequestsHint": "Players request a change of quality category; your decision is final.",
+    "categoryRequestsEmpty": "No pending requests.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "kolo": {
+      "pobednik": "Winner",
+      "finale": "Final",
+      "polufinale": "Semifinal",
+      "cetvrtfinale": "Quarterfinal",
+      "osmina": "Round of 16",
+      "sesnaestina": "Round of 32",
+      "tridesetdvojina": "Round of 64",
+      "sezdesetcetvrtina": "Round of 128",
+      "utesni": "Consolation"
+    },
     "ok": {
       "uloga": "Role updated.",
-      "turnir": "Tournament created."
+      "turnir": "Tournament created.",
+      "sudija": "Referee assigned.",
+      "kategorijaOdobrena": "Category request approved.",
+      "kategorijaOdbijena": "Category request rejected.",
+      "bodovi": "Scoring tables saved."
     },
     "err": {
       "zahtev": "Invalid request.",
@@ -226,7 +271,10 @@
       "uloga": "Role change failed (admin only).",
       "direktor": "Director not uniquely found — enter a more precise name.",
       "postoji": "A tournament with that name already exists for that year.",
-      "turnir": "Creating the tournament failed."
+      "turnir": "Creating the tournament failed.",
+      "sudija": "Assigning the referee failed.",
+      "kategorija": "Resolving the request failed.",
+      "bodovi": "Saving the scoring tables failed."
     }
   },
   "referee": {

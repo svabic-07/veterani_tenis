@@ -52,6 +52,40 @@ export async function toggleRoleAction(formData: FormData) {
   back(formData, "ok=uloga");
 }
 
+/** Dodela/skidanje sudije (direktora) turniru (RPC: is_staff + audit). */
+export async function assignRefereeAction(formData: FormData) {
+  const turnirId = String(formData.get("turnirId") ?? "");
+  const playerRaw = String(formData.get("playerId") ?? "");
+  const playerId = UUID_RE.test(playerRaw) ? playerRaw : null;
+
+  if (!UUID_RE.test(turnirId)) back(formData, "greska=zahtev");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("assign_tournament_director", {
+    _tournament_id: turnirId,
+    // Funkcija prima NULL (skini sudiju); generisani tip je ne-null (param bez defaulta).
+    _player_id: playerId as string,
+  });
+  if (error) back(formData, "greska=sudija");
+  back(formData, "ok=sudija");
+}
+
+/** Odobri/odbij zahtev za promenu kategorije (RPC: is_staff + audit). */
+export async function resolveCategoryAction(formData: FormData) {
+  const requestId = String(formData.get("requestId") ?? "");
+  const approve = formData.get("approve") === "1";
+
+  if (!UUID_RE.test(requestId)) back(formData, "greska=zahtev");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("resolve_category_change", {
+    _request_id: requestId,
+    _approve: approve,
+  });
+  if (error) back(formData, "greska=kategorija");
+  back(formData, `ok=${approve ? "kategorijaOdobrena" : "kategorijaOdbijena"}`);
+}
+
 function slugify(name: string): string {
   const FOLD: Record<string, string> = { č: "c", ć: "c", š: "s", ž: "z", đ: "dj" };
   return (

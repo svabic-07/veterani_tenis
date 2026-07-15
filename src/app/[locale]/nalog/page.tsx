@@ -2,7 +2,9 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHero } from "@/components/ui/page-hero";
-import { claimPlayer, signOut } from "./actions";
+import { claimPlayer, signOut, requestCategoryChangeAction } from "./actions";
+
+const CATS = ["I", "II", "III", "IV", "V"] as const;
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,7 @@ export default async function NalogPage({
   const sp = await searchParams;
   const greska = typeof sp.greska === "string" ? sp.greska : "";
   const povezan = sp.povezan === "1";
+  const katzahtev = sp.katzahtev === "1";
 
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -56,6 +59,24 @@ export default async function NalogPage({
     ? { data: [] }
     : await supabase.rpc("my_player_candidates");
 
+  // Poslednji zahtev za promenu kategorije (RLS: vlasnik čita svoj)
+  const { data: lastRequest } = player
+    ? await supabase
+        .from("category_change_requests")
+        .select("trenutna_kat, trazena_kat, status, created_at")
+        .eq("player_id", player.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+  const pending = lastRequest?.status === "na_cekanju";
+
+  let greskaKey = "";
+  if (greska === "zauzet") greskaKey = "errorTaken";
+  else if (["vecPodnet", "istaKat", "nemaIgraca", "kategorija"].includes(greska))
+    greskaKey = `catErr.${greska}`;
+  else if (greska) greskaKey = "errorClaim";
+
   return (
     <>
       <PageHero compact crumb="/ nalog" eyebrow={email} title={t("title")} />
@@ -65,13 +86,19 @@ export default async function NalogPage({
           ✅ {t("linkedSuccess")}
         </p>
       )}
-      {greska && (
+      {katzahtev && (
+        <p className="mb-5 rounded-xl border border-court/30 bg-court/8 px-4 py-3 text-sm font-semibold text-court-dark">
+          ✅ {t("catReqSent")}
+        </p>
+      )}
+      {greskaKey && (
         <p className="mb-5 rounded-xl bg-clay/10 px-4 py-3 text-sm text-clay-dark">
-          {greska === "zauzet" ? t("errorTaken") : t("errorClaim")}
+          {t(greskaKey)}
         </p>
       )}
 
       {player ? (
+        <>
         <div className="rounded-2xl border border-line bg-card p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">
             {t("linkedPlayer")}
@@ -91,6 +118,58 @@ export default async function NalogPage({
             {t("viewProfile")}
           </Link>
         </div>
+
+        {/* Zahtev za promenu kategorije */}
+        <div className="mt-6 rounded-2xl border border-line bg-card p-6 shadow-sm">
+          <p className="font-display text-lg font-bold text-navy">{t("catCardTitle")}</p>
+          {pending ? (
+            <p className="mt-2 text-sm text-slate">
+              {t("catPending")}{" "}
+              <span className="font-semibold text-navy">
+                {(lastRequest?.trenutna_kat ?? "—") + " → " + lastRequest?.trazena_kat}
+              </span>
+            </p>
+          ) : (
+            <form action={requestCategoryChangeAction} className="mt-3 space-y-3">
+              <input type="hidden" name="locale" value={locale} />
+              <p className="text-sm text-slate">{t("catCardBody")}</p>
+              <label className="block text-sm">
+                <span className="mb-1 block font-semibold text-navy">{t("catNew")}</span>
+                <select
+                  name="trazena"
+                  defaultValue=""
+                  required
+                  className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
+                >
+                  <option value="" disabled>
+                    {t("catChoose")}
+                  </option>
+                  {CATS.filter((c) => c !== player.kategorija).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block text-sm">
+                <span className="mb-1 block font-semibold text-navy">{t("catReason")}</span>
+                <textarea
+                  name="obrazlozenje"
+                  rows={3}
+                  maxLength={500}
+                  className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
+                />
+              </label>
+              <button
+                type="submit"
+                className="rounded-xl bg-clay px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-clay-dark"
+              >
+                {t("catSubmit")}
+              </button>
+            </form>
+          )}
+        </div>
+        </>
       ) : (candidates ?? []).length > 0 ? (
         <div className="rounded-2xl border border-line bg-card p-6 shadow-sm">
           <p className="font-display text-lg font-bold text-navy">{t("pickTitle")}</p>
