@@ -79,6 +79,7 @@
     "title": "Tournament calendar",
     "subtitle": "Upcoming tournaments and a results archive by year.",
     "upcomingTitle": "Upcoming tournaments",
+    "register": "Register →",
     "noUpcoming": "No announced tournaments right now. See the archive below.",
     "archiveTitle": "Archive",
     "empty": "No published tournaments yet.",
@@ -147,6 +148,7 @@
       "results": "Results"
     },
     "soon": "Draws, schedule and results will be available once the director opens the tournament (referee portal — Phase 3).",
+    "champion": "Winner",
     "discipline": {
       "singl": "Singles",
       "dubl": "Doubles",
@@ -394,6 +396,8 @@
     "round": "Round {n}",
     "prelim": "Preliminary round",
     "group": "Group {g}",
+    "groupRR": "Group (round-robin)",
+    "winsShort": "{n} W",
     "bye": "bye",
     "tbd": "—",
     "status": {

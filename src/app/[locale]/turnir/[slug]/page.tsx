@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { getTournamentBySlug, getEntriesForTournament } from "@/lib/data/tournaments";
-import { getDrawsForTournament } from "@/lib/data/draws";
+import { getDrawsForTournament, type TournamentDraw } from "@/lib/data/draws";
+import { isRoundRobin, groupStandings } from "@/lib/draw-groups";
 import { getPlayerById } from "@/lib/data/players";
 import { createClient } from "@/lib/supabase/server";
 import { statusByDate, isUpcoming } from "@/lib/tournament-status";
@@ -28,6 +29,31 @@ export async function generateMetadata({
 }
 
 const DISCIPLINE_ORDER = ["singl", "dubl", "miks"] as const;
+
+// Redosled konkurencija: kategorije „od prve nadalje" (I…IX pa starosne 20,30…), pa disciplina.
+const KAT_RANK: Record<string, number> = {
+  I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6, VII: 7, VIII: 8, IX: 9,
+};
+const catRank = (k: string) => KAT_RANK[k] ?? 100 + (Number.parseInt(k, 10) || 999);
+const discRank = (d: string) => {
+  const i = DISCIPLINE_ORDER.indexOf(d as (typeof DISCIPLINE_ORDER)[number]);
+  return i < 0 ? 99 : i;
+};
+
+// Pobednik konkurencije: iz poslednjeg (najvišeg) kola — finale (pozicija 1),
+// a ako je to kolo round-robin grupa, pobednik je prvi po pobedama.
+function championOf(d: TournamentDraw): string | null {
+  const resolved = d.matches.filter((m) => m.kolo > 0 && m.winner_slot != null);
+  if (resolved.length === 0) return null;
+  const last = Math.max(...resolved.map((m) => m.kolo));
+  const lastMatches = d.matches.filter((m) => m.kolo === last);
+  if (isRoundRobin(lastMatches)) {
+    return groupStandings(lastMatches)[0]?.name ?? null;
+  }
+  const fin = lastMatches.find((m) => m.pozicija === 1 && m.winner_slot != null);
+  const w = fin ? (fin.winner_slot === 1 ? fin.p1 : fin.p2) : null;
+  return w ? `${w.ime} ${w.prezime}` : null;
+}
 
 export default async function TurnirPage({
   params,
@@ -133,6 +159,13 @@ export default async function TurnirPage({
       .map((e) => e.kategorija),
   })).filter((g) => g.kategorije.length > 0);
 
+  // Žrebovi sortirani po kategoriji (I…IX pa starosne), pa disciplini — lakše nalaženje.
+  const sortedDraws = [...draws].sort(
+    (a, b) =>
+      discRank(a.event.disciplina) - discRank(b.event.disciplina) ||
+      catRank(a.event.kategorija) - catRank(b.event.kategorija),
+  );
+
   const info: { label: string; value: string }[] = [
     { label: t("series"), value: tc(`series.${tr.serija}`) },
     { label: t("system"), value: tc(`system.${tr.sistem}`) },
@@ -208,21 +241,29 @@ export default async function TurnirPage({
 
         {draws.length > 0 ? (
           <div className="space-y-8">
-            {draws.map((d) => (
-              <section key={d.id}>
-                <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <h3 className="font-display text-lg font-bold text-navy">
-                    {td("title")} · {t(`discipline.${d.event.disciplina}`)} ·{" "}
-                    {d.event.kategorija}
-                  </h3>
-                  <span className="text-xs text-muted">
-                    {d.kostur ? td("bracketOf", { n: d.kostur }) : null}
-                    {d.broj_nosilaca > 0 ? ` · ${td("seedsCount", { n: d.broj_nosilaca })}` : null}
-                  </span>
-                </div>
-                <DrawBracket draw={d} />
-              </section>
-            ))}
+            {sortedDraws.map((d) => {
+              const champ = !upcoming ? championOf(d) : null;
+              return (
+                <section key={d.id}>
+                  <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <h3 className="font-display text-lg font-bold text-navy">
+                      {td("title")} · {t(`discipline.${d.event.disciplina}`)} ·{" "}
+                      {d.event.kategorija}
+                    </h3>
+                    <span className="text-xs text-muted">
+                      {d.kostur ? td("bracketOf", { n: d.kostur }) : null}
+                      {d.broj_nosilaca > 0 ? ` · ${td("seedsCount", { n: d.broj_nosilaca })}` : null}
+                    </span>
+                    {champ && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-court/12 px-2.5 py-0.5 text-xs font-bold text-court-dark">
+                        🏆 {t("champion")}: {champ}
+                      </span>
+                    )}
+                  </div>
+                  <DrawBracket draw={d} />
+                </section>
+              );
+            })}
           </div>
         ) : !upcoming ? (
           <div className="rounded-2xl border border-dashed border-line2 bg-card p-6 text-sm text-slate">

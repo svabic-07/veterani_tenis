@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import type { TournamentDraw, DrawMatchRow } from "@/lib/data/draws";
+import { isRoundRobin, groupStandings } from "@/lib/draw-groups";
 
 /**
  * Javni prikaz žreba jedne konkurencije:
@@ -96,7 +97,10 @@ export async function DrawBracket({ draw }: { draw: TournamentDraw }) {
   }
   const groupMatches = draw.matches.filter((m) => m.kolo === 0 && m.grupa);
   const prelimMatches = draw.matches.filter((m) => m.kolo === 0 && !m.grupa);
-  const koRounds = [...byRound.keys()].filter((k) => k > 0).sort((a, b) => a - b);
+  const allKoRounds = [...byRound.keys()].filter((k) => k > 0).sort((a, b) => a - b);
+  // Kola koja su zapravo round-robin grupe (uvezena kao kolo>0) prikazujemo kao grupe.
+  const rrRounds = allKoRounds.filter((k) => isRoundRobin(byRound.get(k) ?? []));
+  const koRounds = allKoRounds.filter((k) => !rrRounds.includes(k));
   const lastRound = koRounds.at(-1) ?? 0;
 
   const roundName = (kolo: number) => {
@@ -112,24 +116,54 @@ export async function DrawBracket({ draw }: { draw: TournamentDraw }) {
       ? t(`status.${m.status}`)
       : null;
 
-  const groups = [...new Set(groupMatches.map((m) => m.grupa!))].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  // Blokovi grupa: prave grupe (m.grupa, natural sort) + kola detektovana kao RR.
+  const groupBlocks: { key: string; title: string; matches: DrawMatchRow[] }[] = [
+    ...[...new Set(groupMatches.map((m) => m.grupa!))]
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+      .map((g) => ({
+        key: `g-${g}`,
+        title: t("group", { g }),
+        matches: groupMatches.filter((m) => m.grupa === g),
+      })),
+    ...rrRounds.map((k) => ({
+      key: `rr-${k}`,
+      title: t("groupRR"),
+      matches: byRound.get(k) ?? [],
+    })),
+  ];
 
   return (
     <div className="space-y-5">
-      {/* Grupe (round-robin) */}
-      {groups.length > 0 && (
+      {/* Grupe (round-robin): prave grupe (m.grupa) + kola koja su zapravo RR */}
+      {groupBlocks.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
-          {groups.map((g) => (
-            <div key={g}>
-              <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-court-dark">
-                {t("group", { g })}
-              </h4>
-              <div className="space-y-2">
-                {groupMatches
-                  .filter((m) => m.grupa === g)
-                  .map((m) => (
+          {groupBlocks.map((blk) => {
+            const table = groupStandings(blk.matches);
+            return (
+              <div key={blk.key}>
+                <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-court-dark">
+                  {blk.title}
+                </h4>
+                {table.length > 0 && (
+                  <ol className="mb-2 overflow-hidden rounded-xl border border-line bg-bg2 text-sm">
+                    {table.map((r, i) => (
+                      <li
+                        key={r.name}
+                        className="flex items-center justify-between gap-2 px-3 py-1 [&:not(:last-child)]:border-b [&:not(:last-child)]:border-line"
+                      >
+                        <span className={i === 0 ? "font-bold text-navy" : "text-slate"}>
+                          {i === 0 ? "🏆 " : `${i + 1}. `}
+                          {r.name}
+                        </span>
+                        <span className="font-mono text-xs text-muted">
+                          {t("winsShort", { n: r.wins })}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                <div className="space-y-2">
+                  {blk.matches.map((m) => (
                     <MatchCard
                       key={m.id}
                       m={m}
@@ -138,9 +172,10 @@ export async function DrawBracket({ draw }: { draw: TournamentDraw }) {
                       statusLabel={matchStatusLabel(m)}
                     />
                   ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

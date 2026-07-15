@@ -33,15 +33,14 @@ export default async function KalendarPage({
 
   const today = new Date().toISOString().slice(0, 10);
   const endOf = (tr: (typeof all)[number]) => tr.datum_do ?? tr.datum_od ?? "";
-  // Particija po datumu (uvezeni podaci su svi `zavrsen`): predstojeći = nisu se
-  // završili; arhiva = svi ostali (izuzev 3 prikazana), da se ništa ne sakrije.
+  // Particija STROGO po datumu (uvezeni podaci su svi `zavrsen`):
+  //   predstojeći = datum se još nije završio (svi, ne samo 3) → nude prijavu;
+  //   arhiva = samo turniri čiji je datum prošao.
   const upcoming = all
     .filter((tr) => endOf(tr) >= today)
-    .sort((a, b) => (a.datum_od ?? "").localeCompare(b.datum_od ?? ""))
-    .slice(0, 3);
-  const featuredIds = new Set(upcoming.map((tr) => tr.id));
+    .sort((a, b) => (a.datum_od ?? "").localeCompare(b.datum_od ?? ""));
   const archive = all
-    .filter((tr) => !featuredIds.has(tr.id))
+    .filter((tr) => endOf(tr) !== "" && endOf(tr) < today)
     .sort((a, b) => (b.datum_od ?? "").localeCompare(a.datum_od ?? ""));
 
   const years = [...new Set(archive.map((tr) => (tr.datum_od ?? "").slice(0, 4)).filter(Boolean))];
@@ -96,6 +95,7 @@ export default async function KalendarPage({
                     statusLabel={t(`status.${st}`)}
                     deadline={showDeadline ? formatDeadline(tr.rok_prijave, locale) : null}
                     deadlineLabel={t("deadline")}
+                    cta={st === "najava" ? t("register") : undefined}
                   />
                 );
               })}
@@ -138,6 +138,7 @@ export default async function KalendarPage({
                     name={tr.naziv}
                     host={hostLine(tr)}
                     champions={champs(tr.id)}
+                    finished
                   />
                 );
               })}

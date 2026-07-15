@@ -79,6 +79,7 @@
     "title": "Kalendar turnira",
     "subtitle": "Predstojeći turniri i arhiva rezultata po godinama.",
     "upcomingTitle": "Predstojeći turniri",
+    "register": "Prijavi se →",
     "noUpcoming": "Trenutno nema najavljenih turnira. Pogledajte arhivu ispod.",
     "archiveTitle": "Arhiva",
     "empty": "Trenutno nema objavljenih turnira.",
@@ -147,6 +148,7 @@
       "results": "Rezultati"
     },
     "soon": "Žreb, satnica i rezultati biće dostupni kada direktor otvori turnir (sudijski portal — Faza 3).",
+    "champion": "Pobednik",
     "discipline": {
       "singl": "Singl",
       "dubl": "Dubl",
@@ -425,6 +427,8 @@
     "round": "{n}. kolo",
     "prelim": "Predkolo",
     "group": "Grupa {g}",
+    "groupRR": "Grupa (round-robin)",
+    "winsShort": "{n} pob.",
     "bye": "bye",
     "tbd": "—",
     "status": {

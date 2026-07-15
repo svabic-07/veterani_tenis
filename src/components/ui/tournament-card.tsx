@@ -21,6 +21,8 @@ export function TournamentCard({
   deadline,
   deadlineLabel,
   champions,
+  finished,
+  cta,
 }: {
   slug: string | null;
   dateBig: string;
@@ -34,6 +36,8 @@ export function TournamentCard({
   deadline?: string | null;
   deadlineLabel?: string;
   champions?: Champion[];
+  finished?: boolean;
+  cta?: string;
 }) {
   const inner = (
     <div className="grid grid-cols-[92px_minmax(0,1fr)] items-start gap-4 sm:grid-cols-[104px_minmax(0,1fr)_auto] sm:items-center">
@@ -65,7 +69,7 @@ export function TournamentCard({
         )}
       </div>
 
-      {(statusLabel || deadline) && (
+      {(statusLabel || deadline || cta) && (
         <div className="col-span-2 flex flex-row-reverse items-center justify-end gap-3 sm:col-span-1 sm:flex-col sm:items-end sm:gap-2">
           {statusLabel && statusTone && (
             <Pill tone={statusTone} live={statusTone === "live"} dot={statusTone === "open"}>
@@ -77,13 +81,23 @@ export function TournamentCard({
               {deadlineLabel}: <span className="font-mono text-slate">{deadline}</span>
             </span>
           )}
+          {cta && (
+            <span className="rounded-lg bg-clay px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition group-hover:bg-clay-dark">
+              {cta}
+            </span>
+          )}
         </div>
       )}
     </div>
   );
 
-  const cls =
-    "block rounded-2xl border border-line bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-line2 hover:shadow-[var(--shadow-tvs)] sm:p-[18px]";
+  // Završeni turniri = topliji, blago utišan background (bg2) da se razlikuju
+  // od predstojećih (bela kartica).
+  const cls = `group block rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-tvs)] sm:p-[18px] ${
+    finished
+      ? "border-line2 bg-bg2 hover:border-clay/40"
+      : "border-line bg-card hover:border-line2"
+  }`;
 
   return slug ? (
     <Link href={`/turnir/${slug}`} className={cls}>

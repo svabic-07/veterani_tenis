@@ -133,6 +133,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                     name={tr.naziv}
                     host={[tr.clubs?.naziv, tr.clubs?.grad].filter(Boolean).join(" · ")}
                     champions={champs}
+                    finished
                   />
                 );
               })}
