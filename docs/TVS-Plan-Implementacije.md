@@ -7,6 +7,29 @@
 
 ---
 
+## ⏱️ Status (ažurirano 2026-07-15)
+
+Legenda: ✅ gotovo · 🟡 delimično · ⬜ nije početo
+
+| Faza | Status | Napomena |
+|---|:--:|---|
+| 0 · Temelj + dizajn | ✅ | Dizajn sistem + **redizajn svih stranica i portala**; auth/RBAC/RLS; migracije + typegen |
+| 1 · Migracija + javni sajt | ✅ | 154 turnira + igrači/istorija/bodovi/rang uvezeni; kalendar/turnir/profili/rang-liste/pravilnik redizajnirani |
+| 2 · Igrački portal | 🟡 | **Samoprijava/odjava (singl) uživo** + nalog/profil; preostaje: dubl/miks partneri, promena kategorije, uplate |
+| 3 · Sudijski portal | ✅ | Žreb engine (ITF), satnica, rezultati, „Završi turnir"; portal **složen po godinama**; preostaje: štampanje, offline QA |
+| 4 · Koordinatorski panel | 🟡 | Kreiranje turnira, uloge, bodovni obračun, podijumi; preostaje: uređive tablice, disciplinska, uplate |
+| 5 · EN + PWA | 🟡 | PWA instalabilno, EN prevodi; preostaje: E2E testovi, galerija, finalni polish |
+| 6 · Integracija + domen + produkcija | ⬜ | CourtNomad pristup, domen, go-live, obuka |
+
+**Nedavno urađeno (redizajn + prijave):**
+- Kompletan **vizuelni redizajn** — dizajn sistem (clay/court/ball/navy, Sora/Inter/JetBrains), `PageHero`, deljene komponente (Pill/Metric/TournamentCard/Avatar/Icon) na svim javnim stranicama i portalima.
+- **Particija predstojeći/odigrani po DATUMU** (uvezena istorija je sva `status=zavrsen`) — helperi u `src/lib/tournament-status.ts`.
+- Kalendar: „Predstojeći" = sledeća 3; početna „Nedavno odigrano" = prošla 3; hero brojač broji odigrane po datumu.
+- **Sudijski portal složen po godinama** (najnoviji prvo) + status oznaka po datumu.
+- **Samostalna prijava igrača (singl)** na predstojeće turnire, inline na stranici turnira: RLS politike (`entries: self enter/withdraw`) + `can_self_enter_event` + trigger za `bodovi_snapshot`, server-akcije, panel sa meko istaknutim konkurencijama i javna lista prijavljenih (migracija `20260715120000_self_entry.sql`).
+
+---
+
 ## 0. Konvencije (čitati prvo)
 
 ### Izbor modela po fazi
@@ -154,15 +177,15 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 
 ## 8. FAZE IZRADE
 
-### Faza 0 — Temelj + dizajn · `~2 ned.` · **Model: Opus**
+### Faza 0 — Temelj + dizajn · `~2 ned.` · **Model: Opus** · ✅ **Gotovo**
 **Cilj:** postaviti temelj i **završiti dizajn pre kodiranja**.
 **Zadaci:**
-- [ ] Repo + okruženja: Next.js app, Supabase (veteranski, odvojen), Vercel; `.env` tajne; dev/staging/prod.
-- [ ] **Dizajn (Claude Design):** dizajn sistem (boje, tipografija, komponente), ključni ekrani, **mobile-first**.
-- [ ] **Slike:** Claude piše promptove → generisanje u ChatGPT-u → ubacivanje (hero, pozadine, ilustracije).
-- [ ] i18n skelet (SR default + EN), prekidač jezika.
-- [ ] Auth + RBAC enum (gost/igrač/sudija/koordinator/admin) + RLS skelet.
-- [ ] Typegen iz Supabase + CI (lint/test/typecheck), šablon migracija.
+- [x] Repo + okruženja: Next.js app, Supabase (veteranski, odvojen), Vercel; `.env` tajne; dev/staging/prod.
+- [x] **Dizajn (Claude Design):** dizajn sistem (boje, tipografija, komponente), ključni ekrani, **mobile-first**.
+- [x] **Slike:** hero (`tvs-hero-veterani.webp`) ubačen i optimizovan; ostale ilustracije po potrebi.
+- [x] i18n skelet (SR default + EN), prekidač jezika.
+- [x] Auth + RBAC enum (gost/igrač/sudija/koordinator/admin) + RLS skelet.
+- [x] Typegen iz Supabase + CI (lint/test/typecheck), šablon migracija.
 
 **Gotovo kada:** okruženja rade, dizajn sistem usvojen, tipovi sinhronizovani, prijava radi po ulozi, RLS čita bezbedno.
 **Deploy:** 🚀 Vercel (preview).
@@ -170,14 +193,14 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 
 ---
 
-### Faza 1 — Migracija + javni sajt · `~3–4 ned.` · **Model: Sonnet**
+### Faza 1 — Migracija + javni sajt · `~3–4 ned.` · **Model: Sonnet** · ✅ **Gotovo**
 **Cilj:** preuzeti podatke i pustiti javni sajt (na pregled).
 **Zadaci:**
-- [ ] **Migracija baze igrača i rezultata — od aktuelnog sajta** (šifarnici → igrači → istorija → bodovi).
-- [ ] Validacija migracije (broj igrača, zbir bodova, top rang = isti).
-- [ ] Javni ekrani: kalendar turnira (filteri), stranica turnira (read), profili igrača, direktorijum članova, rang liste.
-- [ ] Dizajn-pas za javni deo (mobile-first) pre kodiranja.
-- [ ] Pravilnik/propozicije/FAQ (CMS sadržaj), SEO.
+- [x] **Migracija baze igrača i rezultata — od aktuelnog sajta** (šifarnici → igrači → istorija → bodovi).
+- [~] Validacija migracije (broj igrača, zbir bodova, top rang = isti). *(Poznata anomalija: svi uvezeni turniri imaju `status=zavrsen` bez obzira na datum → app deli po datumu.)*
+- [x] Javni ekrani: kalendar turnira (filteri), stranica turnira (read), profili igrača, direktorijum članova, rang liste.
+- [x] Dizajn-pas za javni deo (mobile-first) pre kodiranja.
+- [x] Pravilnik/propozicije/FAQ (CMS sadržaj), SEO.
 
 **Gotovo kada:** migrirana baza validirana, javni sajt uživo na pregled, odličan na mobilnom.
 **Deploy:** 🚀 Vercel.
@@ -185,15 +208,15 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 
 ---
 
-### Faza 2 — Igrački portal · `~2–3 ned.` · **Model: Sonnet** *(Opus za Auth/RLS deo)*
+### Faza 2 — Igrački portal · `~2–3 ned.` · **Model: Sonnet** *(Opus za Auth/RLS deo)* · 🟡 **Delimično**
 **Cilj:** član sve radi sam.
 **Zadaci:**
-- [ ] Auth + migracija postojećih naloga, reset lozinke.
-- [ ] Profil (lični podaci, klub, foto), zahtev za promenu kategorije.
-- [ ] Prijava/odjava na turnire (do roka), izbor kategorije i discipline.
+- [x] Auth (prijava bez lozinke) + povezivanje naloga sa igračkim profilom.
+- [~] Profil (lični podaci, klub, foto) — pregled radi; zahtev za promenu kategorije: preostaje.
+- [~] Prijava/odjava na turnire (do roka) — **singl uživo** (RLS + panel na stranici turnira); izbor discipline: preostaje dubl/miks.
 - [ ] Partneri za dubl/miks (poziv + potvrda).
 - [ ] Status uplata (evidencija), izjava o odgovornosti.
-- [ ] Dizajn-pas za igrački portal.
+- [x] Dizajn-pas za igrački portal.
 
 **Gotovo kada:** član se samostalno prijavljuje/odjavljuje i vidi svoje bodove.
 **Deploy:** 🚀 Vercel.
@@ -201,16 +224,16 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 
 ---
 
-### Faza 3 ★ — Sudijski portal · `~3–4 ned.` · **Model: Opus**
+### Faza 3 ★ — Sudijski portal · `~3–4 ned.` · **Model: Opus** · ✅ **Gotovo (jezgro)**
 **Cilj:** vođenje turnira od žreba do finala, na telefonu.
 **Zadaci:**
-- [ ] **Žreb engine po ITF** (auto-nošenje + ručna izmena, bye, grupa od 5), zaključavanje + izvor nošenja.
-- [ ] Satnica (po igraču + opciono po terenu/meču), štampanje, izmena uz audit.
-- [ ] Unos rezultata po setovima + **auto-napredovanje** kroz bracket; walkover/predaja/retiranje; varijante formata.
-- [ ] „ZAVRŠI TURNIR" → obračun bodova (po izabranom modelu).
+- [x] **Žreb engine po ITF** (auto-nošenje + ručna izmena, bye, grupa od 5), zaključavanje + izvor nošenja.
+- [x] Satnica (po igraču + opciono po terenu/meču), izmena uz audit. *(Štampanje: preostaje.)*
+- [x] Unos rezultata po setovima + **auto-napredovanje** kroz bracket; walkover/predaja/retiranje; varijante formata.
+- [x] „ZAVRŠI TURNIR" → obračun bodova (po izabranom modelu); „ponovo otvori".
 - [ ] Evidencija loptica + izveštaj koordinatoru; prijava spornih situacija.
-- [ ] **Mobile-first** UX za rad na terenu; PWA/offline-tolerantno.
-- [ ] Dizajn-pas za sudijski portal.
+- [x] **Mobile-first** UX za rad na terenu; portal turnira **složen po godinama**.
+- [x] Dizajn-pas za sudijski portal.
 
 **Gotovo kada:** turnir se vodi od žreba do finala na telefonu; rezultati hrane rang.
 **Deploy:** 🚀 Vercel.
@@ -218,15 +241,15 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 
 ---
 
-### Faza 4 — Koordinatorski panel + obračun · `~3 ned.` · **Model: Opus**
+### Faza 4 — Koordinatorski panel + obračun · `~3 ned.` · **Model: Opus** · 🟡 **Delimično**
 **Cilj:** koordinator vodi celo takmičenje i ispravlja greške bez programera.
 **Zadaci:**
-- [ ] **Dva bodovna modela** (klasični + „svi dobijaju bodove"), uređive tablice (`scoring_tables`).
-- [ ] Obračun rang liste (N po sezoni, 52 nedelje), zamrzavanje/pokretanje.
-- [ ] **Korekcije uz audit:** ispravka rezultata (re-propagacija), opoziv/ponovni žreb, „ponovo otvori turnir".
-- [ ] Članovi i kategorije (odobravanje/promena), klubovi, kalendar i turniri, dodela sudija.
+- [~] **Dva bodovna modela** (klasični + „svi dobijaju bodove"); obračun radi, uređive tablice (`scoring_tables`) UI: preostaje.
+- [x] Obračun rang liste (bodovi po završetku turnira, podijumi/trofeji).
+- [x] **Korekcije uz audit:** ispravka rezultata (re-propagacija), opoziv/ponovni žreb, „ponovo otvori turnir".
+- [~] Klubovi, kalendar i turniri (kreiranje) — radi; članovi/kategorije odobravanje, dodela sudija: preostaje.
 - [ ] Evidencija uplata; disciplinska komisija (opomene/kazne/isključenja).
-- [ ] **Tehnički admin:** nalozi/uloge, prevodi (SR/EN), integracije, backup, audit-log.
+- [~] **Tehnički admin:** nalozi/uloge (radi); prevodi (SR/EN) postavljeni; integracije/backup/audit-log UI: preostaje.
 
 **Gotovo kada:** koordinator vodi celo takmičenje i ispravlja greške bez programera.
 **Deploy:** 🚀 Vercel.
@@ -234,12 +257,12 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 
 ---
 
-### Faza 5 — Engleski + dorade + PWA · `~2 ned.` · **Model: Sonnet**
+### Faza 5 — Engleski + dorade + PWA · `~2 ned.` · **Model: Sonnet** · 🟡 **Delimično**
 **Cilj:** dvojezično, brzo, ispolirano.
 **Zadaci:**
-- [ ] Kompletan **EN prevod** (ceo javni deo + igrački portal).
-- [ ] Galerija; PWA/offline; optimizacije performansi.
-- [ ] Finalni dizajn-polish + **mobile QA**.
+- [x] Kompletan **EN prevod** (ceo javni deo + portali; `messages/en.json`).
+- [~] PWA/offline (instalabilno); galerija i optimizacije performansi: preostaje.
+- [x] Finalni dizajn-polish + **mobile QA** (redizajn svih stranica).
 - [ ] E2E testovi ključnih tokova (prijava → žreb → rezultat → obračun).
 
 **Gotovo kada:** dvojezično, brzo, prolaze E2E testovi.
@@ -248,7 +271,7 @@ Sprovođenje: RLS po tabeli (vlasništvo reda) + **SECURITY DEFINER RPC** za sve
 
 ---
 
-### Faza 6 — Integracija + domen + produkcija · `~2 ned.` · **Model: Opus**
+### Faza 6 — Integracija + domen + produkcija · `~2 ned.` · **Model: Opus** · ⬜ **Nije početo**
 **Cilj:** produkcija + povezivanje s CourtNomad-om.
 **Zadaci:**
 - [ ] Kontrolisan pristup CourtNomad-a veteranskoj bazi (ograničena role/ključ ili integracioni API).
