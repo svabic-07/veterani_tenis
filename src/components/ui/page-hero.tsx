@@ -28,12 +28,14 @@ export function PageHero({
   badge?: ReactNode;
   compact?: boolean;
 }) {
+  // Compact hero podrazumevano koristi letterbox foto traku; početna prosleđuje svoju.
+  const bgImage = image ?? (compact ? "/tvs-hero-compact.webp" : undefined);
   return (
     <section className="relative overflow-hidden bg-navy text-white">
-      {image ? (
+      {bgImage ? (
         <>
           <Image
-            src={image}
+            src={bgImage}
             alt=""
             fill
             priority
@@ -44,7 +46,10 @@ export function PageHero({
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(90deg, rgba(21,35,58,.95) 0%, rgba(21,35,58,.74) 42%, rgba(21,35,58,.32) 100%)",
+                // horizontalno: jako levo (zona teksta) → svetlije desno (slika);
+                // + blagi vrh→dno sloj da naslov/stat ostanu čitljivi preko sunčevog flare-a
+                "linear-gradient(90deg, rgba(21,35,58,.97) 0%, rgba(21,35,58,.90) 34%, rgba(21,35,58,.60) 60%, rgba(21,35,58,.24) 100%)," +
+                "linear-gradient(180deg, rgba(21,35,58,.28) 0%, rgba(21,35,58,0) 34%, rgba(21,35,58,.34) 100%)",
             }}
           />
         </>
