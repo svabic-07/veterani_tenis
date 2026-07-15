@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
-> **Poslednje ažurirano:** 2026-07-14
-> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga, čeka email konfig.) · 3 ✅ (žreb → rezultati → obračun, sudijski portal) · 4 🔶 (koordinatorski panel — jezgro) · 5 🔶 (dvojezičnost ✅ + PWA instalabilnost ✅, ostaje offline/E2E)
+> **Poslednje ažurirano:** 2026-07-16
+> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga + **samoprijava singl** + **zahtev za promenu kategorije**, čeka email konfig.) · 3 ✅ (žreb → rezultati → obračun, sudijski portal) · 4 🔶 (koordinatorski panel — jezgro + **uredive bodovne tablice, dodela sudije, odobravanje kategorije**) · 5 🔶 (dvojezičnost ✅ + PWA ✅ + **redizajn ✅**, ostaje offline/E2E)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -18,7 +18,7 @@ Informacioni sistem „Teniski Veterani Srbije" — 4 portala (javni, igrački, 
 
 | Šta | Vrednost |
 |---|---|
-| **Live (Vercel)** | https://veteranitenis-svabic-6407s-projects.vercel.app *(iza Vercel Authentication zaštite — vidljivo ulogovanom)* |
+| **Live (Vercel)** | **https://project-82ord.vercel.app** *(radi javno; „test" domen — pravi domen uskoro). Uzrok ranijih 404 na svim `.vercel.app`: Framework Preset bio „Other" umesto „Next.js" — ispravljeno 2026-07-16 (potvrdio Vercel support). `live:false` je bio red herring.* |
 | **GitHub** | https://github.com/svabic-07/veterani_tenis (grana `main`, auto-deploy) |
 | **Vercel projekat** | `prj_j4zTPYcJTGhd1LqqqFPYxhLFdTfR` · tim `team_j9xXu6MjUJP3Z8abVpBNVLAN` (svabic-6407s-projects) |
 | **Supabase (aktivna)** | projekat `veterani-tenis` · ref `ckfbofnjgotarmpiphgz` · region eu-central-1 |
@@ -85,6 +85,11 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 10. `…0714090000_scoring` — **`scoring_tables`** (140 redova, klasični model) + **`finish_tournament()`** (obračun + nedeljni rang)
 11. `…0714110000_koordinator` — **`audit_log`** + `revoke_draw`/`clear_match_result`/`reopen_tournament`/`admin_list_users`
 12. `…0714130000_podiums` — **`player_podiums`** view (plasman 1/2/3 po konkurenciji; `security_invoker`) za pobednike turnira i trofeje igrača
+13. `…0715120000_self_entry` — **samoprijava igrača (singl)**: RLS `entries self enter/withdraw` + `can_self_enter_event()` + `my_player_id()` + trigger snapshot bodova (ne mogu se lažirati)
+14. `…0715140000_category_requests` — **`category_change_requests`** + `request_status` enum; `request_category_change()` (na `/nalog`) i `resolve_category_change()` (staff, menja `players.kategorija`) — uz audit
+15. `…0715150000_coordinator_tools` — `update_scoring_points()` (uredive bodovne tablice), `admin_list_referees()`, `assign_tournament_director()` — uz audit
+
+⚠️ **Deploy migracija:** `supabase db push` NEBEZBEDAN (remote history koristi druge timestampove nego lokalni fajlovi). Migracije 13–15 primenjene preko Management API `database/query` + upis u `schema_migrations`.
 
 **Još nije kreirano (Faza 4):** `payments`, `sanctions`, `news`/`gallery`.
 
@@ -139,7 +144,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 - **`/koordinator`**: novi turnir (naziv/serija/sistem/klub/direktor po imenu/datumi/rok), lista turnira, **korisnici i uloge** (admin klikom dodeljuje/oduzima; zaštita da admin sebi ne skine admin), audit trag (poslednjih 15).
 - **`/sudija/[slug]`** za staff: „Opozovi žreb", „Korekcije rezultata" (poništavanje po meču), „Ponovo otvori turnir" (checkbox potvrda); **konkurencije**: dodavanje (kategorija × disciplina) i brisanje praznih.
 
-**Ostaje u Fazi 4:** bodovne tablice kroz UI (sada samo u bazi), model `svi_boduju` + Master tablica, nedeljni cron obračun (sada se rang računa na „ZAVRŠI TURNIR"), evidencija uplata, disciplinska, spajanje duplikata igrača (17 iz migracije), CMS vesti.
+**Ostaje u Fazi 4:** model `svi_boduju` + Master tablica, nedeljni cron obračun (sada se rang računa na „ZAVRŠI TURNIR"), evidencija uplata, disciplinska, **odobravanje članova** (nedovoljno definisano), spajanje duplikata igrača (17 iz migracije), CMS vesti. *(uredive bodovne tablice UI, dodela sudije, odobravanje kategorije — ✅ 2026-07-15, vidi dole)*
 
 ### 🔶 Faza 5 — dvojezičnost + PWA + polish (2026-07-14, u toku)
 - **EN prevod:** auditom potvrđena parnost `sr.json`/`en.json` (310 = 310 ključeva), statične stranice (`o-savezu`/`kontakt`/`pravilnik`) kroz `L(sr,en)` helper — prevod je kompletan (sistem građen dvojezično od početka). Sitne popravke: metadata fallback naslovi (`Igrač`/`Player`, `Turnir`/`Tournament`) locale-aware; `o-savezu` statistika ~2.600 → ~2.900.
@@ -148,9 +153,18 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 
 **Ostaje u Fazi 5:** servisni radnik za offline (rad na terenu), performanse (Vercel region `iad1` → `fra1`), E2E testovi ključnih tokova, galerija.
 
+### ✅ Redizajn + Faza 4 dopuna + samoprijava (2026-07-15/16)
+- **Redizajn (Faza 0–7):** novi dizajn sistem (temelji), potpisni `PageHero` (foto glavni hero + compact letterbox traka na podstranicama, navy gradijent za čitljivost), redizajn kalendara/turnira/igrača/profila/ranga/statika/portala. Hero slike: `tvs-hero-veterani/compact/net.webp` (WebP, promptovi u ChatGPT-u).
+- **Samoprijava igrača (singl):** inline na stranici turnira — igrač sa povezanim nalogom se sam prijavljuje/odjavljuje u predstojeće singl konkurencije (u roku, pre žreba); bodovi za nošenje iz triggera (ne mogu se lažirati); javna lista prijavljenih.
+- **Faza 4 dopuna:** (a) **uredive bodovne tablice** — podstranica `/koordinator/bodovne-tablice`; (b) **dodela sudije** turniru (select u listi turnira); (c) **odobravanje promene kategorije** — igrač traži na `/nalog`, koordinator odobrava/odbija (sekcija u panelu). Sve uz audit.
+- **Prikaz turnira:** završeni turniri drugačiji (topliji) background na kartici; konkurencije sortirane po kategoriji (I…IX pa starosne); **🏆 pobednik po konkurenciji** u zaglavlju žreba; **round-robin grupe** (uvezene kao kolo>0) prikazane kao „Grupa" sa tabelom pobeda umesto polomljenog bracket-a (`src/lib/draw-groups.ts`).
+- **Kalendar:** particija STROGO po datumu (predstojeći = svi budući; arhiva = samo prošli) + „Prijavi se" dugme na predstojećim.
+- **Podaci — dopuna rezultata sa ref sajta:** turnir **Oktagon Open Pančevo 11.07.2026** (156) — pun rezultati (27 mečeva, 4 kat) + bodovi + rang; **ITF MT400 Serbia Open 16.05.2026** (149) — bodovi/rang (ref sajt nema detalje mečeva). Ostalih 8 praznih turnira nema podatke ni na ref sajtu. Rezultati skinuti iz `data-json` ref stranica (igrači upareni po `legacy_id` = ref `clan_id`).
+- **Vercel:** glavni projekat popravljen (Framework Preset), demo projekat `veterani-tenis-demo` obrisan, naplata rešena. `/en` radi (bila lažna uzbuna). not-found stranica → client component (prevodi se razrešavaju).
+
 ### 🟢 Sitnice (Faza 6 / pred go-live)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
-- Domen na Vercel + isključiti Deployment Protection kad ide u javnost.
+- **Pravi domen** na Vercel (sada „test" `project-82ord.vercel.app`) → projekat `veterani_tenis` → Settings → Domains.
 - Auth: custom SMTP + Site URL (vidi Fazu 2).
 
 ---
@@ -175,6 +189,13 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-14 | `Faza 1: istorija` | Uvoz 154 turnira + 6.745 mečeva + bodovi/rang + profil (istorija/mečevi) |
 | 2026-07-14 | `Faza 5: PWA + i18n polish` | Instalabilnost (192/512 maskable, apple-icon, theme-color) + proxy fix + EN audit |
 | 2026-07-14 | `Kalendar + trofeji` | Predstojeći/arhiva po godinama + pobednici po kategoriji na kartici + pehari na profilu |
+| 2026-07-14/15 | `Redizajn Faza 0–7` | Dizajn sistem + nova početna/kalendar/turnir/igrači/profil/rang/statika/portali |
+| 2026-07-15 | `Samostalna prijava (singl)` | Inline samoprijava/odjava na stranici turnira + javna lista prijavljenih |
+| 2026-07-15 | `Koordinator Faza 4` | Uredive bodovne tablice + dodela sudije + odobravanje promene kategorije (uz audit) |
+| 2026-07-16 | `Heroji` | Nove foto slike (glavni veteran + compact letterbox traka) + zatamnjenje |
+| 2026-07-16 | `Turniri + kalendar` | Završeni bg + sortiranje konkurencija + 🏆 pobednik + round-robin grupe; kalendar particija po datumu + „Prijavi se" |
+| 2026-07-16 | `fix(i18n) not-found` | not-found kao client component (prevodi se razrešavaju) |
+| 2026-07-16 | *(bez commita — podaci u bazi)* | Turnir 156 (pun rezultati+bodovi) i 149 (bodovi) sa ref sajta; Vercel framework fix; demo obrisan |
 
 ---
 
