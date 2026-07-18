@@ -713,6 +713,9 @@ export type Database = {
           datum_od: string | null
           direktor_id: string | null
           direktor_ime: string | null
+          domacin: string | null
+          kontakt: string | null
+          lokacija: string | null
           id: string
           klub_id: string | null
           lat: number | null
@@ -734,6 +737,9 @@ export type Database = {
           datum_od?: string | null
           direktor_id?: string | null
           direktor_ime?: string | null
+          domacin?: string | null
+          kontakt?: string | null
+          lokacija?: string | null
           id?: string
           klub_id?: string | null
           lat?: number | null
@@ -755,6 +761,9 @@ export type Database = {
           datum_od?: string | null
           direktor_id?: string | null
           direktor_ime?: string | null
+          domacin?: string | null
+          kontakt?: string | null
+          lokacija?: string | null
           id?: string
           klub_id?: string | null
           lat?: number | null
@@ -858,7 +867,7 @@ export type Database = {
         }[]
       }
       assign_tournament_director: {
-        Args: { _player_id: string; _tournament_id: string }
+        Args: { _player_id: string | null; _tournament_id: string; _direktor_ime?: string | null }
         Returns: undefined
       }
       can_manage_event: { Args: { _event_id: string }; Returns: boolean }

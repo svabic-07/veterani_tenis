@@ -3,12 +3,9 @@ import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHero } from "@/components/ui/page-hero";
 import { formatDateRange } from "@/lib/format";
-import {
-  toggleRoleAction,
-  assignRefereeAction,
-  resolveCategoryAction,
-} from "./actions";
+import { toggleRoleAction, resolveCategoryAction } from "./actions";
 import { NewTournamentForm } from "./new-tournament-form";
+import { AssignRefereeForm } from "./assign-referee-form";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +53,6 @@ export default async function KoordinatorPage({
     { data: tournaments },
     { data: clubs },
     { data: audit },
-    { data: referees },
     { data: catRequests },
   ] = await Promise.all([
     supabase.rpc("admin_list_users"),
@@ -72,7 +68,6 @@ export default async function KoordinatorPage({
       .select("id, action, entity, entity_id, created_at, actor")
       .order("created_at", { ascending: false })
       .limit(15),
-    supabase.rpc("admin_list_referees"),
     supabase
       .from("category_change_requests")
       .select(
@@ -126,6 +121,9 @@ export default async function KoordinatorPage({
             director: t("f.director"),
             directorHint: t("f.directorHint"),
             place: t("f.place"),
+            host: t("f.host"),
+            contact: t("f.contact"),
+            location: t("f.location"),
             deadline: t("f.deadline"),
             from: t("f.from"),
             to: t("f.to"),
@@ -147,7 +145,8 @@ export default async function KoordinatorPage({
         </div>
         <ul className="overflow-hidden rounded-2xl border border-line bg-card">
           {(tournaments ?? []).map((tr, i) => {
-            const inList = (referees ?? []).some((r) => r.player_id === tr.direktor_id);
+            const refName =
+              tr.direktor_ime ?? (tr.direktor ? `${tr.direktor.ime} ${tr.direktor.prezime}` : null);
             return (
               <li
                 key={tr.id}
@@ -168,34 +167,12 @@ export default async function KoordinatorPage({
                     {tc(`status.${tr.status}`)}
                   </span>
                 </div>
-                <form action={assignRefereeAction} className="mt-2 flex flex-wrap items-center gap-2">
-                  <input type="hidden" name="locale" value={locale} />
-                  <input type="hidden" name="turnirId" value={tr.id} />
-                  <span className="text-xs font-semibold text-muted">{t("referee")}:</span>
-                  <select
-                    name="playerId"
-                    defaultValue={tr.direktor_id ?? ""}
-                    className="rounded-lg border border-line2 bg-bg px-2 py-1 text-xs outline-none focus:border-clay"
-                  >
-                    <option value="">{t("noReferee")}</option>
-                    {(referees ?? []).map((r) => (
-                      <option key={r.player_id} value={r.player_id}>
-                        {r.ime}
-                      </option>
-                    ))}
-                    {tr.direktor_id && !inList && tr.direktor && (
-                      <option value={tr.direktor_id}>
-                        {tr.direktor.ime} {tr.direktor.prezime} ({t("noAccount")})
-                      </option>
-                    )}
-                  </select>
-                  <button
-                    type="submit"
-                    className="rounded-lg border border-line2 px-2.5 py-1 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
-                  >
-                    {t("assign")}
-                  </button>
-                </form>
+                <AssignRefereeForm
+                  turnirId={tr.id}
+                  locale={locale}
+                  currentName={refName}
+                  labels={{ referee: t("referee"), assign: t("assign"), hint: t("f.directorHint") }}
+                />
               </li>
             );
           })}

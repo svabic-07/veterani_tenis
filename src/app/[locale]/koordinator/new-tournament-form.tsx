@@ -8,6 +8,7 @@ type Opt = { value: string; label: string };
 type Labels = {
   name: string; series: string; system: string; club: string; director: string;
   directorHint: string; place: string; deadline: string; from: string; to: string; create: string;
+  host: string; contact: string; location: string;
 };
 
 const FIELD = "w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay";
@@ -108,6 +109,21 @@ export function NewTournamentForm({
       <label className="text-sm">
         <span className="mb-1 block font-semibold text-navy">{labels.place}</span>
         <input type="text" name="mesto" value={mesto} onChange={(e) => setMesto(e.target.value)} className={FIELD} />
+      </label>
+
+      <label className="text-sm">
+        <span className="mb-1 block font-semibold text-navy">{labels.host}</span>
+        <input type="text" name="domacin" className={FIELD} />
+      </label>
+
+      <label className="text-sm">
+        <span className="mb-1 block font-semibold text-navy">{labels.contact}</span>
+        <input type="text" name="kontakt" placeholder="+381 6x xxx xxxx" className={FIELD} />
+      </label>
+
+      <label className="text-sm sm:col-span-2">
+        <span className="mb-1 block font-semibold text-navy">{labels.location}</span>
+        <input type="text" name="lokacija" className={FIELD} />
       </label>
 
       <label className="text-sm">

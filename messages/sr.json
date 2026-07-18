@@ -40,10 +40,22 @@
       "explore": "Istraži sistem"
     },
     "cards": {
-      "calendar": { "title": "Kalendar turnira", "desc": "Filteri po seriji, sistemu, disciplini i gradu." },
-      "players": { "title": "Profili igrača", "desc": "Bodovi, kretanje ranga, istorija turnira, međusobni skor." },
-      "referee": { "title": "Sudijski portal", "desc": "Žreb, satnica i unos rezultata — optimizovano za teren." },
-      "rules": { "title": "Pravilnik", "desc": "Propozicije, bodovanje i kategorije članova." }
+      "calendar": {
+        "title": "Kalendar turnira",
+        "desc": "Filteri po seriji, sistemu, disciplini i gradu."
+      },
+      "players": {
+        "title": "Profili igrača",
+        "desc": "Bodovi, kretanje ranga, istorija turnira, međusobni skor."
+      },
+      "referee": {
+        "title": "Sudijski portal",
+        "desc": "Žreb, satnica i unos rezultata — optimizovano za teren."
+      },
+      "rules": {
+        "title": "Pravilnik",
+        "desc": "Propozicije, bodovanje i kategorije članova."
+      }
     }
   },
   "footer": {
@@ -154,7 +166,10 @@
       "dubl": "Dubl",
       "miks": "Miks"
     },
-    "notFound": "Turnir nije pronađen."
+    "notFound": "Turnir nije pronađen.",
+    "organizer": "Organizator",
+    "contact": "Kontakt",
+    "participants": "Broj učesnika"
   },
   "players": {
     "title": "Igrači",
@@ -184,7 +199,11 @@
       "rankingRow": "{bodovi} bodova · {turnira, plural, one {# turnir} few {# turnira} other {# turnira}}",
       "winShort": "P",
       "lossShort": "I",
-      "disc": { "singl": "Singl", "dubl": "Dubl", "miks": "Miks" }
+      "disc": {
+        "singl": "Singl",
+        "dubl": "Dubl",
+        "miks": "Miks"
+      }
     }
   },
   "auth": {
@@ -250,7 +269,10 @@
       "place": "Mesto",
       "deadline": "Rok prijave",
       "from": "Od",
-      "to": "Do"
+      "to": "Do",
+      "host": "Domaćin (organizator)",
+      "contact": "Kontakt (telefon)",
+      "location": "Lokacija (adresa terena)"
     },
     "tournaments": "Turniri",
     "users": "Korisnici i uloge",
@@ -258,7 +280,11 @@
     "usersHintAdmin": "Klik na ulogu dodeljuje/oduzima (zeleno = dodeljena).",
     "grantRole": "Dodeli ulogu",
     "revokeRole": "Oduzmi ulogu",
-    "th": { "user": "Nalog", "player": "Igrač", "roles": "Uloge" },
+    "th": {
+      "user": "Nalog",
+      "player": "Igrač",
+      "roles": "Uloge"
+    },
     "audit": "Trag korekcija (audit)",
     "auditEmpty": "Još nema zabeleženih korekcija.",
     "scoringTables": "Bodovne tablice",
@@ -449,6 +475,10 @@
     "points": "Bodovi",
     "tournaments": "Turnira",
     "empty": "Rang lista za ovu kategoriju i disciplinu još nije obračunata. Pojaviće se nakon prvih odigranih turnira ili migracije postojećih podataka.",
-    "disc": { "singl": "Singl", "dubl": "Dubl", "miks": "Miks" }
+    "disc": {
+      "singl": "Singl",
+      "dubl": "Dubl",
+      "miks": "Miks"
+    }
   }
 }

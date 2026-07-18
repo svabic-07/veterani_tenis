@@ -90,6 +90,9 @@ export default async function TurnirPage({
       }
     | null = null;
 
+  // Prijave — uvek (broj učesnika u info bloku); panel ih koristi za predstojeće.
+  const allEntries = await getEntriesForTournament(tr.id);
+
   if (upcoming && singlEvents.length > 0) {
     const supabase = await createClient();
     const { data: claimsData } = await supabase.auth.getClaims();
@@ -118,7 +121,7 @@ export default async function TurnirPage({
       }
     }
 
-    const entries = await getEntriesForTournament(tr.id);
+    const entries = allEntries;
     const publishedEventIds = new Set(draws.map((d) => d.event.id));
     const withinDeadline =
       !tr.rok_prijave || new Date().getTime() <= new Date(tr.rok_prijave).getTime();
@@ -166,15 +169,27 @@ export default async function TurnirPage({
       catRank(a.event.kategorija) - catRank(b.event.kategorija),
   );
 
-  const info: { label: string; value: string }[] = [
+  const participantCount = new Set(allEntries.map((e) => e.playerId)).size;
+
+  const info: { label: string; value: string; href?: string }[] = [
     { label: t("series"), value: tc(`series.${tr.serija}`) },
     { label: t("system"), value: tc(`system.${tr.sistem}`) },
     { label: t("dates"), value: formatDateRange(tr.datum_od, tr.datum_do, locale) },
     ...(club ? [{ label: t("host"), value: `${club.naziv}${club.grad ? ` · ${club.grad}` : ""}` }] : []),
+    ...(tr.domacin ? [{ label: t("organizer"), value: tr.domacin }] : []),
     ...(tr.direktor_ime || dir
       ? [{ label: t("director"), value: tr.direktor_ime ?? `${dir!.ime} ${dir!.prezime}` }]
       : []),
+    ...(tr.kontakt ? [{ label: t("contact"), value: tr.kontakt }] : []),
+    ...(tr.lokacija ? [{ label: t("location"), value: tr.lokacija }] : []),
     ...(tr.rok_prijave ? [{ label: t("deadline"), value: formatDeadline(tr.rok_prijave, locale) }] : []),
+    ...(participantCount > 0
+      ? [{
+          label: t("participants"),
+          value: String(participantCount),
+          href: entryProps ? "#prijava" : "#zrebovi",
+        }]
+      : []),
   ];
 
   return (
@@ -242,7 +257,7 @@ export default async function TurnirPage({
         })()}
 
         {draws.length > 0 ? (
-          <div className="space-y-8">
+          <div id="zrebovi" className="space-y-8">
             {sortedDraws.map((d) => {
               const champ = !upcoming ? championOf(d) : null;
               return (
@@ -286,7 +301,15 @@ export default async function TurnirPage({
                   }`}
                 >
                   <dt className="text-muted">{row.label}</dt>
-                  <dd className="text-right font-medium text-ink">{row.value}</dd>
+                  <dd className="text-right font-medium text-ink">
+                    {row.href ? (
+                      <a href={row.href} className="font-bold text-clay underline-offset-2 hover:underline">
+                        {row.value} →
+                      </a>
+                    ) : (
+                      row.value
+                    )}
+                  </dd>
                 </div>
               ))}
             </dl>

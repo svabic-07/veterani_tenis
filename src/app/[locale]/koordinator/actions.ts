@@ -57,14 +57,15 @@ export async function assignRefereeAction(formData: FormData) {
   const turnirId = String(formData.get("turnirId") ?? "");
   const playerRaw = String(formData.get("playerId") ?? "");
   const playerId = UUID_RE.test(playerRaw) ? playerRaw : null;
+  const direktorIme = String(formData.get("direktorIme") ?? "").trim().slice(0, 120) || null;
 
   if (!UUID_RE.test(turnirId)) back(formData, "greska=zahtev");
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("assign_tournament_director", {
     _tournament_id: turnirId,
-    // Funkcija prima NULL (skini sudiju); generisani tip je ne-null (param bez defaulta).
-    _player_id: playerId as string,
+    _player_id: playerId as string, // funkcija prima NULL (skini sudiju)
+    _direktor_ime: direktorIme,
   });
   if (error) back(formData, "greska=sudija");
   back(formData, "ok=sudija");
@@ -108,6 +109,9 @@ export async function createTournamentAction(formData: FormData) {
   const direktorRaw = String(formData.get("direktorId") ?? "");
   const direktorId = UUID_RE.test(direktorRaw) ? direktorRaw : null;
   const direktorIme = String(formData.get("direktorIme") ?? "").trim().slice(0, 120) || null;
+  const domacin = String(formData.get("domacin") ?? "").trim().slice(0, 120) || null;
+  const kontakt = String(formData.get("kontakt") ?? "").trim().slice(0, 80) || null;
+  const lokacija = String(formData.get("lokacija") ?? "").trim().slice(0, 200) || null;
   const datumOd = String(formData.get("datumOd") ?? "");
   const datumDo = String(formData.get("datumDo") ?? "");
   const rok = String(formData.get("rok") ?? "");
@@ -136,6 +140,9 @@ export async function createTournamentAction(formData: FormData) {
     klub_id: UUID_RE.test(klubId) ? klubId : null,
     direktor_id: direktorId,
     direktor_ime: direktorIme,
+    domacin,
+    kontakt,
+    lokacija,
     season_id: season?.id ?? null,
     datum_od: datumOd || null,
     datum_do: datumDo || null,
