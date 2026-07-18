@@ -2,14 +2,14 @@ import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getDrawsForTournament, type TournamentDraw } from "@/lib/data/draws";
+import { getDrawsForTournament } from "@/lib/data/draws";
 import { DrawBracket } from "@/components/draw-bracket";
+import { ResultForm } from "./result-form";
 import { formatDateRange, isoToBelgradeInput } from "@/lib/format";
 import {
   createDrawAction,
   publishDrawAction,
   discardDrawAction,
-  enterResultAction,
   finishTournamentAction,
   addEntryAction,
   removeEntryAction,
@@ -31,65 +31,6 @@ const DRAW_STATUS_STYLE: Record<string, string> = {
   opozvan: "bg-clay/15 text-clay-dark",
 };
 
-function ResultForm({
-  m,
-  eventId,
-  slug,
-  locale,
-  labels,
-}: {
-  m: TournamentDraw["matches"][number];
-  eventId: string;
-  slug: string;
-  locale: string;
-  labels: { p1: string; p2: string; placeholder: string; save: string; statuses: Record<string, string> };
-}) {
-  return (
-    <form
-      action={enterResultAction}
-      className="flex flex-wrap items-center gap-2 rounded-xl border border-line2 bg-bg2 p-3"
-    >
-      <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="slug" value={slug} />
-      <input type="hidden" name="eventId" value={eventId} />
-      <input type="hidden" name="matchId" value={m.id} />
-      <fieldset className="flex min-w-0 flex-1 basis-52 flex-col gap-1">
-        <label className="flex items-center gap-2 text-sm text-navy">
-          <input type="radio" name="winner" value="1" required className="accent-court" />
-          <span className="truncate">{labels.p1}</span>
-        </label>
-        <label className="flex items-center gap-2 text-sm text-navy">
-          <input type="radio" name="winner" value="2" className="accent-court" />
-          <span className="truncate">{labels.p2}</span>
-        </label>
-      </fieldset>
-      <input
-        type="text"
-        name="rezultat"
-        placeholder={labels.placeholder}
-        inputMode="numeric"
-        className="w-32 rounded-lg border border-line2 bg-card px-3 py-2 font-mono text-sm outline-none focus:border-clay"
-      />
-      <select
-        name="status"
-        defaultValue="zavrsen"
-        className="rounded-lg border border-line2 bg-card px-2 py-2 text-sm outline-none focus:border-clay"
-      >
-        {Object.entries(labels.statuses).map(([v, l]) => (
-          <option key={v} value={v}>
-            {l}
-          </option>
-        ))}
-      </select>
-      <button
-        type="submit"
-        className="rounded-lg bg-court px-4 py-2 text-sm font-semibold text-white transition hover:bg-court-dark"
-      >
-        {labels.save}
-      </button>
-    </form>
-  );
-}
 
 export default async function SudijaTurnirPage({
   params,
