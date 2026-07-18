@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { belgradeInputToIso } from "@/lib/format";
+import { buildTournamentReport } from "@/lib/tournament-report";
 import {
   createDrawForEvent,
   publishDraw,
@@ -428,6 +429,21 @@ export async function finishTournamentAction(formData: FormData) {
         "tournament_not_found",
       ].find((k) => error.message.includes(k));
       throw new DrawError(known ?? "server");
+    }
+
+    // Automatski izveštaj u vestima (best-effort — ne sme srušiti završetak)
+    try {
+      const report = await buildTournamentReport(supabase, tournamentId);
+      if (report) {
+        await supabase.rpc("publish_news", {
+          _naslov: report.naslov,
+          _sadrzaj: report.sadrzaj,
+          _turnir_id: tournamentId,
+        });
+        revalidatePath("/vesti");
+      }
+    } catch {
+      // izveštaj je opciona pogodnost; završetak turnira je već uspeo
     }
   } catch (err) {
     back(`greska=${errCode(err)}`);

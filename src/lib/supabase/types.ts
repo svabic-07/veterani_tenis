@@ -998,6 +998,10 @@ export type Database = {
         Args: { _keep: string; _dup: string }
         Returns: undefined
       }
+      publish_news: {
+        Args: { _naslov: string; _sadrzaj: string; _turnir_id?: string | null }
+        Returns: undefined
+      }
       my_player_id: { Args: never; Returns: string }
       reopen_tournament: {
         Args: { _tournament_id: string }
