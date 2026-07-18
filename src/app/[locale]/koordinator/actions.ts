@@ -236,6 +236,132 @@ export async function addPlayerAction(formData: FormData) {
   backTo(formData, "/koordinator/clanovi", `ok=${gost ? "gost" : "igrac"}`);
 }
 
+/** Izmena podataka igrača + kontakt (RLS: players/player_private staff write). */
+export async function updatePlayerAction(formData: FormData) {
+  const playerId = String(formData.get("playerId") ?? "");
+  const q = String(formData.get("q") ?? "").slice(0, 60);
+  const backQ = q ? `&q=${encodeURIComponent(q)}` : "";
+  if (!UUID_RE.test(playerId)) backTo(formData, "/koordinator/clanovi", `greska=zahtev${backQ}`);
+
+  const godisteRaw = String(formData.get("godiste") ?? "").trim();
+  const godiste = /^\d{4}$/.test(godisteRaw) ? Number(godisteRaw) : null;
+  const klubId = String(formData.get("klubId") ?? "");
+  const katRaw = String(formData.get("kategorija") ?? "");
+  const kategorija = (KATEGORIJE as readonly string[]).includes(katRaw)
+    ? (katRaw as (typeof KATEGORIJE)[number])
+    : null;
+  const aktivan = formData.get("aktivan") === "1";
+  const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 120) || null;
+  const telefon = String(formData.get("telefon") ?? "").trim().slice(0, 40) || null;
+
+  const supabase = await createClient();
+  const { error: e1 } = await supabase
+    .from("players")
+    .update({
+      godiste,
+      klub_id: UUID_RE.test(klubId) ? klubId : null,
+      kategorija,
+      is_active: aktivan,
+    })
+    .eq("id", playerId);
+  const { error: e2 } = await supabase
+    .from("player_private")
+    .upsert({ player_id: playerId, email, telefon }, { onConflict: "player_id" });
+  if (e1 || e2) backTo(formData, "/koordinator/clanovi", `greska=igrac${backQ}`);
+  backTo(formData, "/koordinator/clanovi", `ok=izmena${backQ}`);
+}
+
+/** Spajanje duplikata igrača (RPC merge_players, audit). */
+export async function mergePlayersAction(formData: FormData) {
+  const keep = String(formData.get("keepId") ?? "");
+  const dup = String(formData.get("dupId") ?? "");
+  if (!UUID_RE.test(keep) || !UUID_RE.test(dup) || keep === dup) {
+    backTo(formData, "/koordinator/clanovi", "greska=zahtev");
+  }
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("merge_players", { _keep: keep, _dup: dup });
+  if (error) {
+    const kod = error.message.includes("dup_has_account") ? "dupNalog" : "spajanje";
+    backTo(formData, "/koordinator/clanovi", `greska=${kod}`);
+  }
+  backTo(formData, "/koordinator/clanovi", "ok=spajanje");
+}
+
+/** Nova uplata (RLS: payments staff all). */
+export async function addPaymentAction(formData: FormData) {
+  const playerId = String(formData.get("playerId") ?? "");
+  const tip = String(formData.get("tip") ?? "");
+  const iznosRaw = String(formData.get("iznos") ?? "").replace(",", ".").trim();
+  const iznos = Number(iznosRaw);
+  const sezonaRaw = String(formData.get("sezona") ?? "").trim();
+  const sezona = /^\d{4}$/.test(sezonaRaw) ? Number(sezonaRaw) : new Date().getFullYear();
+  const napomena = String(formData.get("napomena") ?? "").trim().slice(0, 200) || null;
+
+  if (
+    !UUID_RE.test(playerId) ||
+    !["clanarina", "kotizacija"].includes(tip) ||
+    !Number.isFinite(iznos) ||
+    iznos < 0
+  ) {
+    backTo(formData, "/koordinator/uplate", "greska=zahtev");
+  }
+
+  const supabase = await createClient();
+  const { data: me } = await supabase.auth.getClaims();
+  const { error } = await supabase.from("payments").insert({
+    player_id: playerId,
+    tip: tip as "clanarina" | "kotizacija",
+    iznos,
+    sezona,
+    napomena,
+    created_by: me?.claims?.sub ?? null,
+  });
+  if (error) backTo(formData, "/koordinator/uplate", "greska=uplata");
+  backTo(formData, "/koordinator/uplate", "ok=uplata");
+}
+
+/** Brisanje uplate (RLS: staff). */
+export async function deletePaymentAction(formData: FormData) {
+  const id = String(formData.get("paymentId") ?? "");
+  if (!UUID_RE.test(id)) backTo(formData, "/koordinator/uplate", "greska=zahtev");
+  const supabase = await createClient();
+  const { error } = await supabase.from("payments").delete().eq("id", id);
+  if (error) backTo(formData, "/koordinator/uplate", "greska=uplata");
+  backTo(formData, "/koordinator/uplate", "ok=uplataObrisana");
+}
+
+/** Nova vest (RLS: news staff all). */
+export async function addNewsAction(formData: FormData) {
+  const naslov = String(formData.get("naslov") ?? "").trim().slice(0, 160);
+  const sadrzaj = String(formData.get("sadrzaj") ?? "").trim().slice(0, 8000);
+  if (naslov.length < 3 || sadrzaj.length < 3) backTo(formData, "/koordinator/vesti", "greska=zahtev");
+
+  const supabase = await createClient();
+  const { data: me } = await supabase.auth.getClaims();
+  const { error } = await supabase
+    .from("news")
+    .insert({ naslov, sadrzaj, autor: me?.claims?.sub ?? null });
+  if (error) backTo(formData, "/koordinator/vesti", "greska=vest");
+  revalidatePath("/vesti");
+  backTo(formData, "/koordinator/vesti", "ok=vest");
+}
+
+/** Objavi/sakrij ili obriši vest (RLS: staff). */
+export async function toggleNewsAction(formData: FormData) {
+  const id = String(formData.get("newsId") ?? "");
+  const mode = String(formData.get("mode") ?? "");
+  if (!UUID_RE.test(id)) backTo(formData, "/koordinator/vesti", "greska=zahtev");
+
+  const supabase = await createClient();
+  const { error } =
+    mode === "obrisi"
+      ? await supabase.from("news").delete().eq("id", id)
+      : await supabase.from("news").update({ objavljena: mode === "objavi" }).eq("id", id);
+  if (error) backTo(formData, "/koordinator/vesti", "greska=vest");
+  revalidatePath("/vesti");
+  backTo(formData, "/koordinator/vesti", "ok=vestIzmena");
+}
+
 /** Pretraga igrača za izbor direktora (padajući meni; staff). */
 export async function searchDirectorsAction(
   query: string,

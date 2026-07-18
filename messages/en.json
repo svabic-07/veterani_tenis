@@ -289,7 +289,13 @@
       "klub": "Club added.",
       "grad": "City saved.",
       "igrac": "Player added.",
-      "gost": "Guest added."
+      "gost": "Guest added.",
+      "izmena": "Player data saved.",
+      "spajanje": "Players merged.",
+      "uplata": "Payment recorded.",
+      "uplataObrisana": "Payment deleted.",
+      "vest": "Post published.",
+      "vestIzmena": "Post updated."
     },
     "err": {
       "zahtev": "Invalid request.",
@@ -305,7 +311,11 @@
       "bodovi": "Saving the scoring tables failed.",
       "klub": "Saving the club failed.",
       "klubPostoji": "A club with that name already exists.",
-      "igrac": "Adding the player failed."
+      "igrac": "Adding the player failed.",
+      "spajanje": "Merge failed.",
+      "dupNalog": "The duplicate has a linked account — unlink it first (contact the admin).",
+      "uplata": "Saving the payment failed.",
+      "vest": "Saving the post failed."
     },
     "clubs": {
       "title": "Clubs",
@@ -335,7 +345,51 @@
       "emailHint": "Copy the addresses and paste them into the BCC field of your email client. Direct sending from the site comes with custom SMTP.",
       "copyEmails": "Copy all addresses",
       "copied": "Copied",
-      "showEmails": "Show addresses"
+      "showEmails": "Show addresses",
+      "editTitle": "Edit player",
+      "searchPlaceholder": "Search by first and last name…",
+      "noResults": "No results.",
+      "phone": "Phone",
+      "active": "Active",
+      "save": "Save",
+      "guestTag": "guest",
+      "mergeTitle": "Merge duplicates",
+      "mergeHint": "Everything (matches, points, entries, payments) moves to the kept player; the duplicate is deleted. Irreversible.",
+      "mergeKeep": "Keep player",
+      "mergeDup": "Duplicate (deleted)",
+      "mergeCta": "Merge players",
+      "mergeConfirm": "I understand merging is irreversible."
+    },
+    "payments": {
+      "title": "Payments",
+      "lead": "Membership and entry-fee records.",
+      "new": "New payment",
+      "player": "Player",
+      "type": "Type",
+      "clanarina": "Membership",
+      "kotizacija": "Entry fee",
+      "amount": "Amount (RSD)",
+      "season": "Season",
+      "note": "Note",
+      "add": "Record payment",
+      "recent": "Recent payments",
+      "empty": "No payments recorded yet.",
+      "delete": "Delete"
+    },
+    "newsAdmin": {
+      "title": "News",
+      "lead": "Site announcements (public /vesti page).",
+      "new": "New post",
+      "headline": "Headline",
+      "body": "Text (blank line = new paragraph)",
+      "publish": "Publish",
+      "list": "Published posts",
+      "empty": "No posts yet.",
+      "published": "published",
+      "hidden": "hidden",
+      "hide": "Hide",
+      "show": "Publish",
+      "delete": "Delete"
     }
   },
   "referee": {
@@ -411,7 +465,8 @@
       "rezultat_ponisten": "Result cleared (audited).",
       "otvoren": "Tournament reopened — points deleted, rankings recalculated.",
       "konkurencija": "Event added.",
-      "konkurencija_obrisana": "Event deleted."
+      "konkurencija_obrisana": "Event deleted.",
+      "podesavanja": "Tournament settings saved."
     },
     "err": {
       "confirm_required": "Tick the confirmation before finishing the tournament.",
@@ -447,7 +502,20 @@
     "guestFirstName": "First name",
     "guestLastName": "Last name",
     "guestYear": "Year",
-    "addGuest": "Add guest"
+    "addGuest": "Add guest",
+    "settingsTitle": "Tournament settings",
+    "st": {
+      "name": "Name",
+      "place": "Place",
+      "host": "Host (organizer)",
+      "referee": "Referee/director (name)",
+      "contact": "Contact",
+      "location": "Location (address)",
+      "from": "From",
+      "to": "To",
+      "deadline": "Entry deadline",
+      "save": "Save changes"
+    }
   },
   "draw": {
     "title": "Draw",
@@ -522,5 +590,10 @@
       "dubl": "Doubles",
       "miks": "Mixed"
     }
+  },
+  "news": {
+    "title": "News",
+    "subtitle": "Association announcements and updates.",
+    "empty": "No published news yet."
   }
 }

@@ -381,6 +381,90 @@ export type Database = {
           },
         ]
       }
+      news: {
+        Row: {
+          autor: string | null
+          created_at: string
+          id: string
+          naslov: string
+          objavljena: boolean
+          sadrzaj: string
+          updated_at: string
+        }
+        Insert: {
+          autor?: string | null
+          created_at?: string
+          id?: string
+          naslov: string
+          objavljena?: boolean
+          sadrzaj: string
+          updated_at?: string
+        }
+        Update: {
+          autor?: string | null
+          created_at?: string
+          id?: string
+          naslov?: string
+          objavljena?: boolean
+          sadrzaj?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          datum: string
+          id: string
+          iznos: number
+          napomena: string | null
+          player_id: string
+          sezona: number
+          tip: Database["public"]["Enums"]["payment_type"]
+          turnir_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          datum?: string
+          id?: string
+          iznos: number
+          napomena?: string | null
+          player_id: string
+          sezona: number
+          tip: Database["public"]["Enums"]["payment_type"]
+          turnir_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          datum?: string
+          id?: string
+          iznos?: number
+          napomena?: string | null
+          player_id?: string
+          sezona?: number
+          tip?: Database["public"]["Enums"]["payment_type"]
+          turnir_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_turnir_id_fkey"
+            columns: ["turnir_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_private: {
         Row: {
           created_at: string
@@ -909,6 +993,10 @@ export type Database = {
           prezime: string
           zauzet: boolean
         }[]
+      }
+      merge_players: {
+        Args: { _keep: string; _dup: string }
+        Returns: undefined
       }
       my_player_id: { Args: never; Returns: string }
       reopen_tournament: {

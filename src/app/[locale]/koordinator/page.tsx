@@ -150,6 +150,18 @@ export default async function KoordinatorPage({
               {t("members.title")} →
             </Link>
             <Link
+              href="/koordinator/uplate"
+              className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+            >
+              {t("payments.title")} →
+            </Link>
+            <Link
+              href="/koordinator/vesti"
+              className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+            >
+              {t("newsAdmin.title")} →
+            </Link>
+            <Link
               href="/koordinator/bodovne-tablice"
               className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
             >

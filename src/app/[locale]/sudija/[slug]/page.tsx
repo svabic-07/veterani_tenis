@@ -13,6 +13,7 @@ import {
   finishTournamentAction,
   addEntryAction,
   addGuestEntryAction,
+  updateTournamentAction,
   removeEntryAction,
   scheduleMatchAction,
   swapSlotsAction,
@@ -59,7 +60,7 @@ export default async function SudijaTurnirPage({
   const { data: tr } = await supabase
     .from("tournaments")
     .select(
-      "id, legacy_id, naziv, status, datum_od, datum_do, mesto, direktor_id, tournament_events ( id, kategorija, disciplina )",
+      "id, legacy_id, naziv, status, datum_od, datum_do, mesto, direktor_id, direktor_ime, domacin, kontakt, lokacija, rok_prijave, tournament_events ( id, kategorija, disciplina )",
     )
     .eq("legacy_id", slug)
     .maybeSingle();
@@ -160,6 +161,59 @@ export default async function SudijaTurnirPage({
           {t(`err.${greska}`)}
         </p>
       )}
+
+      {/* Podešavanja turnira (naziv, datumi, kontakt…) */}
+      <details id="podesavanja" className="mb-6 rounded-2xl border border-line bg-card p-4 shadow-sm" open={ok === "podesavanja" || greska === "bad_request"}>
+        <summary className="cursor-pointer font-display text-base font-bold text-navy">
+          ⚙️ {t("settingsTitle")}
+        </summary>
+        <form action={updateTournamentAction} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="slug" value={slug} />
+          <input type="hidden" name="turnirId" value={tr.id} />
+          <label className="text-sm sm:col-span-2">
+            <span className="mb-1 block font-semibold text-navy">{t("st.name")}</span>
+            <input type="text" name="naziv" required minLength={3} defaultValue={tr.naziv} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("st.place")}</span>
+            <input type="text" name="mesto" defaultValue={tr.mesto ?? ""} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("st.host")}</span>
+            <input type="text" name="domacin" defaultValue={tr.domacin ?? ""} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("st.referee")}</span>
+            <input type="text" name="direktorIme" defaultValue={tr.direktor_ime ?? ""} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("st.contact")}</span>
+            <input type="text" name="kontakt" defaultValue={tr.kontakt ?? ""} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <label className="text-sm sm:col-span-2">
+            <span className="mb-1 block font-semibold text-navy">{t("st.location")}</span>
+            <input type="text" name="lokacija" defaultValue={tr.lokacija ?? ""} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("st.from")}</span>
+            <input type="date" name="datumOd" defaultValue={tr.datum_od ?? ""} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("st.to")}</span>
+            <input type="date" name="datumDo" defaultValue={tr.datum_do ?? ""} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("st.deadline")}</span>
+            <input type="datetime-local" name="rok" defaultValue={tr.rok_prijave ? isoToBelgradeInput(tr.rok_prijave) : ""} className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay" />
+          </label>
+          <div className="sm:col-span-2">
+            <button type="submit" className="rounded-xl bg-clay px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-clay-dark">
+              {t("st.save")}
+            </button>
+          </div>
+        </form>
+      </details>
 
       <div className="space-y-6">
         {tr.tournament_events.map((ev) => {

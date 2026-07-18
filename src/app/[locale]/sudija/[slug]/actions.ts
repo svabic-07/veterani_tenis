@@ -97,6 +97,45 @@ export async function addEntryAction(formData: FormData) {
   back("ok=prijava");
 }
 
+/** Podešavanja turnira (RLS: staff write / direktor svoj turnir). */
+export async function updateTournamentAction(formData: FormData) {
+  const turnirId = String(formData.get("turnirId") ?? "");
+  const back = backTo(formData, "podesavanja");
+  try {
+    if (!UUID_RE.test(turnirId)) throw new DrawError("bad_request");
+    const supabase = await guard(formData, turnirId);
+    const naziv = String(formData.get("naziv") ?? "").trim().slice(0, 160);
+    if (naziv.length < 3) throw new DrawError("bad_request");
+    const s = (name: string, max: number) =>
+      String(formData.get(name) ?? "").trim().slice(0, max) || null;
+    const d = (name: string) => {
+      const v = String(formData.get(name) ?? "").trim();
+      return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+    };
+    const rok = String(formData.get("rok") ?? "").trim();
+
+    const { error } = await supabase
+      .from("tournaments")
+      .update({
+        naziv,
+        mesto: s("mesto", 80),
+        domacin: s("domacin", 120),
+        kontakt: s("kontakt", 80),
+        lokacija: s("lokacija", 200),
+        direktor_ime: s("direktorIme", 120),
+        datum_od: d("datumOd"),
+        datum_do: d("datumDo"),
+        rok_prijave: rok ? belgradeInputToIso(rok) : null,
+      })
+      .eq("id", turnirId);
+    if (error) throw new DrawError("forbidden");
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=podesavanja");
+}
+
 /** Gost na turniru: kreira igrača (i ne-člana) i odmah ga prijavljuje (status gost). */
 export async function addGuestEntryAction(formData: FormData) {
   const eventId = String(formData.get("eventId") ?? "");

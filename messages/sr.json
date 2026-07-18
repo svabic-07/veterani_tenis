@@ -324,7 +324,13 @@
       "klub": "Klub je dodat.",
       "grad": "Grad je sačuvan.",
       "igrac": "Igrač je dodat.",
-      "gost": "Gost je dodat."
+      "gost": "Gost je dodat.",
+      "izmena": "Podaci igrača su sačuvani.",
+      "spajanje": "Igrači su spojeni.",
+      "uplata": "Uplata je upisana.",
+      "uplataObrisana": "Uplata je obrisana.",
+      "vest": "Vest je objavljena.",
+      "vestIzmena": "Vest je ažurirana."
     },
     "err": {
       "zahtev": "Neispravan zahtev.",
@@ -340,7 +346,11 @@
       "bodovi": "Čuvanje bodovnih tablica nije uspelo.",
       "klub": "Čuvanje kluba nije uspelo.",
       "klubPostoji": "Klub sa tim nazivom već postoji.",
-      "igrac": "Dodavanje igrača nije uspelo."
+      "igrac": "Dodavanje igrača nije uspelo.",
+      "spajanje": "Spajanje nije uspelo.",
+      "dupNalog": "Duplikat ima povezan nalog — prvo ga otkačite (kontaktirajte admina).",
+      "uplata": "Čuvanje uplate nije uspelo.",
+      "vest": "Čuvanje vesti nije uspelo."
     },
     "clubs": {
       "title": "Klubovi",
@@ -370,7 +380,51 @@
       "emailHint": "Kopirajte adrese i nalepite ih u BCC polje vašeg email programa. Slanje direktno sa sajta stiže sa custom SMTP podešavanjem.",
       "copyEmails": "Kopiraj sve adrese",
       "copied": "Kopirano",
-      "showEmails": "Prikaži adrese"
+      "showEmails": "Prikaži adrese",
+      "editTitle": "Izmena igrača",
+      "searchPlaceholder": "Pretraga po imenu i prezimenu…",
+      "noResults": "Nema rezultata.",
+      "phone": "Telefon",
+      "active": "Aktivan",
+      "save": "Sačuvaj",
+      "guestTag": "gost",
+      "mergeTitle": "Spajanje duplikata",
+      "mergeHint": "Sve (mečevi, bodovi, prijave, uplate) prelazi na igrača koji se zadržava; duplikat se briše. Nepovratno.",
+      "mergeKeep": "Zadrži igrača",
+      "mergeDup": "Duplikat (briše se)",
+      "mergeCta": "Spoji igrače",
+      "mergeConfirm": "Razumem da je spajanje nepovratno."
+    },
+    "payments": {
+      "title": "Uplate",
+      "lead": "Evidencija članarina i kotizacija.",
+      "new": "Nova uplata",
+      "player": "Igrač",
+      "type": "Tip",
+      "clanarina": "Članarina",
+      "kotizacija": "Kotizacija",
+      "amount": "Iznos (RSD)",
+      "season": "Sezona",
+      "note": "Napomena",
+      "add": "Upiši uplatu",
+      "recent": "Poslednje uplate",
+      "empty": "Još nema upisanih uplata.",
+      "delete": "Obriši"
+    },
+    "newsAdmin": {
+      "title": "Vesti",
+      "lead": "Objave i obaveštenja na sajtu (javna stranica /vesti).",
+      "new": "Nova vest",
+      "headline": "Naslov",
+      "body": "Tekst (prazan red = novi pasus)",
+      "publish": "Objavi vest",
+      "list": "Objavljene vesti",
+      "empty": "Još nema vesti.",
+      "published": "objavljena",
+      "hidden": "sakrivena",
+      "hide": "Sakrij",
+      "show": "Objavi",
+      "delete": "Obriši"
     }
   },
   "referee": {
@@ -446,7 +500,8 @@
       "rezultat_ponisten": "Rezultat je poništen (zabeleženo u audit).",
       "otvoren": "Turnir je ponovo otvoren — bodovi obrisani, rang preračunat.",
       "konkurencija": "Konkurencija je dodata.",
-      "konkurencija_obrisana": "Konkurencija je obrisana."
+      "konkurencija_obrisana": "Konkurencija je obrisana.",
+      "podesavanja": "Podešavanja turnira su sačuvana."
     },
     "err": {
       "confirm_required": "Označite potvrdu pre završetka turnira.",
@@ -482,7 +537,20 @@
     "guestFirstName": "Ime",
     "guestLastName": "Prezime",
     "guestYear": "Godište",
-    "addGuest": "Dodaj gosta"
+    "addGuest": "Dodaj gosta",
+    "settingsTitle": "Podešavanja turnira",
+    "st": {
+      "name": "Naziv",
+      "place": "Mesto",
+      "host": "Domaćin (organizator)",
+      "referee": "Sudija/direktor (ime)",
+      "contact": "Kontakt",
+      "location": "Lokacija (adresa)",
+      "from": "Od",
+      "to": "Do",
+      "deadline": "Rok prijave",
+      "save": "Sačuvaj izmene"
+    }
   },
   "draw": {
     "title": "Žreb",
@@ -522,5 +590,10 @@
       "dubl": "Dubl",
       "miks": "Miks"
     }
+  },
+  "news": {
+    "title": "Vesti",
+    "subtitle": "Obaveštenja i novosti saveza.",
+    "empty": "Još nema objavljenih vesti."
   }
 }
