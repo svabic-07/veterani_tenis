@@ -294,10 +294,21 @@ export default async function SudijaTurnirPage({
                 )}
                 <div className="ml-auto flex flex-wrap gap-2">
                   {!locked && (!draw || draw.status === "radna") && (
-                    <form action={createDrawAction}>
+                    <form action={createDrawAction} className="flex flex-wrap items-center gap-2.5">
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="slug" value={slug} />
                       <input type="hidden" name="eventId" value={ev.id} />
+                      {/* malo prijava (5–8): sudija može da izabere „svak sa svakim";
+                          3–4 igraju svak sa svakim automatski */}
+                      {n >= 5 && n <= 8 && (
+                        <label
+                          className="flex items-center gap-1.5 text-xs font-semibold text-navy"
+                          title={t("rrHint")}
+                        >
+                          <input type="checkbox" name="svakSaSvakim" value="1" className="accent-clay" />
+                          {t("rrLabel")}
+                        </label>
+                      )}
                       <button
                         type="submit"
                         disabled={n < 3}

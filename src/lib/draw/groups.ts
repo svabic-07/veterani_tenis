@@ -35,8 +35,9 @@ function roundRobinMatches(
 }
 
 export function generateSingleGroup(entries: readonly DrawEntry[], rngSeed: string): GeneratedDraw {
-  if (entries.length < 3 || entries.length > 4) {
-    throw new Error("jedna grupa je za 3–4 učesnika");
+  // 3–4 automatski (generateDraw); do 8 kad sudija izabere „svak sa svakim"
+  if (entries.length < 3 || entries.length > 8) {
+    throw new Error("jedna grupa je za 3–8 učesnika");
   }
   const order = shuffle(entries, createRng(rngSeed));
   return {

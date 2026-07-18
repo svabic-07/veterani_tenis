@@ -58,10 +58,11 @@ async function guardOpen(formData: FormData, id: string) {
 
 export async function createDrawAction(formData: FormData) {
   const eventId = String(formData.get("eventId") ?? "");
+  const svakSaSvakim = formData.get("svakSaSvakim") === "1";
   const back = backTo(formData, `event-${eventId}`);
   try {
     const supabase = await guardOpen(formData, eventId);
-    await createDrawForEvent(supabase, eventId);
+    await createDrawForEvent(supabase, eventId, { svakSaSvakim });
   } catch (err) {
     back(`greska=${errCode(err)}`);
     return;

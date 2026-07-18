@@ -20,7 +20,11 @@ export class DrawError extends Error {
 }
 
 /** Kreira RADNI žreb iz prijava konkurencije. Postojeći radni žreb se zamenjuje. */
-export async function createDrawForEvent(supabase: Db, eventId: string) {
+export async function createDrawForEvent(
+  supabase: Db,
+  eventId: string,
+  opts?: { svakSaSvakim?: boolean },
+) {
   const { data: existing } = await supabase
     .from("draws")
     .select("id, status")
@@ -51,9 +55,10 @@ export async function createDrawForEvent(supabase: Db, eventId: string) {
     };
   });
   if (entries.length < 3) throw new DrawError("not_enough_entries");
+  if (opts?.svakSaSvakim && entries.length > 8) throw new DrawError("rr_too_many");
 
   const rngSeed = randomUUID();
-  const draw = generateDraw(entries, rngSeed);
+  const draw = generateDraw(entries, rngSeed, { forceRoundRobin: opts?.svakSaSvakim });
 
   if (existing) {
     const { error } = await supabase.from("draws").delete().eq("id", existing.id);

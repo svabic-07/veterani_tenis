@@ -312,4 +312,17 @@ describe("generateDraw — izbor formata", () => {
   it("odbija manje od 3 učesnika", () => {
     expect(() => generateDraw(makeEntries(2), "f")).toThrow();
   });
+
+  it("forceRoundRobin: jedna grupa svak-sa-svakim do 8 učesnika", () => {
+    const d6 = generateDraw(makeEntries(6), "rr", { forceRoundRobin: true });
+    expect(d6.tip).toBe("grupa");
+    expect(d6.matches).toHaveLength(15); // 6·5/2 — svi u kolu 0
+    expect(d6.matches.every((m) => m.round === 0)).toBe(true);
+
+    const d8 = generateDraw(makeEntries(8), "rr", { forceRoundRobin: true });
+    expect(d8.tip).toBe("grupa");
+    expect(d8.matches).toHaveLength(28);
+
+    expect(() => generateDraw(makeEntries(9), "rr", { forceRoundRobin: true })).toThrow();
+  });
 });
