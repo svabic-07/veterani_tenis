@@ -602,7 +602,14 @@ export default async function SudijaTurnirPage({
                           <input
                             type="datetime-local"
                             name="termin"
-                            defaultValue={isoToBelgradeInput(m.termin)}
+                            // bez termina: datum prvog dana turnira predefinisan — upisuje se samo vreme
+                            defaultValue={
+                              m.termin
+                                ? isoToBelgradeInput(m.termin)
+                                : tr.datum_od
+                                  ? `${tr.datum_od}T09:00`
+                                  : ""
+                            }
                             className="rounded-lg border border-line2 bg-card px-2 py-1.5 text-sm outline-none focus:border-clay"
                           />
                           <input
