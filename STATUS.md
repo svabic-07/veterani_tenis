@@ -203,6 +203,15 @@ Po zajedničkoj analizi Claude + Codex (GPT 5.6) — prioritet: zaštita zvanič
 - **Štampanje satnice:** `/turnir/[slug]/satnica` — tabela po danima (vreme/teren/meč/konkurencija), dugme Štampaj, print CSS (header/footer sajta `print:hidden`); linkovi sa javne stranice i sudijskog portala.
 - **Offline (PWA):** `public/sw.js` — network-first (keš SAMO kad mreže nema — nikad zastareo sadržaj online), `/_next/static` cache-first (hešovano), `/api`+`/prijava`+`/nalog` se ne keširaju; odvojeni ključevi HTML vs RSC (Next prefetch ne gazi HTML); `offline.html` fallback. **Verifikovano Playwright-om:** keširana stranica se otvara sa ugašenim serverom, nekeširana pada na offline poruku.
 
+### ✅ Revizija sistema Claude + Codex (2026-07-18, veče)
+Dvostruka revizija (Codex GPT 5.6 čitao kod + Claude SQL/RLS/smoke testovi). Popravljeno isti dan:
+- **KRITIČNO — guardOpen slug spoof**: server akcije su status turnira čitale iz `slug`-a u formi (falsifikovanje zaobilazi zaključavanje). Fix: status se razrešava iz entiteta (meč→žreb→konkurencija→turnir). **+ RLS sloj** (migracija 28): `can_edit_event()` — sve „manager write" politike (entries/draws/matches/match_sets) + direktorske politike odbijaju pisanje na završenom turniru i pri direktnom PostgREST pozivu.
+- **KRITIČNO — SW privatnost**: `/sudija` i `/koordinator` dodati u NEVER_CACHE (keš je zajednički za sve naloge istog browser profila); verzija keša `tvs-v2`. Offline za teren i dalje radi preko javne stranice turnira.
+- **finish_tournament v5** (migracija 29): turnir samo sa solo kategorijama može da se završi; solo pravilo samo za singl i samo kad kategorija NIKAD nije imala žreb (opozvan = otkazana); **čista grupa tie-break po spec-u** (pobede → međusobni duel za dvoje → set-razlika → gem-razlika) umesto UUID-a.
+- moveEntry: obavezno isti turnir; „Prijavi i u jaču" nudi samo jače kategorije iste discipline.
+- Codex nalaz „gost-pobedio-gosta kaskada ne radi" — **opovrgnut testom** (kaskada tačna: obe gostove putanje se obrađuju).
+- Test baterija (rollback na produkcionoj bazi): 11 regresionih + 8 novih testova + smoke 19 ruta — sve zeleno. Preostalo iz revizije (sitnica): eksplicitni opt-out za solo bodove (sada: ukloniti prijavu = ne boduje se).
+
 ### 🧪 Demo nalozi (2026-07-18)
 - **Sudija:** `svabic+sudija@gmail.com` (uloga `sudija`, povezan sa neaktivnim igračem „Demo Sudija") · **Koordinator:** `svabic+koordinator@gmail.com` (uloga `koordinator`). Gmail plus-aliasi → magic link stiže u `svabic@gmail.com` inbox; prijava na `/prijava` unosom alias adrese. Rezervna lozinka `TVS-demo-2026` postavljena (UI nema password formu — za slučaj da se doda).
 - **DEMO turnir** `demo-obuka-2026` („DEMO turnir — obuka (nije zvaničan)", +30 dana, 3 konkurencije) — sudija mu je Demo Sudija, pa demo sudijski nalog ima šta da vodi. Obrisati pred go-live (i turnir i naloge i igrača `deadbeef-…`).

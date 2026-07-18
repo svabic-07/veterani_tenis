@@ -36,6 +36,12 @@ const DRAW_STATUS_STYLE: Record<string, string> = {
   opozvan: "bg-clay/15 text-clay-dark",
 };
 
+// Jačina kategorije: I najjača … V; starosne — mlađa je „jača" (30 < 75).
+const KAT_RANK: Record<string, number> = {
+  I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6, VII: 7, VIII: 8, IX: 9,
+};
+const katRank = (k: string) => KAT_RANK[k] ?? 100 + (Number.parseInt(k, 10) || 999);
+
 
 export default async function SudijaTurnirPage({
   params,
@@ -464,8 +470,14 @@ export default async function SudijaTurnirPage({
                     </ul>
                   )}
                   {/* samo 1 prijavljen: pobednik svoje kategorije „bez borbe" +
-                      opcija da igra i u jačoj kategoriji (bodovi u obe) */}
-                  {n === 1 && tr.tournament_events.length > 1 && (
+                      opcija da igra i u JAČOJ kategoriji iste discipline */}
+                  {n === 1 &&
+                    ev.disciplina === "singl" &&
+                    tr.tournament_events.some(
+                      (e2) =>
+                        e2.disciplina === ev.disciplina &&
+                        katRank(e2.kategorija) < katRank(ev.kategorija),
+                    ) && (
                     <div className="mt-3 rounded-lg border border-ball/60 bg-ball/10 p-2.5 text-xs text-navy">
                       <p className="font-semibold">{t("soloHint")}</p>
                       <form action={addEntryAction} className="mt-2 flex flex-wrap items-center gap-2">
@@ -482,7 +494,11 @@ export default async function SudijaTurnirPage({
                             {t("moveTo")}
                           </option>
                           {tr.tournament_events
-                            .filter((e2) => e2.id !== ev.id)
+                            .filter(
+                              (e2) =>
+                                e2.disciplina === ev.disciplina &&
+                                katRank(e2.kategorija) < katRank(ev.kategorija),
+                            )
                             .map((e2) => (
                               <option key={e2.id} value={e2.id}>
                                 {tt(`discipline.${e2.disciplina}`)} · {e2.kategorija}

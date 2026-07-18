@@ -7,14 +7,20 @@
  * - /api/*, /prijava, /nalog, POST: ne dira se (auth i mutacije uvek uživo).
  */
 
-const VERSION = "tvs-v1";
+const VERSION = "tvs-v2";
 const STATIC_CACHE = `${VERSION}-static`;
 const PAGES_CACHE = `${VERSION}-pages`;
 const OFFLINE_URL = "/offline.html";
 const PAGES_MAX = 150;
 
-// putanje koje se nikad ne keširaju (prolaze direktno na mrežu)
-const NEVER_CACHE = ["/api/", "/prijava", "/nalog", "/en/prijava", "/en/nalog"];
+// putanje koje se nikad ne keširaju (prolaze direktno na mrežu):
+// auth tokovi + privatni portali — keš je zajednički za sve naloge istog
+// browser profila, pa bi keširan /sudija ili /koordinator mogao da procuri
+// drugom korisniku. Za offline rad na terenu služi javna stranica turnira.
+const NEVER_CACHE = [
+  "/api/", "/prijava", "/nalog", "/sudija", "/koordinator",
+  "/en/prijava", "/en/nalog", "/en/sudija", "/en/koordinator",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
