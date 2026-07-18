@@ -461,6 +461,8 @@
     "prelimShort": "Prelim",
     "printSchedule": "Print schedule",
     "rrLabel": "Round robin",
+    "soloHint": "Only 1 entry — on finishing the tournament they receive their category's winner points (unopposed). You can additionally enter them in a stronger category: they earn points in both.",
+    "soloAdd": "Also enter in stronger",
     "rrHint": "One group — everyone plays everyone (for few entries). 3–4 players play round robin automatically.",
     "reportTitle": "Referee report",
     "reportHint": "Balls and any disputes — visible only to the coordinator. Can be filled in after the tournament is finished.",

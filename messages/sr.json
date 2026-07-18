@@ -496,6 +496,8 @@
     "prelimShort": "Predkolo",
     "printSchedule": "Štampaj satnicu",
     "rrLabel": "Svak sa svakim",
+    "soloHint": "Samo 1 prijavljen — na završetku turnira dobija bodove pobednika svoje kategorije (bez borbe). Možete ga dodatno prijaviti u jaču kategoriju: bodove osvaja u obe.",
+    "soloAdd": "Prijavi i u jaču",
     "rrHint": "Jedna grupa — svi igraju međusobno (za malo prijavljenih). 3–4 igrača igraju svak sa svakim automatski.",
     "reportTitle": "Izveštaj sudije",
     "reportHint": "Loptice i eventualne sporne situacije — vidi samo koordinator. Može se popuniti i posle završetka turnira.",

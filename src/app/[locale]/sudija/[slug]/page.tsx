@@ -463,6 +463,41 @@ export default async function SudijaTurnirPage({
                       ))}
                     </ul>
                   )}
+                  {/* samo 1 prijavljen: pobednik svoje kategorije „bez borbe" +
+                      opcija da igra i u jačoj kategoriji (bodovi u obe) */}
+                  {n === 1 && tr.tournament_events.length > 1 && (
+                    <div className="mt-3 rounded-lg border border-ball/60 bg-ball/10 p-2.5 text-xs text-navy">
+                      <p className="font-semibold">{t("soloHint")}</p>
+                      <form action={addEntryAction} className="mt-2 flex flex-wrap items-center gap-2">
+                        <input type="hidden" name="locale" value={locale} />
+                        <input type="hidden" name="slug" value={slug} />
+                        <input type="hidden" name="playerId" value={entries[0].players!.id} />
+                        <select
+                          name="eventId"
+                          required
+                          defaultValue=""
+                          className="rounded-md border border-line2 bg-card px-1.5 py-1 text-xs outline-none focus:border-clay"
+                        >
+                          <option value="" disabled>
+                            {t("moveTo")}
+                          </option>
+                          {tr.tournament_events
+                            .filter((e2) => e2.id !== ev.id)
+                            .map((e2) => (
+                              <option key={e2.id} value={e2.id}>
+                                {tt(`discipline.${e2.disciplina}`)} · {e2.kategorija}
+                              </option>
+                            ))}
+                        </select>
+                        <button
+                          type="submit"
+                          className="rounded-md bg-court px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-court-dark"
+                        >
+                          {t("soloAdd")}
+                        </button>
+                      </form>
+                    </div>
+                  )}
                   <form method="get" className="mt-3 flex gap-2">
                     <input type="hidden" name="ev" value={ev.id} />
                     <input
