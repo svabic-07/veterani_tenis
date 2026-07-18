@@ -184,7 +184,7 @@ Koordinator = sekretar saveza, sve kroz UI bez programera:
 - **Klubovi** (`/koordinator/klubovi`): dodavanje + izmena grada (puni autofill Mesta). **Uplate** (`/koordinator/uplate`): članarine/kotizacije po igraču. **Vesti** (`/koordinator/vesti` + javna `/vesti`): CMS v1 (objavi/sakrij/obriši; ISR 5 min).
 - **Uloge:** koordinator klikom dodeljuje/oduzima ulogu **sudija** (`set_referee_role`); ostale uloge i dalje samo admin.
 - **Auth fix:** Supabase Site URL + redirect allow-lista → produkcija (magic link više ne vodi na localhost); prijava radi na produkciji.
-- Test podaci: turnir „Test 8" (kreiran kroz UI) + „Test Sudijski — Žreb 16" (engine test) — obrisati pred go-live.
+- ✅ Test podaci **obrisani 2026-07-18**: turniri „Test 8" i „Test Sudijski — Žreb 16" + njihovih 14 bodova + test gost — kaskadno kroz bazu (bodovi eksplicitno jer je FK `SET NULL`), rang preračunat (508 redova), verifikovano na produkciji (404 + nema na kalendaru).
 
 ### ✅ Integritet obračuna + nedeljni rang + atomske korekcije (2026-07-18)
 Po zajedničkoj analizi Claude + Codex (GPT 5.6) — prioritet: zaštita zvaničnog obračuna.
