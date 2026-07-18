@@ -161,6 +161,8 @@
     },
     "soon": "Draws, schedule and results will be available once the director opens the tournament (referee portal — Phase 3).",
     "champion": "Winner",
+    "pointsTitle": "Points earned",
+    "pointsHint": "Points count towards the rankings and stay valid for 52 weeks after the tournament.",
     "discipline": {
       "singl": "Singles",
       "dubl": "Doubles",

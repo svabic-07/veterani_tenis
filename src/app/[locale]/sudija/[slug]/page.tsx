@@ -132,6 +132,10 @@ export default async function SudijaTurnirPage({
   const playerName = (p: { ime: string; prezime: string } | null) =>
     p ? `${p.ime[0]}. ${p.prezime}` : "—";
 
+  // Posle „ZAVRŠI TURNIR" portal je samo za pregled — izmene idu kroz
+  // „Ponovo otvori turnir" (koordinator); server-side guardOpen isto blokira.
+  const locked = tr.status === "zavrsen";
+
   // ZAVRŠI TURNIR: bar jedan objavljen žreb, nijedan radni, svi mečevi rešeni
   const published = draws.filter((d) => d.status === "objavljen" || d.status === "zakljucan");
   const canFinish =
@@ -164,7 +168,8 @@ export default async function SudijaTurnirPage({
         </p>
       )}
 
-      {/* Podešavanja turnira (naziv, datumi, kontakt…) */}
+      {/* Podešavanja turnira (naziv, datumi, kontakt…) — do završetka */}
+      {!locked && (
       <details id="podesavanja" className="mb-6 rounded-2xl border border-line bg-card p-4 shadow-sm" open={ok === "podesavanja" || greska === "bad_request"}>
         <summary className="cursor-pointer font-display text-base font-bold text-navy">
           ⚙️ {t("settingsTitle")}
@@ -216,6 +221,7 @@ export default async function SudijaTurnirPage({
           </div>
         </form>
       </details>
+      )}
 
       {tr.tournament_events.length === 0 && (
         <p className="mb-6 rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-slate">
@@ -228,7 +234,7 @@ export default async function SudijaTurnirPage({
           const draw = drawByEvent.get(ev.id);
           const entries = entriesByEvent.get(ev.id) ?? [];
           const n = entries.length;
-          const canEditEntries = !draw || draw.status === "radna";
+          const canEditEntries = !locked && (!draw || draw.status === "radna");
           const playable = (draw?.matches ?? []).filter(
             (m) => m.winner_slot === null && m.p1 && m.p2,
           );
@@ -269,7 +275,7 @@ export default async function SudijaTurnirPage({
                   </span>
                 )}
                 <div className="ml-auto flex flex-wrap gap-2">
-                  {(!draw || draw.status === "radna") && (
+                  {!locked && (!draw || draw.status === "radna") && (
                     <form action={createDrawAction}>
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="slug" value={slug} />
@@ -577,8 +583,8 @@ export default async function SudijaTurnirPage({
                   );
                 })()}
 
-              {/* Satnica: termin + teren po meču */}
-              {draw && (
+              {/* Satnica: termin + teren po meču — do završetka */}
+              {draw && !locked && (
                 <details className="mt-4 rounded-xl border border-line2 bg-bg2 p-3">
                   <summary className="cursor-pointer text-sm font-semibold text-navy">
                     {t("scheduleTitle")}

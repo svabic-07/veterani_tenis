@@ -154,6 +154,24 @@ export default async function TurnirPage({
     };
   }
 
+  // Osvojeni bodovi po konkurenciji — samo za završen turnir (obračunat ili uvezen)
+  const pointsByEvent = new Map<string, { name: string; bodovi: number }[]>();
+  if (tr.status === "zavrsen") {
+    const supabase = await createClient();
+    const { data: pts } = await supabase
+      .from("ranking_points")
+      .select("kategorija, disciplina, bodovi, players ( ime, prezime )")
+      .eq("tournament_id", tr.id)
+      .order("bodovi", { ascending: false });
+    for (const r of pts ?? []) {
+      if (!r.players) continue;
+      const key = `${r.kategorija}|${r.disciplina}`;
+      const list = pointsByEvent.get(key) ?? [];
+      list.push({ name: `${r.players.ime} ${r.players.prezime}`, bodovi: r.bodovi });
+      pointsByEvent.set(key, list);
+    }
+  }
+
   // Grupiši konkurencije po disciplini
   const byDiscipline = DISCIPLINE_ORDER.map((disc) => ({
     disc,
@@ -260,6 +278,8 @@ export default async function TurnirPage({
           <div id="zrebovi" className="space-y-8">
             {sortedDraws.map((d) => {
               const champ = !upcoming ? championOf(d) : null;
+              const points =
+                pointsByEvent.get(`${d.event.kategorija}|${d.event.disciplina}`) ?? [];
               return (
                 <section key={d.id}>
                   <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -285,6 +305,27 @@ export default async function TurnirPage({
                         .map((e) => [e.playerId, e.bodovi]),
                     )}
                   />
+                  {points.length > 0 && (
+                    <div className="mt-3 rounded-2xl border border-line bg-card p-4">
+                      <div className="mb-2 text-xs font-bold uppercase tracking-wide text-court-dark">
+                        {t("pointsTitle")}
+                      </div>
+                      <ul className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
+                        {points.map((p, i) => (
+                          <li
+                            key={`${p.name}-${i}`}
+                            className="flex items-baseline justify-between gap-3 text-sm"
+                          >
+                            <span className="min-w-0 flex-1 truncate text-navy">{p.name}</span>
+                            <span className="font-mono text-sm font-bold text-clay">
+                              {p.bodovi}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="mt-2 text-xs text-muted">{t("pointsHint")}</p>
+                    </div>
+                  )}
                 </section>
               );
             })}

@@ -161,6 +161,8 @@
     },
     "soon": "Žreb, satnica i rezultati biće dostupni kada direktor otvori turnir (sudijski portal — Faza 3).",
     "champion": "Pobednik",
+    "pointsTitle": "Osvojeni bodovi",
+    "pointsHint": "Bodovi ulaze u rang listu i važe 52 nedelje od turnira.",
     "discipline": {
       "singl": "Singl",
       "dubl": "Dubl",

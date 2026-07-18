@@ -42,11 +42,25 @@ function errCode(err: unknown): string {
   return err instanceof DrawError ? err.code : "server";
 }
 
+/** guard + odbij mutaciju ako je turnir završen — posle „ZAVRŠI TURNIR"
+ *  nema izmena; ispravke idu kroz „Ponovo otvori turnir" (koordinator). */
+async function guardOpen(formData: FormData, id: string) {
+  const supabase = await guard(formData, id);
+  const slug = String(formData.get("slug") ?? "");
+  const { data: tr } = await supabase
+    .from("tournaments")
+    .select("status")
+    .eq("legacy_id", slug)
+    .maybeSingle();
+  if (tr?.status === "zavrsen") throw new DrawError("tournament_finished");
+  return supabase;
+}
+
 export async function createDrawAction(formData: FormData) {
   const eventId = String(formData.get("eventId") ?? "");
   const back = backTo(formData, `event-${eventId}`);
   try {
-    const supabase = await guard(formData, eventId);
+    const supabase = await guardOpen(formData, eventId);
     await createDrawForEvent(supabase, eventId);
   } catch (err) {
     back(`greska=${errCode(err)}`);
@@ -60,7 +74,7 @@ export async function publishDrawAction(formData: FormData) {
   const eventId = String(formData.get("eventId") ?? "");
   const back = backTo(formData, `event-${eventId}`);
   try {
-    const supabase = await guard(formData, drawId);
+    const supabase = await guardOpen(formData, drawId);
     await publishDraw(supabase, drawId);
   } catch (err) {
     back(`greska=${errCode(err)}`);
@@ -74,7 +88,7 @@ export async function discardDrawAction(formData: FormData) {
   const eventId = String(formData.get("eventId") ?? "");
   const back = backTo(formData, `event-${eventId}`);
   try {
-    const supabase = await guard(formData, drawId);
+    const supabase = await guardOpen(formData, drawId);
     await discardDraw(supabase, drawId);
   } catch (err) {
     back(`greska=${errCode(err)}`);
@@ -89,7 +103,7 @@ export async function addEntryAction(formData: FormData) {
   const back = backTo(formData, `event-${eventId}`);
   try {
     if (!UUID_RE.test(playerId)) throw new DrawError("bad_request");
-    const supabase = await guard(formData, eventId);
+    const supabase = await guardOpen(formData, eventId);
     await addEntry(supabase, eventId, playerId);
   } catch (err) {
     back(`greska=${errCode(err)}`);
@@ -104,7 +118,7 @@ export async function updateTournamentAction(formData: FormData) {
   const back = backTo(formData, "podesavanja");
   try {
     if (!UUID_RE.test(turnirId)) throw new DrawError("bad_request");
-    const supabase = await guard(formData, turnirId);
+    const supabase = await guardOpen(formData, turnirId);
     const naziv = String(formData.get("naziv") ?? "").trim().slice(0, 160);
     if (naziv.length < 3) throw new DrawError("bad_request");
     const s = (name: string, max: number) =>
@@ -147,7 +161,7 @@ export async function addGuestEntryAction(formData: FormData) {
   const back = backTo(formData, `event-${eventId}`);
   try {
     if (ime.length < 2 || prezime.length < 2) throw new DrawError("bad_request");
-    const supabase = await guard(formData, eventId);
+    const supabase = await guardOpen(formData, eventId);
     // players: staff write RLS — gost po postojećem obrascu (legacy 'gost-…')
     const { data: player, error } = await supabase
       .from("players")
@@ -187,7 +201,7 @@ export async function setSeedAction(formData: FormData) {
   try {
     if (!UUID_RE.test(entryId) || !UUID_RE.test(eventId)) throw new DrawError("bad_request");
     if (seedRaw !== "" && (seed === null || seed < 1 || seed > 32)) throw new DrawError("bad_request");
-    const supabase = await guard(formData, entryId);
+    const supabase = await guardOpen(formData, entryId);
 
     // žreb ne sme biti objavljen
     const { data: d } = await supabase
@@ -226,7 +240,7 @@ export async function moveEntryAction(formData: FormData) {
   const back = backTo(formData, `event-${noviEventId}`);
   try {
     if (!UUID_RE.test(entryId) || !UUID_RE.test(noviEventId)) throw new DrawError("bad_request");
-    const supabase = await guard(formData, entryId);
+    const supabase = await guardOpen(formData, entryId);
 
     const { data: entry } = await supabase
       .from("entries")
@@ -270,7 +284,7 @@ export async function removeEntryAction(formData: FormData) {
   const eventId = String(formData.get("eventId") ?? "");
   const back = backTo(formData, `event-${eventId}`);
   try {
-    const supabase = await guard(formData, entryId);
+    const supabase = await guardOpen(formData, entryId);
     await removeEntry(supabase, entryId);
   } catch (err) {
     back(`greska=${errCode(err)}`);
@@ -286,7 +300,7 @@ export async function scheduleMatchAction(formData: FormData) {
   const teren = String(formData.get("teren") ?? "").trim();
   const back = backTo(formData, `event-${eventId}`);
   try {
-    const supabase = await guard(formData, matchId);
+    const supabase = await guardOpen(formData, matchId);
     await scheduleMatch(supabase, matchId, termin ? belgradeInputToIso(termin) : null, teren || null);
   } catch (err) {
     back(`greska=${errCode(err)}`);
@@ -309,7 +323,7 @@ export async function swapSlotsAction(formData: FormData) {
       }
       return { matchId, slot: Number(slot) as 1 | 2 };
     };
-    const supabase = await guard(formData, drawId);
+    const supabase = await guardOpen(formData, drawId);
     await swapSlots(supabase, drawId, parse(slotA), parse(slotB));
   } catch (err) {
     back(`greska=${errCode(err)}`);
@@ -376,7 +390,7 @@ export async function addEventAction(formData: FormData) {
   try {
     if (!kategorija || kategorija.length > 8) throw new DrawError("bad_request");
     if (!["singl", "dubl", "miks"].includes(disciplina)) throw new DrawError("bad_request");
-    const supabase = await guard(formData, tournamentId);
+    const supabase = await guardOpen(formData, tournamentId);
     const { error } = await supabase.from("tournament_events").insert({
       turnir_id: tournamentId,
       kategorija,
@@ -395,7 +409,7 @@ export async function removeEventAction(formData: FormData) {
   const eventId = String(formData.get("eventId") ?? "");
   const back = backTo(formData, "");
   try {
-    const supabase = await guard(formData, eventId);
+    const supabase = await guardOpen(formData, eventId);
     const { data: draw } = await supabase
       .from("draws")
       .select("id")
@@ -488,7 +502,7 @@ export async function enterResultAction(formData: FormData) {
     if (!["zavrsen", "walkover", "predaja", "retiranje"].includes(status)) {
       throw new DrawError("bad_request");
     }
-    const supabase = await guard(formData, matchId);
+    const supabase = await guardOpen(formData, matchId);
     await enterResult(supabase, matchId, {
       winnerSlot: winner,
       status: status as "zavrsen" | "walkover" | "predaja" | "retiranje",
