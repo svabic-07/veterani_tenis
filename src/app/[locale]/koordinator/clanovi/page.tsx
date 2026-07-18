@@ -172,6 +172,14 @@ export default async function ClanoviPage({
                   <input type="hidden" name="playerId" value={p.id} />
                   <input type="hidden" name="q" value={q} />
                   <label className="text-xs">
+                    <span className="mb-0.5 block font-semibold text-muted">{t("members.firstName")}</span>
+                    <input type="text" name="ime" defaultValue={p.ime} className="w-full rounded-lg border border-line2 bg-bg px-2 py-1.5 text-sm outline-none focus:border-clay" />
+                  </label>
+                  <label className="text-xs">
+                    <span className="mb-0.5 block font-semibold text-muted">{t("members.lastName")}</span>
+                    <input type="text" name="prezime" defaultValue={p.prezime} className="w-full rounded-lg border border-line2 bg-bg px-2 py-1.5 text-sm outline-none focus:border-clay" />
+                  </label>
+                  <label className="text-xs">
                     <span className="mb-0.5 block font-semibold text-muted">{t("members.birthYear")}</span>
                     <input type="text" name="godiste" inputMode="numeric" defaultValue={p.godiste ?? ""} className="w-full rounded-lg border border-line2 bg-bg px-2 py-1.5 text-sm outline-none focus:border-clay" />
                   </label>

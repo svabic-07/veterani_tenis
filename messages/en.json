@@ -255,6 +255,9 @@
     "scoringTables": "Scoring tables",
     "scoringTablesLead": "Edit point values by round reached (model: classic).",
     "scoringModelKlasicni": "Model: classic (progression). Values are points by round reached; “consolation” = loss in the 1st round.",
+    "scoringModelSviBoduju": "Model: “everyone scores” (Masters-style). Points = placement (winner/final/semifinal) + each group win; a participant without a win gets fixed points. “Reserve” is not calculated automatically. Values do not depend on the draw size.",
+    "modelKlasicni": "Classic",
+    "modelSviBoduju": "Everyone scores",
     "backToPanel": "Back to panel",
     "skeleton": "Draw size",
     "save": "Save",
@@ -277,9 +280,16 @@
       "sesnaestina": "Round of 32",
       "tridesetdvojina": "Round of 64",
       "sezdesetcetvrtina": "Round of 128",
-      "utesni": "Consolation"
+      "utesni": "Consolation",
+      "pobeda_u_grupi": "Group win",
+      "bez_pobede": "No win",
+      "rezerva": "Reserve"
     },
+    "rankingsTitle": "Rankings",
+    "rankingsHint": "Rankings are recalculated automatically every Monday at 03:00 (points older than 52 weeks drop off). Run a recalculation now if needed.",
+    "recalcRankings": "Recalculate rankings now",
     "ok": {
+      "rang": "Rankings recalculated.",
       "uloga": "Role updated.",
       "turnir": "Tournament created.",
       "sudija": "Referee assigned.",
@@ -298,6 +308,7 @@
       "vestIzmena": "Post updated."
     },
     "err": {
+      "rang": "Rankings recalculation failed.",
       "zahtev": "Invalid request.",
       "auth": "Please sign in again.",
       "samoodbrana": "You cannot revoke your own admin role.",
@@ -460,6 +471,7 @@
       "ponisten": "Working draw discarded.",
       "rezultat": "Result saved — the winner advanced to the next round.",
       "zavrsen": "The tournament is finished — points calculated and rankings updated.",
+      "zavrsenBezVesti": "The tournament is finished and points calculated, but the automatic news report was NOT published — publish it manually in the coordinator panel (News).",
       "prijava": "Player entered.",
       "odjava": "Entry removed.",
       "satnica": "Schedule saved.",
@@ -481,6 +493,7 @@
       "unresolved_matches": "All matches must be resolved before finishing.",
       "no_published_draws": "There are no published draws.",
       "tournament_not_found": "Tournament not found.",
+      "missing_scoring_cell": "The scoring table is missing a value for this series/draw size/round — fill it in the coordinator panel (Scoring tables) and try again.",
       "not_published": "The draw is not published — no revoke needed.",
       "draw_not_found": "Draw not found.",
       "tournament_finished": "The tournament is finished — reopen it first.",

@@ -7,6 +7,7 @@ import { updateScoringTableAction } from "./actions";
 export const dynamic = "force-dynamic";
 
 const SERIES = ["s2000", "s1000", "s500", "s250"] as const;
+const SERIES_B = ["s2000", "s1000", "s500", "s250", "master"] as const;
 const KOSTURI = [8, 16, 32, 64, 128] as const;
 const KOLA = [
   "pobednik",
@@ -18,6 +19,14 @@ const KOLA = [
   "tridesetdvojina",
   "sezdesetcetvrtina",
   "utesni",
+] as const;
+const KOLA_B = [
+  "pobednik",
+  "finale",
+  "polufinale",
+  "pobeda_u_grupi",
+  "bez_pobede",
+  "rezerva",
 ] as const;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
@@ -38,8 +47,14 @@ export default async function BodovneTablicePage({
   const sp = await searchParams;
   const ok = typeof sp.ok === "string" ? sp.ok : "";
   const greska = typeof sp.greska === "string" ? sp.greska : "";
+  const model = sp.model === "svi_boduju" ? "svi_boduju" : "klasicni";
   const kosturRaw = typeof sp.kostur === "string" ? Number(sp.kostur) : 32;
-  const kostur = (KOSTURI as readonly number[]).includes(kosturRaw) ? kosturRaw : 32;
+  const kostur =
+    model === "svi_boduju"
+      ? 8
+      : (KOSTURI as readonly number[]).includes(kosturRaw)
+        ? kosturRaw
+        : 32;
 
   const t = await getTranslations("coordinator");
   const tc = await getTranslations("calendar");
@@ -59,7 +74,7 @@ export default async function BodovneTablicePage({
   const { data: rows } = await supabase
     .from("scoring_tables")
     .select("id, serija, kolo, bodovi")
-    .eq("model", "klasicni")
+    .eq("model", model)
     .eq("kostur", kostur);
 
   // mapa (serija|kolo) → { id, bodovi }; koje kolone (kola) postoje za ovaj kostur
@@ -69,7 +84,8 @@ export default async function BodovneTablicePage({
     byKey.set(`${r.serija}|${r.kolo}`, { id: r.id, bodovi: r.bodovi });
     presentKola.add(r.kolo);
   }
-  const kolaCols = KOLA.filter((k) => presentKola.has(k));
+  const kolaCols = (model === "svi_boduju" ? KOLA_B : KOLA).filter((k) => presentKola.has(k));
+  const seriesRows = model === "svi_boduju" ? SERIES_B : SERIES;
 
   return (
     <>
@@ -88,29 +104,56 @@ export default async function BodovneTablicePage({
           <p className="mt-5 rounded-xl bg-clay/10 px-4 py-3 text-sm text-clay-dark">{t(`err.${greska}`)}</p>
         )}
 
-        {/* Izbor kostura */}
+        {/* Izbor modela */}
         <div className="mt-6 flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-muted">{t("skeleton")}:</span>
-          {KOSTURI.map((k) => (
+          {(
+            [
+              ["klasicni", t("modelKlasicni")],
+              ["svi_boduju", t("modelSviBoduju")],
+            ] as const
+          ).map(([m, label]) => (
             <Link
-              key={k}
-              href={`/koordinator/bodovne-tablice?kostur=${k}`}
-              className={`rounded-full px-3 py-1 text-sm font-semibold transition ${
-                k === kostur
-                  ? "bg-clay text-white"
-                  : "border border-line2 text-slate hover:border-clay hover:text-clay"
+              key={m}
+              href={`/koordinator/bodovne-tablice?model=${m}`}
+              className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+                m === model
+                  ? "bg-navy text-white"
+                  : "border border-line2 text-slate hover:border-navy hover:text-navy"
               }`}
             >
-              {k}
+              {label}
             </Link>
           ))}
         </div>
 
-        <p className="mt-3 text-sm text-muted">{t("scoringModelKlasicni")}</p>
+        {/* Izbor kostura (samo klasični — Model B ne zavisi od kostura) */}
+        {model === "klasicni" && (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-semibold text-muted">{t("skeleton")}:</span>
+            {KOSTURI.map((k) => (
+              <Link
+                key={k}
+                href={`/koordinator/bodovne-tablice?kostur=${k}`}
+                className={`rounded-full px-3 py-1 text-sm font-semibold transition ${
+                  k === kostur
+                    ? "bg-clay text-white"
+                    : "border border-line2 text-slate hover:border-clay hover:text-clay"
+                }`}
+              >
+                {k}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        <p className="mt-3 text-sm text-muted">
+          {model === "svi_boduju" ? t("scoringModelSviBoduju") : t("scoringModelKlasicni")}
+        </p>
 
         <form action={updateScoringTableAction} className="mt-4">
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="kostur" value={kostur} />
+          <input type="hidden" name="model" value={model} />
           <div className="overflow-x-auto rounded-2xl border border-line bg-card">
             <table className="w-full min-w-max text-sm">
               <thead>
@@ -124,7 +167,7 @@ export default async function BodovneTablicePage({
                 </tr>
               </thead>
               <tbody>
-                {SERIES.map((s) => (
+                {seriesRows.map((s) => (
                   <tr key={s} className="border-b border-line last:border-0">
                     <td className="px-4 py-2 font-semibold text-navy">{tc(`series.${s}`)}</td>
                     {kolaCols.map((k) => {

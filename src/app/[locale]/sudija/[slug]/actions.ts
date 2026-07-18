@@ -155,8 +155,20 @@ export async function addGuestEntryAction(formData: FormData) {
       .select("id")
       .single();
     if (error || !player) throw new DrawError("forbidden");
-    await addEntry(supabase, eventId, player.id);
-    await supabase.from("entries").update({ status: "gost" }).eq("event_id", eventId).eq("player_id", player.id);
+    try {
+      await addEntry(supabase, eventId, player.id);
+      const { error: stErr } = await supabase
+        .from("entries")
+        .update({ status: "gost" })
+        .eq("event_id", eventId)
+        .eq("player_id", player.id);
+      if (stErr) throw new DrawError("forbidden");
+    } catch (err) {
+      // ne ostavljaj gosta-siroče: skloni prijavu (ako je nastala) pa igrača
+      await supabase.from("entries").delete().eq("event_id", eventId).eq("player_id", player.id);
+      await supabase.from("players").delete().eq("id", player.id);
+      throw err;
+    }
   } catch (err) {
     back(`greska=${errCode(err)}`);
     return;
@@ -234,12 +246,18 @@ export async function moveEntryAction(formData: FormData) {
       if (d && d.status !== "radna" && d.status !== "opozvan") throw new DrawError("draw_published");
     }
 
-    const { error: delErr } = await supabase.from("entries").delete().eq("id", entryId);
-    if (delErr) throw new DrawError("forbidden");
-    const { error: insErr } = await supabase
+    // prvo upiši novu prijavu, pa obriši staru — pad ne sme da izgubi prijavu
+    const { data: nova, error: insErr } = await supabase
       .from("entries")
-      .insert({ event_id: noviEventId, player_id: entry.player_id, status: entry.status });
-    if (insErr) throw new DrawError(insErr.code === "23505" ? "already_entered" : "forbidden");
+      .insert({ event_id: noviEventId, player_id: entry.player_id, status: entry.status })
+      .select("id")
+      .single();
+    if (insErr || !nova) throw new DrawError(insErr?.code === "23505" ? "already_entered" : "forbidden");
+    const { error: delErr } = await supabase.from("entries").delete().eq("id", entryId);
+    if (delErr) {
+      await supabase.from("entries").delete().eq("id", nova.id); // vrati na staro
+      throw new DrawError("forbidden");
+    }
   } catch (err) {
     back(`greska=${errCode(err)}`);
     return;
@@ -412,6 +430,7 @@ function pickKnown(message: string): string {
 export async function finishTournamentAction(formData: FormData) {
   const tournamentId = String(formData.get("tournamentId") ?? "");
   const back = backTo(formData, "");
+  let vestOk = true;
   try {
     if (formData.get("potvrda") !== "on") throw new DrawError("confirm_required");
     const supabase = await guard(formData, tournamentId);
@@ -427,30 +446,33 @@ export async function finishTournamentAction(formData: FormData) {
         "unresolved_matches",
         "no_published_draws",
         "tournament_not_found",
+        "missing_scoring_cell",
       ].find((k) => error.message.includes(k));
       throw new DrawError(known ?? "server");
     }
 
-    // Automatski izveštaj u vestima (best-effort — ne sme srušiti završetak)
+    // Automatski izveštaj u vestima (best-effort — ne sme srušiti završetak,
+    // ali koordinator dobija upozorenje ako vest nije objavljena)
     try {
       const report = await buildTournamentReport(supabase, tournamentId);
       if (report) {
-        await supabase.rpc("publish_news", {
+        const { error: newsErr } = await supabase.rpc("publish_news", {
           _naslov: report.naslov,
           _sadrzaj: report.sadrzaj,
           _turnir_id: tournamentId,
         });
-        revalidatePath("/vesti");
+        if (newsErr) vestOk = false;
+        else revalidatePath("/vesti");
       }
     } catch {
-      // izveštaj je opciona pogodnost; završetak turnira je već uspeo
+      vestOk = false; // izveštaj je opciona pogodnost; završetak je već uspeo
     }
   } catch (err) {
     back(`greska=${errCode(err)}`);
     return;
   }
   revalidatePath("/rang-liste");
-  back("ok=zavrsen");
+  back(vestOk ? "ok=zavrsen" : "ok=zavrsenBezVesti");
 }
 
 export async function enterResultAction(formData: FormData) {

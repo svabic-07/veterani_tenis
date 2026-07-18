@@ -3,7 +3,12 @@ import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHero } from "@/components/ui/page-hero";
 import { formatDateRange } from "@/lib/format";
-import { toggleRoleAction, resolveCategoryAction, setRefereeRoleAction } from "./actions";
+import {
+  toggleRoleAction,
+  resolveCategoryAction,
+  setRefereeRoleAction,
+  recalcRankingsAction,
+} from "./actions";
 import { NewTournamentForm } from "./new-tournament-form";
 import { AssignRefereeForm } from "./assign-referee-form";
 
@@ -373,6 +378,21 @@ export default async function KoordinatorPage({
             </tbody>
           </table>
         </div>
+      </section>
+
+      {/* Rang liste */}
+      <section className="mb-8 rounded-2xl border border-line bg-card p-5 shadow-sm">
+        <h2 className="font-display text-lg font-bold text-navy">{t("rankingsTitle")}</h2>
+        <p className="mt-1 text-sm text-muted">{t("rankingsHint")}</p>
+        <form action={recalcRankingsAction} className="mt-3">
+          <input type="hidden" name="locale" value={locale} />
+          <button
+            type="submit"
+            className="rounded-xl border border-line2 px-4 py-2 text-sm font-semibold text-navy transition hover:border-navy"
+          >
+            {t("recalcRankings")}
+          </button>
+        </form>
       </section>
 
       {/* Audit log */}

@@ -98,11 +98,16 @@ export default async function KluboviPage({
           <ul className="overflow-hidden rounded-2xl border border-line bg-card">
             {(clubs ?? []).map((c, i) => (
               <li key={c.id} className={`flex flex-wrap items-center gap-2 px-4 py-2 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}>
-                <span className="min-w-0 flex-1 truncate font-semibold text-navy">{c.naziv}</span>
-                <form action={updateClubCityAction} className="flex items-center gap-1.5">
+                <form action={updateClubCityAction} className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
                   <input type="hidden" name="locale" value={locale} />
                   <input type="hidden" name="klubId" value={c.id} />
                   <input type="hidden" name="q" value={q} />
+                  <input
+                    type="text"
+                    name="naziv"
+                    defaultValue={c.naziv}
+                    className="min-w-40 flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm font-semibold text-navy outline-none focus:border-line2 focus:bg-bg"
+                  />
                   <input
                     type="text"
                     name="grad"

@@ -290,6 +290,9 @@
     "scoringTables": "Bodovne tablice",
     "scoringTablesLead": "Uredi vrednosti bodova po dostignutom kolu (model: klasični).",
     "scoringModelKlasicni": "Model: klasični (napredovanje). Vrednosti su bodovi po dostignutom kolu; „utešni“ = poraz u 1. kolu.",
+    "scoringModelSviBoduju": "Model: „svi boduju“ (Master-stil). Bodovi = plasman (pobednik/finale/polufinale) + svaka pobeda u grupi; učesnik bez pobede dobija fiksne bodove. „Rezerva“ se ne obračunava automatski. Vrednosti ne zavise od kostura.",
+    "modelKlasicni": "Klasični",
+    "modelSviBoduju": "Svi boduju",
     "backToPanel": "Nazad na panel",
     "skeleton": "Kostur",
     "save": "Sačuvaj",
@@ -312,9 +315,16 @@
       "sesnaestina": "Šesnaestina",
       "tridesetdvojina": "Tridesetdvojina",
       "sezdesetcetvrtina": "Šezdesetčetvrtina",
-      "utesni": "Utešni"
+      "utesni": "Utešni",
+      "pobeda_u_grupi": "Pobeda u grupi",
+      "bez_pobede": "Bez pobede",
+      "rezerva": "Rezerva"
     },
+    "rankingsTitle": "Rang liste",
+    "rankingsHint": "Rang se automatski preračunava svakog ponedeljka u 03:00 (bodovi stariji od 52 nedelje ispadaju). Po potrebi pokrenite preračun odmah.",
+    "recalcRankings": "Preračunaj rang sada",
     "ok": {
+      "rang": "Rang liste su preračunate.",
       "uloga": "Uloga je ažurirana.",
       "turnir": "Turnir je kreiran.",
       "sudija": "Sudija je dodeljen.",
@@ -333,6 +343,7 @@
       "vestIzmena": "Vest je ažurirana."
     },
     "err": {
+      "rang": "Preračun ranga nije uspeo.",
       "zahtev": "Neispravan zahtev.",
       "auth": "Prijavite se ponovo.",
       "samoodbrana": "Ne možete sami sebi oduzeti admin ulogu.",
@@ -495,6 +506,7 @@
       "ponisten": "Radni žreb je poništen.",
       "rezultat": "Rezultat je sačuvan — pobednik je prošao u sledeće kolo.",
       "zavrsen": "Turnir je završen — bodovi su obračunati i rang liste ažurirane.",
+      "zavrsenBezVesti": "Turnir je završen i bodovi obračunati, ali automatska vest NIJE objavljena — objavite je ručno u koordinatorskom panelu (Vesti).",
       "prijava": "Igrač je prijavljen.",
       "odjava": "Prijava je uklonjena.",
       "satnica": "Satnica je sačuvana.",
@@ -516,6 +528,7 @@
       "unresolved_matches": "Svi mečevi moraju biti rešeni pre završetka.",
       "no_published_draws": "Nema objavljenih žrebova.",
       "tournament_not_found": "Turnir nije pronađen.",
+      "missing_scoring_cell": "U bodovnoj tablici nedostaje vrednost za ovu seriju/kostur/kolo — dopunite je u koordinatorskom panelu (Bodovne tablice) pa pokušajte ponovo.",
       "not_enough_entries": "Premalo prijava za žreb (minimum 3).",
       "draw_published": "Žreb je već objavljen — opoziv radi koordinator.",
       "not_working_draw": "Žreb nije u radnom statusu.",

@@ -1,6 +1,6 @@
 # TVS — Status projekta
 
-> **Poslednje ažurirano:** 2026-07-16 (kraj dana)
+> **Poslednje ažurirano:** 2026-07-18
 > **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga ✅ radi na produkciji + samoprijava singl + zahtev za promenu kategorije; ostaje custom SMTP) · 3 ✅ (žreb → rezultati → obračun, sudijski portal + **strukturisan unos rezultata, ručni nosioci, satnica default, auto-izveštaj u vestima**) · 4 ✅ jezgro (koordinatorski **mini-admin**: turniri/igrači/gosti/klubovi/uloge/uplate/vesti/duplikati; ostaje SMTP blast, model B tablica) · 5 🔶 (dvojezičnost ✅ + PWA ✅ + redizajn ✅, ostaje offline/E2E)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
@@ -94,6 +94,9 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 19. `…0716160000_koordinator_mini_admin` — `set_referee_role()` (koordinator dodeljuje/oduzima ulogu sudija, uz audit)
 20. `…0716170000_sekretar` — **`payments`** (članarine/kotizacije; owner read) + **`news`** (CMS v1; javno čitanje objavljenih) + **`merge_players()`** (spajanje duplikata: sve reference → glavni, uz audit)
 21. `…0716180000_publish_news` — `publish_news()` (staff ili direktor turnira; auto-izveštaj na „ZAVRŠI TURNIR")
+22. `…0718100000_svi_boduju_master` — **Model B „svi boduju"** (Master-stil: pobednik 800 · finale 600 · PF 400 · pobeda u grupi 200 · bez pobede 500 · rezerva 200; kanonski kostur 8, sve serije uklj. Master) + **finish_tournament v2**: validacija pokrivenosti tablice (`missing_scoring_cell` umesto tihog 0), model iz sezone turnira, `n_best` iz sezone turnira
+23. `…0718110000_weekly_rankings_cron` — **`recalc_weekly_rankings()`** (pun nedeljni snapshot svih parova) + **pg_cron** `tvs-weekly-rankings` (pon 03:00 UTC) + `admin_recalc_rankings()` (ručno iz panela, uz audit)
+24. `…0718120000_atomic_admin_fixes` — **`admin_update_player()`** (atomska izmena igrača uklj. ime/prezime + kontakt) + **merge_players v2** (dedup `ranking_points` po turniru×kat×disc + preračun ranga posle spajanja)
 
 ⚠️ **Deploy migracija:** `supabase db push` NEBEZBEDAN (remote history koristi druge timestampove nego lokalni fajlovi). Migracije 13–15 primenjene preko Management API `database/query` + upis u `schema_migrations`.
 
@@ -150,7 +153,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 - **`/koordinator`**: novi turnir (naziv/serija/sistem/klub/direktor po imenu/datumi/rok), lista turnira, **korisnici i uloge** (admin klikom dodeljuje/oduzima; zaštita da admin sebi ne skine admin), audit trag (poslednjih 15).
 - **`/sudija/[slug]`** za staff: „Opozovi žreb", „Korekcije rezultata" (poništavanje po meču), „Ponovo otvori turnir" (checkbox potvrda); **konkurencije**: dodavanje (kategorija × disciplina) i brisanje praznih.
 
-**Ostaje u Fazi 4:** model `svi_boduju` + Master tablica, nedeljni cron obračun (sada se rang računa na „ZAVRŠI TURNIR"), evidencija uplata, disciplinska, **odobravanje članova** (nedovoljno definisano), spajanje duplikata igrača (17 iz migracije), CMS vesti. *(uredive bodovne tablice UI, dodela sudije, odobravanje kategorije — ✅ 2026-07-15, vidi dole)*
+**Ostaje u Fazi 4:** SMTP blast (masovni email sa segmentima), disciplinska, **odobravanje članova** (nedovoljno definisano), aktivacioni kodovi za 656 članova bez emaila. *(uredive bodovne tablice UI, dodela sudije, odobravanje kategorije — ✅ 2026-07-15; `svi_boduju` + Master tablica + validacija obračuna, nedeljni cron rang, atomske korekcije — ✅ 2026-07-18, vidi dole)*
 
 ### 🔶 Faza 5 — dvojezičnost + PWA + polish (2026-07-14, u toku)
 - **EN prevod:** auditom potvrđena parnost `sr.json`/`en.json` (310 = 310 ključeva), statične stranice (`o-savezu`/`kontakt`/`pravilnik`) kroz `L(sr,en)` helper — prevod je kompletan (sistem građen dvojezično od početka). Sitne popravke: metadata fallback naslovi (`Igrač`/`Player`, `Turnir`/`Tournament`) locale-aware; `o-savezu` statistika ~2.600 → ~2.900.
@@ -181,6 +184,15 @@ Koordinator = sekretar saveza, sve kroz UI bez programera:
 - **Uloge:** koordinator klikom dodeljuje/oduzima ulogu **sudija** (`set_referee_role`); ostale uloge i dalje samo admin.
 - **Auth fix:** Supabase Site URL + redirect allow-lista → produkcija (magic link više ne vodi na localhost); prijava radi na produkciji.
 - Test podaci: turnir „Test 8" (kreiran kroz UI) + „Test Sudijski — Žreb 16" (engine test) — obrisati pred go-live.
+
+### ✅ Integritet obračuna + nedeljni rang + atomske korekcije (2026-07-18)
+Po zajedničkoj analizi Claude + Codex (GPT 5.6) — prioritet: zaštita zvaničnog obračuna.
+- **Model B „svi boduju"** (migracija 22): tablica po spec-u (uredivo u panelu, novi tab „Svi boduju" na `/koordinator/bodovne-tablice`; ne zavisi od kostura); obračun = plasman (pobednik/finale/PF) + pobede pre završnice × „pobeda u grupi", donja granica „bez pobede" za svakog učesnika. Radi za grupe (grupa/grupa5) i eliminaciju; model se bira na turniru ili nasleđuje iz sezone (`default_scoring`).
+- **Validacija tablice u `finish_tournament`**: nedostajuća ćelija → greška `missing_scoring_cell:serija:kostur:kolo` (prevedena poruka u sudijskom UI) umesto tihog 0 bodova. `n_best` i model sada iz **sezone turnira** (ne globalno aktivne).
+- **Nedeljni cron rang** (migracija 23): pg_cron ponedeljkom 03:00 UTC — bodovi stariji od 52 nedelje ispadaju i bez novog turnira; dugme „Preračunaj rang sada" u panelu (audit).
+- **Atomske korekcije** (migracija 24 + akcije): izmena igrača kroz `admin_update_player` RPC (uklj. **ime/prezime**); izmena **naziva kluba**; novi turnir briše turnir ako konkurencije ne prođu; premeštanje prijave prvo upisuje novu pa briše staru; gost bez siročića; auto-vest javlja kad NIJE objavljena (`ok=zavrsenBezVesti`); `merge_players` dedup bodova istog turnira + preračun ranga.
+- Testirano SQL simulacijom (rollback) na produkcionoj bazi: regresija klasičnog obračuna 0 razlika; svi_boduju 28/28 učesnika boduje; grupa5 tačno po spec-u (P1=800, P2=600, P3=400+2×200, P4=400+200, P5=500); `missing_scoring_cell` validacija; model iz sezone; recalc 528 redova. Migracije primenjene preko Management API + `schema_migrations`.
+- ⚠️ Codex-ovi preostali nalazi (u backlog): uplate bez veze sa turnirom kroz UI, CMS bez izmene vesti, audit samo 15 zapisa, greške baze izgledaju kao prazne liste, sezona bez UI.
 
 ### 🟢 Sitnice (Faza 6 / pred go-live)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).

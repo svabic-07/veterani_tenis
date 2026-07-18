@@ -10,6 +10,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export async function updateScoringTableAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "sr");
   const kostur = String(formData.get("kostur") ?? "32");
+  const model = formData.get("model") === "svi_boduju" ? "svi_boduju" : "klasicni";
 
   const updates: { id: string; bodovi: number }[] = [];
   for (const [key, value] of formData.entries()) {
@@ -25,7 +26,7 @@ export async function updateScoringTableAction(formData: FormData) {
 
   revalidatePath("/koordinator/bodovne-tablice");
   redirect({
-    href: `/koordinator/bodovne-tablice?kostur=${kostur}&${error ? "greska=bodovi" : "ok=bodovi"}`,
+    href: `/koordinator/bodovne-tablice?model=${model}&kostur=${kostur}&${error ? "greska=bodovi" : "ok=bodovi"}`,
     locale,
   });
 }

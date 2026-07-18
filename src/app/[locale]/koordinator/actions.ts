@@ -65,7 +65,7 @@ export async function assignRefereeAction(formData: FormData) {
   const { error } = await supabase.rpc("assign_tournament_director", {
     _tournament_id: turnirId,
     _player_id: playerId as string, // funkcija prima NULL (skini sudiju)
-    _direktor_ime: direktorIme,
+    _direktor_ime: direktorIme as string, // funkcija prima NULL
   });
   if (error) back(formData, "greska=sudija");
   back(formData, "ok=sudija");
@@ -164,13 +164,18 @@ export async function createTournamentAction(formData: FormData) {
     sistem === "kvalitativni"
       ? ["I", "II", "III", "IV", "V"]
       : ["30", "35", "40", "45", "50", "55", "60", "65", "70", "75"];
-  await supabase.from("tournament_events").insert(
+  const { error: evErr } = await supabase.from("tournament_events").insert(
     kategorije.map((kategorija) => ({
       turnir_id: created.id,
       kategorija,
       disciplina: "singl" as const,
     })),
   );
+  if (evErr) {
+    // ne ostavljaj turnir bez konkurencija — obriši pa prijavi grešku
+    await supabase.from("tournaments").delete().eq("id", created.id);
+    back(formData, "greska=turnir");
+  }
 
   back(formData, `ok=turnir&slug=${legacyId}`);
 }
@@ -194,6 +199,15 @@ function backTo(formData: FormData, path: string, query: string): never {
   throw new Error("unreachable");
 }
 
+/** Ručni preračun nedeljnog ranga (RPC: is_staff + audit); inače cron ponedeljkom. */
+export async function recalcRankingsAction(formData: FormData) {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("admin_recalc_rankings");
+  if (error) back(formData, "greska=rang");
+  revalidatePath("/rang-liste");
+  back(formData, "ok=rang");
+}
+
 /** Novi klub (RLS: staff write). */
 export async function addClubAction(formData: FormData) {
   const naziv = String(formData.get("naziv") ?? "").trim().slice(0, 120);
@@ -208,16 +222,23 @@ export async function addClubAction(formData: FormData) {
   backTo(formData, "/koordinator/klubovi", "ok=klub");
 }
 
-/** Izmena grada kluba (RLS: staff write) — grad puni autofill „Mesto" na turnirima. */
+/** Izmena kluba: naziv + grad (RLS: staff write) — grad puni autofill „Mesto" na turnirima. */
 export async function updateClubCityAction(formData: FormData) {
   const klubId = String(formData.get("klubId") ?? "");
+  const naziv = String(formData.get("naziv") ?? "").trim().slice(0, 120);
   const grad = String(formData.get("grad") ?? "").trim().slice(0, 80) || null;
   const q = String(formData.get("q") ?? "");
   if (!UUID_RE.test(klubId)) backTo(formData, "/koordinator/klubovi", "greska=zahtev");
 
   const supabase = await createClient();
-  const { error } = await supabase.from("clubs").update({ grad }).eq("id", klubId);
-  if (error) backTo(formData, "/koordinator/klubovi", "greska=klub");
+  // naziv se menja samo ako je unet (prazno polje ne briše naziv)
+  const { error } = await supabase
+    .from("clubs")
+    .update(naziv.length >= 2 ? { naziv, grad } : { grad })
+    .eq("id", klubId);
+  if (error) {
+    backTo(formData, "/koordinator/klubovi", `greska=${error.code === "23505" ? "klubPostoji" : "klub"}`);
+  }
   backTo(formData, "/koordinator/klubovi", `ok=grad${q ? `&q=${encodeURIComponent(q)}` : ""}`);
 }
 
@@ -255,13 +276,16 @@ export async function addPlayerAction(formData: FormData) {
   backTo(formData, "/koordinator/clanovi", `ok=${gost ? "gost" : "igrac"}`);
 }
 
-/** Izmena podataka igrača + kontakt (RLS: players/player_private staff write). */
+/** Izmena podataka igrača + kontakt — atomski RPC (is_staff + audit).
+ *  Ime/prezime se menjaju samo ako su uneti (prazno polje ne briše). */
 export async function updatePlayerAction(formData: FormData) {
   const playerId = String(formData.get("playerId") ?? "");
   const q = String(formData.get("q") ?? "").slice(0, 60);
   const backQ = q ? `&q=${encodeURIComponent(q)}` : "";
   if (!UUID_RE.test(playerId)) backTo(formData, "/koordinator/clanovi", `greska=zahtev${backQ}`);
 
+  const ime = String(formData.get("ime") ?? "").trim().slice(0, 60);
+  const prezime = String(formData.get("prezime") ?? "").trim().slice(0, 60);
   const godisteRaw = String(formData.get("godiste") ?? "").trim();
   const godiste = /^\d{4}$/.test(godisteRaw) ? Number(godisteRaw) : null;
   const klubId = String(formData.get("klubId") ?? "");
@@ -274,19 +298,19 @@ export async function updatePlayerAction(formData: FormData) {
   const telefon = String(formData.get("telefon") ?? "").trim().slice(0, 40) || null;
 
   const supabase = await createClient();
-  const { error: e1 } = await supabase
-    .from("players")
-    .update({
-      godiste,
-      klub_id: UUID_RE.test(klubId) ? klubId : null,
-      kategorija,
-      is_active: aktivan,
-    })
-    .eq("id", playerId);
-  const { error: e2 } = await supabase
-    .from("player_private")
-    .upsert({ player_id: playerId, email, telefon }, { onConflict: "player_id" });
-  if (e1 || e2) backTo(formData, "/koordinator/clanovi", `greska=igrac${backQ}`);
+  // funkcija prima NULL za godište/klub/kategoriju/kontakt (tipovi ih generišu kao obavezne)
+  const { error } = await supabase.rpc("admin_update_player", {
+    _player_id: playerId,
+    _ime: ime,
+    _prezime: prezime,
+    _godiste: godiste as number,
+    _klub_id: (UUID_RE.test(klubId) ? klubId : null) as string,
+    _kategorija: kategorija as NonNullable<typeof kategorija>,
+    _is_active: aktivan,
+    _email: email as string,
+    _telefon: telefon as string,
+  });
+  if (error) backTo(formData, "/koordinator/clanovi", `greska=igrac${backQ}`);
   backTo(formData, "/koordinator/clanovi", `ok=izmena${backQ}`);
 }
 

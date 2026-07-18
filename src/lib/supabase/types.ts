@@ -798,13 +798,13 @@ export type Database = {
           direktor_id: string | null
           direktor_ime: string | null
           domacin: string | null
-          kontakt: string | null
-          lokacija: string | null
           id: string
           klub_id: string | null
+          kontakt: string | null
           lat: number | null
           legacy_id: string | null
           lng: number | null
+          lokacija: string | null
           mesto: string | null
           naziv: string
           rok_prijave: string | null
@@ -822,13 +822,13 @@ export type Database = {
           direktor_id?: string | null
           direktor_ime?: string | null
           domacin?: string | null
-          kontakt?: string | null
-          lokacija?: string | null
           id?: string
           klub_id?: string | null
+          kontakt?: string | null
           lat?: number | null
           legacy_id?: string | null
           lng?: number | null
+          lokacija?: string | null
           mesto?: string | null
           naziv: string
           rok_prijave?: string | null
@@ -846,13 +846,13 @@ export type Database = {
           direktor_id?: string | null
           direktor_ime?: string | null
           domacin?: string | null
-          kontakt?: string | null
-          lokacija?: string | null
           id?: string
           klub_id?: string | null
+          kontakt?: string | null
           lat?: number | null
           legacy_id?: string | null
           lng?: number | null
+          lokacija?: string | null
           mesto?: string | null
           naziv?: string
           rok_prijave?: string | null
@@ -950,8 +950,27 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_recalc_rankings: { Args: never; Returns: undefined }
+      admin_update_player: {
+        Args: {
+          _email: string
+          _godiste: number
+          _ime: string
+          _is_active: boolean
+          _kategorija: Database["public"]["Enums"]["quality_category"]
+          _klub_id: string
+          _player_id: string
+          _prezime: string
+          _telefon: string
+        }
+        Returns: undefined
+      }
       assign_tournament_director: {
-        Args: { _player_id: string | null; _tournament_id: string; _direktor_ime?: string | null }
+        Args: {
+          _direktor_ime?: string
+          _player_id: string
+          _tournament_id: string
+        }
         Returns: undefined
       }
       can_manage_event: { Args: { _event_id: string }; Returns: boolean }
@@ -983,6 +1002,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      merge_players: {
+        Args: { _dup: string; _keep: string }
+        Returns: undefined
+      }
       my_player_candidates: {
         Args: never
         Returns: {
@@ -994,15 +1017,12 @@ export type Database = {
           zauzet: boolean
         }[]
       }
-      merge_players: {
-        Args: { _keep: string; _dup: string }
-        Returns: undefined
-      }
-      publish_news: {
-        Args: { _naslov: string; _sadrzaj: string; _turnir_id?: string | null }
-        Returns: undefined
-      }
       my_player_id: { Args: never; Returns: string }
+      publish_news: {
+        Args: { _naslov: string; _sadrzaj: string; _turnir_id?: string }
+        Returns: undefined
+      }
+      recalc_weekly_rankings: { Args: never; Returns: undefined }
       reopen_tournament: {
         Args: { _tournament_id: string }
         Returns: undefined
@@ -1018,11 +1038,11 @@ export type Database = {
         Args: { _approve: boolean; _request_id: string }
         Returns: undefined
       }
+      revoke_draw: { Args: { _draw_id: string }; Returns: undefined }
       set_referee_role: {
-        Args: { _user_id: string; _grant: boolean }
+        Args: { _grant: boolean; _user_id: string }
         Returns: undefined
       }
-      revoke_draw: { Args: { _draw_id: string }; Returns: undefined }
       update_scoring_points: { Args: { _updates: Json }; Returns: number }
     }
     Enums: {
