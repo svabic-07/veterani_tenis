@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
 > **Poslednje ažurirano:** 2026-07-18
-> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga ✅ radi na produkciji + samoprijava singl + zahtev za promenu kategorije; ostaje custom SMTP) · 3 ✅ (žreb → rezultati → obračun, sudijski portal + **strukturisan unos rezultata, ručni nosioci, satnica default, auto-izveštaj u vestima**) · 4 ✅ jezgro (koordinatorski **mini-admin**: turniri/igrači/gosti/klubovi/uloge/uplate/vesti/duplikati; ostaje SMTP blast, model B tablica) · 5 🔶 (dvojezičnost ✅ + PWA ✅ + redizajn ✅, ostaje offline/E2E)
+> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga ✅ radi na produkciji + samoprijava singl + zahtev za promenu kategorije; ostaje custom SMTP) · 3 ✅ (žreb → rezultati → obračun, sudijski portal + **strukturisan unos rezultata, ručni nosioci, satnica default, auto-izveštaj u vestima**) · 4 ✅ jezgro (koordinatorski **mini-admin**: turniri/igrači/gosti/klubovi/uloge/uplate/vesti/duplikati; ostaje SMTP blast, model B tablica) · 5 🔶 (dvojezičnost ✅ + PWA ✅ + redizajn ✅, ostaje E2E)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -97,6 +97,7 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 22. `…0718100000_svi_boduju_master` — **Model B „svi boduju"** (Master-stil: pobednik 800 · finale 600 · PF 400 · pobeda u grupi 200 · bez pobede 500 · rezerva 200; kanonski kostur 8, sve serije uklj. Master) + **finish_tournament v2**: validacija pokrivenosti tablice (`missing_scoring_cell` umesto tihog 0), model iz sezone turnira, `n_best` iz sezone turnira
 23. `…0718110000_weekly_rankings_cron` — **`recalc_weekly_rankings()`** (pun nedeljni snapshot svih parova) + **pg_cron** `tvs-weekly-rankings` (pon 03:00 UTC) + `admin_recalc_rankings()` (ručno iz panela, uz audit)
 24. `…0718120000_atomic_admin_fixes` — **`admin_update_player()`** (atomska izmena igrača uklj. ime/prezime + kontakt) + **merge_players v2** (dedup `ranking_points` po turniru×kat×disc + preračun ranga posle spajanja)
+25. `…0718140000_referee_reports` — **`referee_reports`** (izveštaj sudije: loptice dodeljeno/potrošeno, sporne situacije, napomena; interno — RLS staff + direktor turnira)
 
 ⚠️ **Deploy migracija:** `supabase db push` NEBEZBEDAN (remote history koristi druge timestampove nego lokalni fajlovi). Migracije 13–15 primenjene preko Management API `database/query` + upis u `schema_migrations`.
 
@@ -146,7 +147,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 - **Satnica**: termin (datetime, čuva se kao pravi trenutak — unos/prikaz po beogradskom vremenu) + teren po meču; javna stranica turnira prikazuje sortiranu satnicu.
 - **Zamena pozicija** u radnom eliminacionom žrebu (dva select-a → zameni; bye se ponovo propagira). Za grupe: ponovni žreb.
 
-**Ostaje u Fazi 3 (niži prioritet):** evidencija loptica + izveštaj koordinatoru, offline tolerancija, štampanje satnice.
+**Faza 3 — kompletirana 2026-07-18:** evidencija loptica + izveštaj koordinatoru ✅, offline tolerancija ✅, štampanje satnice ✅ (vidi dole).
 
 ### 🔶 Faza 4 — koordinatorski panel, jezgro (2026-07-14)
 - Migracija `…0714110000_koordinator`: **`audit_log`** (upis samo kroz funkcije) + korekcije kao SECURITY DEFINER funkcije sa auditom: **`revoke_draw`** (opoziv objavljenog žreba), **`clear_match_result`** (poništavanje rezultata + čišćenje propagacije; blokira ako je nizvodni meč rešen; grupni mečevi prazne PF), **`reopen_tournament`** (završen → ponovo otvoren: briše bodove turnira + preračun ranga), **`admin_list_users`** (pregled naloga sa ulogama). Sve staff-only. Testirano SQL simulacijom (rollback).
@@ -193,6 +194,13 @@ Po zajedničkoj analizi Claude + Codex (GPT 5.6) — prioritet: zaštita zvanič
 - **Atomske korekcije** (migracija 24 + akcije): izmena igrača kroz `admin_update_player` RPC (uklj. **ime/prezime**); izmena **naziva kluba**; novi turnir briše turnir ako konkurencije ne prođu; premeštanje prijave prvo upisuje novu pa briše staru; gost bez siročića; auto-vest javlja kad NIJE objavljena (`ok=zavrsenBezVesti`); `merge_players` dedup bodova istog turnira + preračun ranga.
 - Testirano SQL simulacijom (rollback) na produkcionoj bazi: regresija klasičnog obračuna 0 razlika; svi_boduju 28/28 učesnika boduje; grupa5 tačno po spec-u (P1=800, P2=600, P3=400+2×200, P4=400+200, P5=500); `missing_scoring_cell` validacija; model iz sezone; recalc 528 redova. Migracije primenjene preko Management API + `schema_migrations`.
 - ⚠️ Codex-ovi preostali nalazi (u backlog): uplate bez veze sa turnirom kroz UI, CMS bez izmene vesti, audit samo 15 zapisa, greške baze izgledaju kao prazne liste, sezona bez UI.
+
+### ✅ Sudijski paket: zaključavanje + izveštaj + štampa + offline (2026-07-18, popodne)
+- **Posle „ZAVRŠI TURNIR" nema izmena:** `guardOpen` u sudijskim akcijama (svih 14 mutacija odbija izmene na završenom turniru — jedini put je koordinatorsko „Ponovo otvori"); UI sakriva podešavanja/prijave/satnicu/kreiranje žreba (read-only pregled).
+- **Javna stranica završenog turnira:** sekcija „Osvojeni bodovi" po konkurenciji (iz `ranking_points`, radi i za istorijske turnire) — uz postojeći kostur, grupe i 🏆 pobednike.
+- **Izveštaj sudije** (migracija 25): loptice dodeljeno/potrošeno + sporne situacije + napomena; upisiv i posle završetka; koordinatorski panel prikazuje poslednjih 10 („Izveštaji sudija", sporne istaknute).
+- **Štampanje satnice:** `/turnir/[slug]/satnica` — tabela po danima (vreme/teren/meč/konkurencija), dugme Štampaj, print CSS (header/footer sajta `print:hidden`); linkovi sa javne stranice i sudijskog portala.
+- **Offline (PWA):** `public/sw.js` — network-first (keš SAMO kad mreže nema — nikad zastareo sadržaj online), `/_next/static` cache-first (hešovano), `/api`+`/prijava`+`/nalog` se ne keširaju; odvojeni ključevi HTML vs RSC (Next prefetch ne gazi HTML); `offline.html` fallback. **Verifikovano Playwright-om:** keširana stranica se otvara sa ugašenim serverom, nekeširana pada na offline poruku.
 
 ### 🟢 Sitnice (Faza 6 / pred go-live)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
