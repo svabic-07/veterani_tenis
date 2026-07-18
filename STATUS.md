@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
-> **Poslednje ažurirano:** 2026-07-16
-> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga + **samoprijava singl** + **zahtev za promenu kategorije**, čeka email konfig.) · 3 ✅ (žreb → rezultati → obračun, sudijski portal) · 4 🔶 (koordinatorski panel — jezgro + **uredive bodovne tablice, dodela sudije, odobravanje kategorije**) · 5 🔶 (dvojezičnost ✅ + PWA ✅ + **redizajn ✅**, ostaje offline/E2E)
+> **Poslednje ažurirano:** 2026-07-16 (kraj dana)
+> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga ✅ radi na produkciji + samoprijava singl + zahtev za promenu kategorije; ostaje custom SMTP) · 3 ✅ (žreb → rezultati → obračun, sudijski portal + **strukturisan unos rezultata, ručni nosioci, satnica default, auto-izveštaj u vestima**) · 4 ✅ jezgro (koordinatorski **mini-admin**: turniri/igrači/gosti/klubovi/uloge/uplate/vesti/duplikati; ostaje SMTP blast, model B tablica) · 5 🔶 (dvojezičnost ✅ + PWA ✅ + redizajn ✅, ostaje offline/E2E)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -88,6 +88,12 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 13. `…0715120000_self_entry` — **samoprijava igrača (singl)**: RLS `entries self enter/withdraw` + `can_self_enter_event()` + `my_player_id()` + trigger snapshot bodova (ne mogu se lažirati)
 14. `…0715140000_category_requests` — **`category_change_requests`** + `request_status` enum; `request_category_change()` (na `/nalog`) i `resolve_category_change()` (staff, menja `players.kategorija`) — uz audit
 15. `…0715150000_coordinator_tools` — `update_scoring_points()` (uredive bodovne tablice), `admin_list_referees()`, `assign_tournament_director()` — uz audit
+16. `…0716120000_direktor_ime` — `tournaments.direktor_ime` (sudija kao slobodan tekst; može i ne-igrač)
+17. `…0716140000_tournament_contact` — `tournaments.domacin/kontakt/lokacija` (kao stari sajt; backfill sa ref sajta: 119 sudija, 121 kontakt, 41 lokacija)
+18. `…0716150000_assign_director_name` — `assign_tournament_director` prima i ime (dodela sudije comboboxom)
+19. `…0716160000_koordinator_mini_admin` — `set_referee_role()` (koordinator dodeljuje/oduzima ulogu sudija, uz audit)
+20. `…0716170000_sekretar` — **`payments`** (članarine/kotizacije; owner read) + **`news`** (CMS v1; javno čitanje objavljenih) + **`merge_players()`** (spajanje duplikata: sve reference → glavni, uz audit)
+21. `…0716180000_publish_news` — `publish_news()` (staff ili direktor turnira; auto-izveštaj na „ZAVRŠI TURNIR")
 
 ⚠️ **Deploy migracija:** `supabase db push` NEBEZBEDAN (remote history koristi druge timestampove nego lokalni fajlovi). Migracije 13–15 primenjene preko Management API `database/query` + upis u `schema_migrations`.
 
@@ -162,6 +168,20 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 - **Podaci — dopuna rezultata sa ref sajta:** turnir **Oktagon Open Pančevo 11.07.2026** (156) — pun rezultati (27 mečeva, 4 kat) + bodovi + rang; **ITF MT400 Serbia Open 16.05.2026** (149) — bodovi/rang (ref sajt nema detalje mečeva). Ostalih 8 praznih turnira nema podatke ni na ref sajtu. Rezultati skinuti iz `data-json` ref stranica (igrači upareni po `legacy_id` = ref `clan_id`).
 - **Vercel:** glavni projekat popravljen (Framework Preset), demo projekat `veterani-tenis-demo` obrisan, naplata rešena. `/en` radi (bila lažna uzbuna). not-found stranica → client component (prevodi se razrešavaju).
 
+### ✅ Koordinatorski mini-admin + sudijski UX (2026-07-16, popodne)
+Koordinator = sekretar saveza, sve kroz UI bez programera:
+- **Panel:** aktivni/predstojeći turniri na vrhu (novi kreiran odmah vidljiv), završeni u sklopivoj sekciji; naziv → javna stranica, „Upravljaj" → sudijski portal; linkovi: Klubovi · Članovi · Uplate · Vesti · Bodovne tablice.
+- **Novi turnir:** sudija combobox (kucaš → predlozi igrača; može i slobodno ime — `direktor_ime`), klub → **Mesto autofill** (iz `clubs.grad`), polja Domaćin/Kontakt/Lokacija; **automatski kreira konkurencije** (kvalitativni I–V / starosni 30–75, singl).
+- **Upravljanje turnirom** (`/sudija/[slug]`, staff/direktor): ⚙️ Podešavanja (svi podaci turnira), prijave (dodaj/ukloni/pretraga), **„Dodaj gosta"** (kreira ne-člana + odmah prijava), **„Premesti u…"** (prebaci prijavu u drugu kategoriju — bodovi za nošenje se preračunaju), **ručne oznake nosilaca** (N polje; fallback automatski po bodovima).
+- **Žreb:** broj nosilaca **uvek po kosturu** (8→2, 16→4…), i bez rang bodova; **bodovi za nošenje vidljivi u žrebu** (uz ime, dok meč nema rezultat).
+- **Unos rezultata:** strukturisan po setovima (boks po set), auto-fokus, auto-dodavanje sledećeg seta, **auto-detekcija pobednika** (ručno pregazivo); satnica: **datum prvog dana predefinisan** (upisuje se samo vreme i teren).
+- **„ZAVRŠI TURNIR" → auto-izveštaj u vestima:** uvod (mesto/datumi/serija/domaćin/sudija) + 🏆 pobednici po konkurencijama + finale/polufinale sa rezultatima (iz ugla pobednika); grupe kao plasman po pobedama (`src/lib/tournament-report.ts`, testirano na stvarnim podacima).
+- **Članovi** (`/koordinator/clanovi`): novi igrač ili gost; **izmena igrača** (godište, kategorija, klub, aktivan, **email** — otključava aktivaciju naloga, telefon); **spajanje duplikata** (`merge_players`); „Kopiraj sve email adrese" (2.034, za BCC).
+- **Klubovi** (`/koordinator/klubovi`): dodavanje + izmena grada (puni autofill Mesta). **Uplate** (`/koordinator/uplate`): članarine/kotizacije po igraču. **Vesti** (`/koordinator/vesti` + javna `/vesti`): CMS v1 (objavi/sakrij/obriši; ISR 5 min).
+- **Uloge:** koordinator klikom dodeljuje/oduzima ulogu **sudija** (`set_referee_role`); ostale uloge i dalje samo admin.
+- **Auth fix:** Supabase Site URL + redirect allow-lista → produkcija (magic link više ne vodi na localhost); prijava radi na produkciji.
+- Test podaci: turnir „Test 8" (kreiran kroz UI) + „Test Sudijski — Žreb 16" (engine test) — obrisati pred go-live.
+
 ### 🟢 Sitnice (Faza 6 / pred go-live)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
 - **Pravi domen** na Vercel (sada „test" `project-82ord.vercel.app`) → projekat `veterani_tenis` → Settings → Domains.
@@ -196,6 +216,13 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 | 2026-07-16 | `Turniri + kalendar` | Završeni bg + sortiranje konkurencija + 🏆 pobednik + round-robin grupe; kalendar particija po datumu + „Prijavi se" |
 | 2026-07-16 | `fix(i18n) not-found` | not-found kao client component (prevodi se razrešavaju) |
 | 2026-07-16 | *(bez commita — podaci u bazi)* | Turnir 156 (pun rezultati+bodovi) i 149 (bodovi) sa ref sajta; Vercel framework fix; demo obrisan |
+| 2026-07-16 | `Sudijski: unos rezultata` | Strukturisan unos po setovima + auto-fokus + auto-pobednik |
+| 2026-07-16 | `Novi turnir + kontakt` | Sudija combobox, klub→mesto autofill, domaćin/kontakt/lokacija, broj učesnika klikabilan |
+| 2026-07-16 | `Koordinator mini-admin` | Sudijska uloga, klubovi, članovi/gosti, email adrese (BCC) |
+| 2026-07-16 | `Sekretar-paket` | Izmena turnira/igrača, spajanje duplikata, uplate, vesti (CMS v1) |
+| 2026-07-16 | `Panel + prijave UX` | Aktivni turniri na vrhu; premeštanje prijave; auto-konkurencije; „Upravljaj" |
+| 2026-07-16 | `Žreb: nosioci + bodovi` | Ručne oznake nosilaca; broj nosilaca uvek po kosturu; bodovi u žrebu; satnica default datum |
+| 2026-07-16 | `Auto-izveštaj` | „ZAVRŠI TURNIR" objavljuje izveštaj u vestima (pobednici, finale, PF) |
 
 ---
 
