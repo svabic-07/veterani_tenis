@@ -491,7 +491,12 @@ export default async function SudijaTurnirPage({
 
               {draw && (
                 <div className="mt-4">
-                  <DrawBracket draw={draw} />
+                  <DrawBracket
+                    draw={draw}
+                    pointsByPlayer={Object.fromEntries(
+                      entries.map((e) => [e.players!.id, e.bodovi_snapshot]),
+                    )}
+                  />
                 </div>
               )}
 

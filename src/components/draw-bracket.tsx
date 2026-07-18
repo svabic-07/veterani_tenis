@@ -28,11 +28,13 @@ function MatchRow({
   slot,
   byeLabel,
   tbdLabel,
+  points,
 }: {
   m: DrawMatchRow;
   slot: 1 | 2;
   byeLabel: string;
   tbdLabel: string;
+  points?: number | null;
 }) {
   const player = slot === 1 ? m.p1 : m.p2;
   const partner = slot === 1 ? m.partner1 : m.partner2;
@@ -40,6 +42,8 @@ function MatchRow({
   const isWinner = m.winner_slot === slot;
   const label = playerLabel(player, partner);
   const isBye = m.status === "bye" && !player;
+  // bodovi za nošenje — prikaz dok meč nema rezultat (relevantno pre igranja)
+  const showPoints = points != null && m.match_sets.length === 0 && !isWinner;
 
   return (
     <div
@@ -51,6 +55,9 @@ function MatchRow({
         {seed ? <span className="mr-1 font-mono text-[0.7rem] text-clay">[{seed}]</span> : null}
         {label ?? (
           <span className="italic text-muted">{isBye ? byeLabel : tbdLabel}</span>
+        )}
+        {showPoints && (
+          <span className="ml-1.5 font-mono text-[0.7rem] text-muted">{points}</span>
         )}
       </span>
       {m.match_sets.length > 0 && (
@@ -66,17 +73,19 @@ function MatchCard({
   byeLabel,
   tbdLabel,
   statusLabel,
+  pointsByPlayer,
 }: {
   m: DrawMatchRow;
   byeLabel: string;
   tbdLabel: string;
   statusLabel: string | null;
+  pointsByPlayer?: Record<string, number | null>;
 }) {
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-card shadow-sm">
-      <MatchRow m={m} slot={1} byeLabel={byeLabel} tbdLabel={tbdLabel} />
+      <MatchRow m={m} slot={1} byeLabel={byeLabel} tbdLabel={tbdLabel} points={m.p1 ? pointsByPlayer?.[m.p1.id] : null} />
       <div className="border-t border-line" />
-      <MatchRow m={m} slot={2} byeLabel={byeLabel} tbdLabel={tbdLabel} />
+      <MatchRow m={m} slot={2} byeLabel={byeLabel} tbdLabel={tbdLabel} points={m.p2 ? pointsByPlayer?.[m.p2.id] : null} />
       {statusLabel && (
         <div className="border-t border-dashed border-line bg-bg2 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-wide text-muted">
           {statusLabel}
@@ -86,7 +95,13 @@ function MatchCard({
   );
 }
 
-export async function DrawBracket({ draw }: { draw: TournamentDraw }) {
+export async function DrawBracket({
+  draw,
+  pointsByPlayer,
+}: {
+  draw: TournamentDraw;
+  pointsByPlayer?: Record<string, number | null>;
+}) {
   const t = await getTranslations("draw");
 
   const byRound = new Map<number, DrawMatchRow[]>();
@@ -165,6 +180,7 @@ export async function DrawBracket({ draw }: { draw: TournamentDraw }) {
                 <div className="space-y-2">
                   {blk.matches.map((m) => (
                     <MatchCard
+                      pointsByPlayer={pointsByPlayer}
                       key={m.id}
                       m={m}
                       byeLabel={t("bye")}
@@ -191,6 +207,7 @@ export async function DrawBracket({ draw }: { draw: TournamentDraw }) {
                 <div className="space-y-2">
                   {prelimMatches.map((m) => (
                     <MatchCard
+                      pointsByPlayer={pointsByPlayer}
                       key={m.id}
                       m={m}
                       byeLabel={t("bye")}
@@ -209,6 +226,7 @@ export async function DrawBracket({ draw }: { draw: TournamentDraw }) {
                 <div className="flex flex-1 flex-col justify-around gap-2">
                   {(byRound.get(kolo) ?? []).map((m) => (
                     <MatchCard
+                      pointsByPlayer={pointsByPlayer}
                       key={m.id}
                       m={m}
                       byeLabel={t("bye")}

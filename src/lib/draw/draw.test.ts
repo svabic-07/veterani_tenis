@@ -50,8 +50,10 @@ describe("bracketSize / seedCount", () => {
     expect(seedCount(64, makeEntries(50))).toBe(16);
   });
 
-  it("nerangirani se ne nose", () => {
-    expect(seedCount(16, makeEntries(12, { unranked: 9 }))).toBe(3);
+  it("broj nosilaca uvek po kosturu, i kad nema rangiranih (TVS)", () => {
+    expect(seedCount(16, makeEntries(12, { unranked: 9 }))).toBe(4);
+    expect(seedCount(16, makeEntries(12, { unranked: 12 }))).toBe(4);
+    expect(seedCount(8, makeEntries(3))).toBe(2);
   });
 });
 

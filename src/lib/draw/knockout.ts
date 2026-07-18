@@ -52,10 +52,10 @@ export function seedingOrder(entries: readonly DrawEntry[]): DrawEntry[] {
   return [...entries].sort((a, b) => (b.points ?? -1) - (a.points ?? -1));
 }
 
-/** Broj nosilaca: po tabeli kostura, ali samo rangirani se nose. */
+/** Broj nosilaca: uvek po tabeli kostura (8→2, 16→4, 32→8…) — TVS pravilo.
+ *  Redosled: ručne oznake/bodovi (seedingOrder); i bez bodova mesta se popune. */
 export function seedCount(kostur: number, entries: readonly DrawEntry[]): number {
-  const ranked = entries.filter((e) => e.points !== null && e.points > 0).length;
-  return Math.min(SEED_COUNT[kostur] ?? 0, ranked);
+  return Math.min(SEED_COUNT[kostur] ?? 0, entries.length);
 }
 
 type Line = { entry: DrawEntry | null; seed?: number; bye?: boolean; prelim?: number };

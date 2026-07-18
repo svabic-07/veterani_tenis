@@ -277,7 +277,14 @@ export default async function TurnirPage({
                       </span>
                     )}
                   </div>
-                  <DrawBracket draw={d} />
+                  <DrawBracket
+                    draw={d}
+                    pointsByPlayer={Object.fromEntries(
+                      allEntries
+                        .filter((e) => e.eventId === d.event.id)
+                        .map((e) => [e.playerId, e.bodovi]),
+                    )}
+                  />
                 </section>
               );
             })}
