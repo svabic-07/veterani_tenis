@@ -190,7 +190,7 @@ export default async function KoordinatorPage({
               <li key={tr.id} className={`px-4 py-2.5 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <Link
-                    href={`/sudija/${tr.legacy_id}`}
+                    href={`/turnir/${tr.legacy_id}`}
                     className="min-w-0 flex-1 truncate font-semibold text-navy hover:text-clay"
                   >
                     {tr.naziv}
@@ -202,6 +202,12 @@ export default async function KoordinatorPage({
                   <span className="rounded-full bg-bg2 px-2 py-0.5 text-xs font-semibold text-slate">
                     {tc(`status.${tr.status}`)}
                   </span>
+                  <Link
+                    href={`/sudija/${tr.legacy_id}`}
+                    className="rounded-lg bg-navy px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-clay"
+                  >
+                    {t("manage")} →
+                  </Link>
                 </div>
                 <AssignRefereeForm
                   turnirId={tr.id}

@@ -392,7 +392,8 @@
       "delete": "Delete"
     },
     "noActiveTournaments": "No active or upcoming tournaments — create one above.",
-    "finishedTournaments": "Finished tournaments ({n})"
+    "finishedTournaments": "Finished tournaments ({n})",
+    "manage": "Manage"
   },
   "referee": {
     "title": "Referee portal",
