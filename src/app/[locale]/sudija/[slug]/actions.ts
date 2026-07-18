@@ -97,6 +97,33 @@ export async function addEntryAction(formData: FormData) {
   back("ok=prijava");
 }
 
+/** Gost na turniru: kreira igrača (i ne-člana) i odmah ga prijavljuje (status gost). */
+export async function addGuestEntryAction(formData: FormData) {
+  const eventId = String(formData.get("eventId") ?? "");
+  const ime = String(formData.get("ime") ?? "").trim().slice(0, 60);
+  const prezime = String(formData.get("prezime") ?? "").trim().slice(0, 60);
+  const godisteRaw = String(formData.get("godiste") ?? "").trim();
+  const godiste = /^\d{4}$/.test(godisteRaw) ? Number(godisteRaw) : null;
+  const back = backTo(formData, `event-${eventId}`);
+  try {
+    if (ime.length < 2 || prezime.length < 2) throw new DrawError("bad_request");
+    const supabase = await guard(formData, eventId);
+    // players: staff write RLS — gost po postojećem obrascu (legacy 'gost-…')
+    const { data: player, error } = await supabase
+      .from("players")
+      .insert({ ime, prezime, godiste, legacy_id: `gost-${crypto.randomUUID().slice(0, 8)}` })
+      .select("id")
+      .single();
+    if (error || !player) throw new DrawError("forbidden");
+    await addEntry(supabase, eventId, player.id);
+    await supabase.from("entries").update({ status: "gost" }).eq("event_id", eventId).eq("player_id", player.id);
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=prijava");
+}
+
 export async function removeEntryAction(formData: FormData) {
   const entryId = String(formData.get("entryId") ?? "");
   const eventId = String(formData.get("eventId") ?? "");

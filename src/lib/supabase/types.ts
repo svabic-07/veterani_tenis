@@ -926,6 +926,10 @@ export type Database = {
         Args: { _approve: boolean; _request_id: string }
         Returns: undefined
       }
+      set_referee_role: {
+        Args: { _user_id: string; _grant: boolean }
+        Returns: undefined
+      }
       revoke_draw: { Args: { _draw_id: string }; Returns: undefined }
       update_scoring_points: { Args: { _updates: Json }; Returns: number }
     }

@@ -3,7 +3,7 @@ import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHero } from "@/components/ui/page-hero";
 import { formatDateRange } from "@/lib/format";
-import { toggleRoleAction, resolveCategoryAction } from "./actions";
+import { toggleRoleAction, resolveCategoryAction, setRefereeRoleAction } from "./actions";
 import { NewTournamentForm } from "./new-tournament-form";
 import { AssignRefereeForm } from "./assign-referee-form";
 
@@ -136,12 +136,26 @@ export default async function KoordinatorPage({
       <section className="mb-8">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="font-display text-lg font-bold text-navy">{t("tournaments")}</h2>
-          <Link
-            href="/koordinator/bodovne-tablice"
-            className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
-          >
-            {t("scoringTables")} →
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/koordinator/klubovi"
+              className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+            >
+              {t("clubs.title")} →
+            </Link>
+            <Link
+              href="/koordinator/clanovi"
+              className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+            >
+              {t("members.title")} →
+            </Link>
+            <Link
+              href="/koordinator/bodovne-tablice"
+              className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+            >
+              {t("scoringTables")} →
+            </Link>
+          </div>
         </div>
         <ul className="overflow-hidden rounded-2xl border border-line bg-card">
           {(tournaments ?? []).map((tr, i) => {
@@ -260,6 +274,24 @@ export default async function KoordinatorPage({
                             <input type="hidden" name="locale" value={locale} />
                             <input type="hidden" name="userId" value={u.user_id} />
                             <input type="hidden" name="role" value={role} />
+                            <input type="hidden" name="grant" value={has ? "0" : "1"} />
+                            <button
+                              type="submit"
+                              className={`rounded-full px-2.5 py-1 text-xs font-semibold transition ${
+                                has
+                                  ? "bg-court text-white hover:bg-court-dark"
+                                  : "border border-line2 text-muted hover:border-clay hover:text-clay"
+                              }`}
+                              title={has ? t("revokeRole") : t("grantRole")}
+                            >
+                              {role}
+                            </button>
+                          </form>
+                        ) : role === "sudija" ? (
+                          // Koordinator (sekretar) sme da dodeli/oduzme sudijsku ulogu
+                          <form key={role} action={setRefereeRoleAction}>
+                            <input type="hidden" name="locale" value={locale} />
+                            <input type="hidden" name="userId" value={u.user_id} />
                             <input type="hidden" name="grant" value={has ? "0" : "1"} />
                             <button
                               type="submit"

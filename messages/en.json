@@ -285,7 +285,11 @@
       "sudija": "Referee assigned.",
       "kategorijaOdobrena": "Category request approved.",
       "kategorijaOdbijena": "Category request rejected.",
-      "bodovi": "Scoring tables saved."
+      "bodovi": "Scoring tables saved.",
+      "klub": "Club added.",
+      "grad": "City saved.",
+      "igrac": "Player added.",
+      "gost": "Guest added."
     },
     "err": {
       "zahtev": "Invalid request.",
@@ -298,7 +302,40 @@
       "turnir": "Creating the tournament failed.",
       "sudija": "Assigning the referee failed.",
       "kategorija": "Resolving the request failed.",
-      "bodovi": "Saving the scoring tables failed."
+      "bodovi": "Saving the scoring tables failed.",
+      "klub": "Saving the club failed.",
+      "klubPostoji": "A club with that name already exists.",
+      "igrac": "Adding the player failed."
+    },
+    "clubs": {
+      "title": "Clubs",
+      "lead": "Add clubs and cities (city auto-fills Place on tournaments).",
+      "new": "New club",
+      "name": "Club name",
+      "city": "City",
+      "cityHint": "The city is used to auto-fill Place when creating tournaments.",
+      "add": "Add club",
+      "searchPlaceholder": "Search clubs…",
+      "search": "Search",
+      "more": "Showing first 30 — narrow your search."
+    },
+    "members": {
+      "title": "Members",
+      "lead": "New players and guests + notifications to all members.",
+      "new": "New player / guest",
+      "newHint": "Guest = a player who is not an association member (can play, not a member).",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "birthYear": "Birth year",
+      "club": "Club",
+      "category": "Category",
+      "guest": "Guest (not a member)",
+      "add": "Add player",
+      "emailTitle": "Email all members",
+      "emailHint": "Copy the addresses and paste them into the BCC field of your email client. Direct sending from the site comes with custom SMTP.",
+      "copyEmails": "Copy all addresses",
+      "copied": "Copied",
+      "showEmails": "Show addresses"
     }
   },
   "referee": {
@@ -405,7 +442,12 @@
       "auth_required": "Please sign in again.",
       "bad_request": "Invalid request.",
       "server": "Server error. Please try again."
-    }
+    },
+    "guestLabel": "Guest",
+    "guestFirstName": "First name",
+    "guestLastName": "Last name",
+    "guestYear": "Year",
+    "addGuest": "Add guest"
   },
   "draw": {
     "title": "Draw",

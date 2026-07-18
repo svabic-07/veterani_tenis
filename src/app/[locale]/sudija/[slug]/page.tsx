@@ -12,6 +12,7 @@ import {
   discardDrawAction,
   finishTournamentAction,
   addEntryAction,
+  addGuestEntryAction,
   removeEntryAction,
   scheduleMatchAction,
   swapSlotsAction,
@@ -360,6 +361,19 @@ export default async function SudijaTurnirPage({
                       ))}
                     </ul>
                   )}
+                  {/* Gost — igrač koji nije u bazi članova */}
+                  <form action={addGuestEntryAction} className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-line2 p-2.5">
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="eventId" value={ev.id} />
+                    <span className="text-xs font-semibold text-muted">{t("guestLabel")}:</span>
+                    <input type="text" name="ime" required minLength={2} placeholder={t("guestFirstName")} className="w-28 rounded-lg border border-line2 bg-card px-2 py-1.5 text-sm outline-none focus:border-clay" />
+                    <input type="text" name="prezime" required minLength={2} placeholder={t("guestLastName")} className="w-32 rounded-lg border border-line2 bg-card px-2 py-1.5 text-sm outline-none focus:border-clay" />
+                    <input type="text" name="godiste" inputMode="numeric" placeholder={t("guestYear")} className="w-20 rounded-lg border border-line2 bg-card px-2 py-1.5 text-sm outline-none focus:border-clay" />
+                    <button type="submit" className="rounded-md bg-court px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-court-dark">
+                      {t("addGuest")}
+                    </button>
+                  </form>
                 </details>
               )}
 

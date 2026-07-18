@@ -320,7 +320,11 @@
       "sudija": "Sudija je dodeljen.",
       "kategorijaOdobrena": "Zahtev za kategoriju je odobren.",
       "kategorijaOdbijena": "Zahtev za kategoriju je odbijen.",
-      "bodovi": "Bodovne tablice su sačuvane."
+      "bodovi": "Bodovne tablice su sačuvane.",
+      "klub": "Klub je dodat.",
+      "grad": "Grad je sačuvan.",
+      "igrac": "Igrač je dodat.",
+      "gost": "Gost je dodat."
     },
     "err": {
       "zahtev": "Neispravan zahtev.",
@@ -333,7 +337,40 @@
       "turnir": "Kreiranje turnira nije uspelo.",
       "sudija": "Dodela sudije nije uspela.",
       "kategorija": "Rešavanje zahteva nije uspelo.",
-      "bodovi": "Čuvanje bodovnih tablica nije uspelo."
+      "bodovi": "Čuvanje bodovnih tablica nije uspelo.",
+      "klub": "Čuvanje kluba nije uspelo.",
+      "klubPostoji": "Klub sa tim nazivom već postoji.",
+      "igrac": "Dodavanje igrača nije uspelo."
+    },
+    "clubs": {
+      "title": "Klubovi",
+      "lead": "Dodavanje klubova i gradova (grad puni Mesto na turnirima).",
+      "new": "Novi klub",
+      "name": "Naziv kluba",
+      "city": "Grad",
+      "cityHint": "Grad se koristi za automatsko popunjavanje Mesta pri kreiranju turnira.",
+      "add": "Dodaj klub",
+      "searchPlaceholder": "Pretraga klubova…",
+      "search": "Traži",
+      "more": "Prikazano prvih 30 — suzite pretragu."
+    },
+    "members": {
+      "title": "Članovi",
+      "lead": "Novi igrači i gosti + obaveštenja svim članovima.",
+      "new": "Novi igrač / gost",
+      "newHint": "Gost = igrač koji nije član saveza (može na turnir, ne ulazi u članstvo).",
+      "firstName": "Ime",
+      "lastName": "Prezime",
+      "birthYear": "Godište",
+      "club": "Klub",
+      "category": "Kategorija",
+      "guest": "Gost (nije član)",
+      "add": "Dodaj igrača",
+      "emailTitle": "Email svim članovima",
+      "emailHint": "Kopirajte adrese i nalepite ih u BCC polje vašeg email programa. Slanje direktno sa sajta stiže sa custom SMTP podešavanjem.",
+      "copyEmails": "Kopiraj sve adrese",
+      "copied": "Kopirano",
+      "showEmails": "Prikaži adrese"
     }
   },
   "referee": {
@@ -440,7 +477,12 @@
       "auth_required": "Prijavite se ponovo.",
       "bad_request": "Neispravan zahtev.",
       "server": "Greška na serveru. Pokušajte ponovo."
-    }
+    },
+    "guestLabel": "Gost",
+    "guestFirstName": "Ime",
+    "guestLastName": "Prezime",
+    "guestYear": "Godište",
+    "addGuest": "Dodaj gosta"
   },
   "draw": {
     "title": "Žreb",

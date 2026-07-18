@@ -156,6 +156,86 @@ export async function createTournamentAction(formData: FormData) {
   back(formData, `ok=turnir&slug=${legacyId}`);
 }
 
+/** Koordinator/admin: dodela ili oduzimanje sudijske uloge (RPC, audit). */
+export async function setRefereeRoleAction(formData: FormData) {
+  const userId = String(formData.get("userId") ?? "");
+  const grant = formData.get("grant") === "1";
+  if (!UUID_RE.test(userId)) back(formData, "greska=zahtev");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("set_referee_role", { _user_id: userId, _grant: grant });
+  if (error) back(formData, "greska=uloga");
+  back(formData, "ok=uloga");
+}
+
+function backTo(formData: FormData, path: string, query: string): never {
+  const locale = String(formData.get("locale") ?? "sr");
+  revalidatePath(path);
+  redirect({ href: `${path}?${query}`, locale });
+  throw new Error("unreachable");
+}
+
+/** Novi klub (RLS: staff write). */
+export async function addClubAction(formData: FormData) {
+  const naziv = String(formData.get("naziv") ?? "").trim().slice(0, 120);
+  const grad = String(formData.get("grad") ?? "").trim().slice(0, 80) || null;
+  if (naziv.length < 2) backTo(formData, "/koordinator/klubovi", "greska=zahtev");
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("clubs").insert({ naziv, grad });
+  if (error) {
+    backTo(formData, "/koordinator/klubovi", `greska=${error.code === "23505" ? "klubPostoji" : "klub"}`);
+  }
+  backTo(formData, "/koordinator/klubovi", "ok=klub");
+}
+
+/** Izmena grada kluba (RLS: staff write) — grad puni autofill „Mesto" na turnirima. */
+export async function updateClubCityAction(formData: FormData) {
+  const klubId = String(formData.get("klubId") ?? "");
+  const grad = String(formData.get("grad") ?? "").trim().slice(0, 80) || null;
+  const q = String(formData.get("q") ?? "");
+  if (!UUID_RE.test(klubId)) backTo(formData, "/koordinator/klubovi", "greska=zahtev");
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("clubs").update({ grad }).eq("id", klubId);
+  if (error) backTo(formData, "/koordinator/klubovi", "greska=klub");
+  backTo(formData, "/koordinator/klubovi", `ok=grad${q ? `&q=${encodeURIComponent(q)}` : ""}`);
+}
+
+const KATEGORIJE = ["I", "II", "III", "IV", "V"] as const;
+
+/** Novi igrač ili gost (RLS: staff write). Gost = legacy_id 'gost-…' (postojeći obrazac). */
+export async function addPlayerAction(formData: FormData) {
+  const ime = String(formData.get("ime") ?? "").trim().slice(0, 60);
+  const prezime = String(formData.get("prezime") ?? "").trim().slice(0, 60);
+  const godisteRaw = String(formData.get("godiste") ?? "").trim();
+  const godiste = /^\d{4}$/.test(godisteRaw) ? Number(godisteRaw) : null;
+  const klubId = String(formData.get("klubId") ?? "");
+  const katRaw = String(formData.get("kategorija") ?? "");
+  const kategorija = (KATEGORIJE as readonly string[]).includes(katRaw)
+    ? (katRaw as (typeof KATEGORIJE)[number])
+    : null;
+  const gost = formData.get("gost") === "1";
+
+  if (ime.length < 2 || prezime.length < 2) backTo(formData, "/koordinator/clanovi", "greska=zahtev");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("players")
+    .insert({
+      ime,
+      prezime,
+      godiste,
+      klub_id: UUID_RE.test(klubId) ? klubId : null,
+      kategorija,
+      legacy_id: gost ? `gost-${crypto.randomUUID().slice(0, 8)}` : null,
+    })
+    .select("id")
+    .single();
+  if (error || !data) backTo(formData, "/koordinator/clanovi", "greska=igrac");
+  backTo(formData, "/koordinator/clanovi", `ok=${gost ? "gost" : "igrac"}`);
+}
+
 /** Pretraga igrača za izbor direktora (padajući meni; staff). */
 export async function searchDirectorsAction(
   query: string,
