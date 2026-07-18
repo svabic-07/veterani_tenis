@@ -163,6 +163,48 @@ export async function addGuestEntryAction(formData: FormData) {
   back("ok=prijava");
 }
 
+/** Ručna oznaka nosioca na prijavi (pre žreba). Prazno = ukloni oznaku;
+ *  bez ijedne ručne oznake nosioci se pri žrebu dodeljuju po bodovima. */
+export async function setSeedAction(formData: FormData) {
+  const entryId = String(formData.get("entryId") ?? "");
+  const eventId = String(formData.get("eventId") ?? "");
+  const seedRaw = String(formData.get("seed") ?? "").trim();
+  const seed = /^\d{1,2}$/.test(seedRaw) ? Number(seedRaw) : null;
+  const back = backTo(formData, `event-${eventId}`);
+  try {
+    if (!UUID_RE.test(entryId) || !UUID_RE.test(eventId)) throw new DrawError("bad_request");
+    if (seedRaw !== "" && (seed === null || seed < 1 || seed > 32)) throw new DrawError("bad_request");
+    const supabase = await guard(formData, entryId);
+
+    // žreb ne sme biti objavljen
+    const { data: d } = await supabase
+      .from("draws")
+      .select("status")
+      .eq("event_id", eventId)
+      .maybeSingle();
+    if (d && d.status !== "radna" && d.status !== "opozvan") throw new DrawError("draw_published");
+
+    // isti broj ne sme biti dodeljen dvojici
+    if (seed !== null) {
+      const { data: taken } = await supabase
+        .from("entries")
+        .select("id")
+        .eq("event_id", eventId)
+        .eq("seed", seed)
+        .neq("id", entryId)
+        .limit(1);
+      if (taken && taken.length > 0) throw new DrawError("seed_taken");
+    }
+
+    const { error } = await supabase.from("entries").update({ seed }).eq("id", entryId);
+    if (error) throw new DrawError("forbidden");
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=nosilac");
+}
+
 /** Premesti prijavu u drugu konkurenciju (kategoriju) istog turnira.
  *  Delete + insert, da trigger ponovo popuni bodove za nošenje iz nove kategorije. */
 export async function moveEntryAction(formData: FormData) {

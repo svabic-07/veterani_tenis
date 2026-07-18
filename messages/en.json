@@ -470,7 +470,8 @@
       "konkurencija": "Event added.",
       "konkurencija_obrisana": "Event deleted.",
       "podesavanja": "Tournament settings saved.",
-      "premestaj": "Player moved to another event (seeding points recalculated)."
+      "premestaj": "Player moved to another event (seeding points recalculated).",
+      "nosilac": "Seed saved."
     },
     "err": {
       "confirm_required": "Tick the confirmation before finishing the tournament.",
@@ -500,7 +501,8 @@
       "match_not_found": "Match not found.",
       "auth_required": "Please sign in again.",
       "bad_request": "Invalid request.",
-      "server": "Server error. Please try again."
+      "server": "Server error. Please try again.",
+      "seed_taken": "That seed number is already assigned to another player."
     },
     "guestLabel": "Guest",
     "guestFirstName": "First name",
@@ -522,7 +524,8 @@
     },
     "moveTo": "Move to…",
     "move": "Move",
-    "noEventsYet": "This tournament has no events yet — add them below (“New event”), then enter player entries per category."
+    "noEventsYet": "This tournament has no events yet — add them below (“New event”), then enter player entries per category.",
+    "seedHint": "Seed (manual) — empty = automatic by points at draw time"
   },
   "draw": {
     "title": "Draw",

@@ -505,7 +505,8 @@
       "konkurencija": "Konkurencija je dodata.",
       "konkurencija_obrisana": "Konkurencija je obrisana.",
       "podesavanja": "Podešavanja turnira su sačuvana.",
-      "premestaj": "Igrač je premešten u drugu konkurenciju (bodovi za nošenje ponovo obračunati)."
+      "premestaj": "Igrač je premešten u drugu konkurenciju (bodovi za nošenje ponovo obračunati).",
+      "nosilac": "Oznaka nosioca je sačuvana."
     },
     "err": {
       "confirm_required": "Označite potvrdu pre završetka turnira.",
@@ -535,7 +536,8 @@
       "swap_elimination_only": "Zamena pozicija radi samo za eliminacione žrebove (za grupe ponovite žreb).",
       "auth_required": "Prijavite se ponovo.",
       "bad_request": "Neispravan zahtev.",
-      "server": "Greška na serveru. Pokušajte ponovo."
+      "server": "Greška na serveru. Pokušajte ponovo.",
+      "seed_taken": "Taj broj nosioca je već dodeljen drugom igraču."
     },
     "guestLabel": "Gost",
     "guestFirstName": "Ime",
@@ -557,7 +559,8 @@
     },
     "moveTo": "Premesti u…",
     "move": "Premesti",
-    "noEventsYet": "Turnir još nema konkurencije — dodajte ih ispod („Nova konkurencija“), pa unesite prijave igrača po kategorijama."
+    "noEventsYet": "Turnir još nema konkurencije — dodajte ih ispod („Nova konkurencija“), pa unesite prijave igrača po kategorijama.",
+    "seedHint": "Nosilac (ručno) — prazno = automatski po bodovima pri žrebu"
   },
   "draw": {
     "title": "Žreb",

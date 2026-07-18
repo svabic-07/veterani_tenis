@@ -14,6 +14,7 @@ import {
   addEntryAction,
   addGuestEntryAction,
   updateTournamentAction,
+  setSeedAction,
   moveEntryAction,
   removeEntryAction,
   scheduleMatchAction,
@@ -361,6 +362,27 @@ export default async function SudijaTurnirPage({
                               {e.bodovi_snapshot !== null ? ` · ${e.bodovi_snapshot}` : ""}
                             </span>
                           </span>
+                          <form action={setSeedAction} className="flex items-center gap-1" title={t("seedHint")}>
+                            <input type="hidden" name="locale" value={locale} />
+                            <input type="hidden" name="slug" value={slug} />
+                            <input type="hidden" name="eventId" value={ev.id} />
+                            <input type="hidden" name="entryId" value={e.id} />
+                            <span className="text-xs font-semibold text-muted">N</span>
+                            <input
+                              type="text"
+                              name="seed"
+                              inputMode="numeric"
+                              defaultValue={e.seed ?? ""}
+                              placeholder="–"
+                              className="w-10 rounded-md border border-line2 bg-card px-1 py-1 text-center font-mono text-xs outline-none focus:border-clay"
+                            />
+                            <button
+                              type="submit"
+                              className="rounded-md border border-line2 px-1.5 py-1 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+                            >
+                              ✓
+                            </button>
+                          </form>
                           {tr.tournament_events.length > 1 && (
                             <form action={moveEntryAction} className="flex items-center gap-1">
                               <input type="hidden" name="locale" value={locale} />

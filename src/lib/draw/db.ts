@@ -32,16 +32,24 @@ export async function createDrawForEvent(supabase: Db, eventId: string) {
 
   const { data: entryRows, error: e1 } = await supabase
     .from("entries")
-    .select("player_id, bodovi_snapshot, status, players!entries_player_id_fkey ( klub_id )")
+    .select("player_id, bodovi_snapshot, seed, status, players!entries_player_id_fkey ( klub_id )")
     .eq("event_id", eventId)
     .in("status", ["prijavljen", "gost"]);
   if (e1) throw e1;
 
-  const entries: DrawEntry[] = (entryRows ?? []).map((r) => ({
-    id: r.player_id,
-    points: r.bodovi_snapshot,
-    clubId: r.players?.klub_id ?? null,
-  }));
+  // Ručno označeni nosioci (entries.seed pre žreba) imaju prednost: dobijaju
+  // veštački visoke bodove (1e9 - seed) pa ih engine nosi tim redom; ostatak
+  // nosilačkih mesta (i sve bez oznake) ide po bodovima kao i do sad.
+  const MANUAL = 1_000_000_000;
+  const realPoints = new Map<string, number | null>();
+  const entries: DrawEntry[] = (entryRows ?? []).map((r) => {
+    realPoints.set(r.player_id, r.bodovi_snapshot);
+    return {
+      id: r.player_id,
+      points: r.seed != null && r.seed > 0 ? MANUAL - r.seed : r.bodovi_snapshot,
+      clubId: r.players?.klub_id ?? null,
+    };
+  });
   if (entries.length < 3) throw new DrawError("not_enough_entries");
 
   const rngSeed = randomUUID();
@@ -61,7 +69,12 @@ export async function createDrawForEvent(supabase: Db, eventId: string) {
     broj_nosilaca: draw.brojNosilaca,
     status: "radna",
     rng_seed: rngSeed,
-    seed_izvor: draw.seeds.map((s, i) => ({ seed: i + 1, player_id: s.id, bodovi: s.points })),
+    seed_izvor: draw.seeds.map((s, i) => ({
+      seed: i + 1,
+      player_id: s.id,
+      bodovi: realPoints.get(s.id) ?? null,
+      rucni: s.points !== null && s.points >= MANUAL - 1000,
+    })),
   });
   if (e2) throw e2;
 
