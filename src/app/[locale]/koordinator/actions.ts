@@ -105,9 +105,9 @@ export async function createTournamentAction(formData: FormData) {
   const sistem = String(formData.get("sistem") ?? "") as System;
   const mesto = String(formData.get("mesto") ?? "").trim();
   const klubId = String(formData.get("klubId") ?? "");
-  const direktorIme = String(formData.get("direktorIme") ?? "")
-    .replace(/[,()%*]/g, "")
-    .trim();
+  const direktorRaw = String(formData.get("direktorId") ?? "");
+  const direktorId = UUID_RE.test(direktorRaw) ? direktorRaw : null;
+  const direktorIme = String(formData.get("direktorIme") ?? "").trim().slice(0, 120) || null;
   const datumOd = String(formData.get("datumOd") ?? "");
   const datumDo = String(formData.get("datumDo") ?? "");
   const rok = String(formData.get("rok") ?? "");
@@ -117,20 +117,6 @@ export async function createTournamentAction(formData: FormData) {
   }
 
   const supabase = await createClient();
-
-  // direktor po imenu — mora biti jednoznačan pogodak
-  let direktorId: string | null = null;
-  if (direktorIme) {
-    const [ime, ...rest] = direktorIme.split(/\s+/);
-    const prezime = rest.join(" ");
-    let dq = supabase.from("players").select("id").eq("is_active", true).limit(3);
-    dq = prezime
-      ? dq.ilike("ime", `${ime}%`).ilike("prezime", `${prezime}%`)
-      : dq.or(`ime.ilike.%${ime}%,prezime.ilike.%${ime}%`);
-    const { data: kandidati } = await dq;
-    if (!kandidati || kandidati.length !== 1) back(formData, "greska=direktor");
-    direktorId = kandidati[0].id;
-  }
 
   const { data: season } = await supabase
     .from("seasons")
@@ -149,6 +135,7 @@ export async function createTournamentAction(formData: FormData) {
     mesto: mesto || null,
     klub_id: UUID_RE.test(klubId) ? klubId : null,
     direktor_id: direktorId,
+    direktor_ime: direktorIme,
     season_id: season?.id ?? null,
     datum_od: datumOd || null,
     datum_do: datumDo || null,
@@ -160,4 +147,40 @@ export async function createTournamentAction(formData: FormData) {
     back(formData, `greska=${error.code === "23505" ? "postoji" : "turnir"}`);
   }
   back(formData, `ok=turnir&slug=${legacyId}`);
+}
+
+/** Pretraga igrača za izbor direktora (padajući meni; staff). */
+export async function searchDirectorsAction(
+  query: string,
+): Promise<{ id: string; name: string; klub: string | null }[]> {
+  const words = query
+    .replace(/[,()*%:.]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= 2);
+  if (words.length === 0) return [];
+
+  const supabase = await createClient();
+  const { data: staff } = await supabase.rpc("is_staff");
+  if (!staff) return [];
+
+  let dq = supabase
+    .from("players")
+    .select("id, ime, prezime, clubs ( naziv )")
+    .eq("is_active", true)
+    .order("prezime")
+    .limit(8);
+  if (words.length >= 2) {
+    const [a, b] = [words[0], words.slice(1).join(" ")];
+    dq = dq.or(
+      `and(ime.ilike.${a}*,prezime.ilike.${b}*),and(ime.ilike.${b}*,prezime.ilike.${a}*)`,
+    );
+  } else {
+    dq = dq.or(`ime.ilike.*${words[0]}*,prezime.ilike.*${words[0]}*`);
+  }
+  const { data } = await dq;
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    name: `${p.ime} ${p.prezime}`,
+    klub: p.clubs?.naziv ?? null,
+  }));
 }

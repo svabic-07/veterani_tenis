@@ -712,6 +712,7 @@ export type Database = {
           datum_do: string | null
           datum_od: string | null
           direktor_id: string | null
+          direktor_ime: string | null
           id: string
           klub_id: string | null
           lat: number | null
@@ -732,6 +733,7 @@ export type Database = {
           datum_do?: string | null
           datum_od?: string | null
           direktor_id?: string | null
+          direktor_ime?: string | null
           id?: string
           klub_id?: string | null
           lat?: number | null
@@ -752,6 +754,7 @@ export type Database = {
           datum_do?: string | null
           datum_od?: string | null
           direktor_id?: string | null
+          direktor_ime?: string | null
           id?: string
           klub_id?: string | null
           lat?: number | null

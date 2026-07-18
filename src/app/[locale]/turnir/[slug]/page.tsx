@@ -171,7 +171,9 @@ export default async function TurnirPage({
     { label: t("system"), value: tc(`system.${tr.sistem}`) },
     { label: t("dates"), value: formatDateRange(tr.datum_od, tr.datum_do, locale) },
     ...(club ? [{ label: t("host"), value: `${club.naziv}${club.grad ? ` · ${club.grad}` : ""}` }] : []),
-    ...(dir ? [{ label: t("director"), value: `${dir.ime} ${dir.prezime}` }] : []),
+    ...(tr.direktor_ime || dir
+      ? [{ label: t("director"), value: tr.direktor_ime ?? `${dir!.ime} ${dir!.prezime}` }]
+      : []),
     ...(tr.rok_prijave ? [{ label: t("deadline"), value: formatDeadline(tr.rok_prijave, locale) }] : []),
   ];
 

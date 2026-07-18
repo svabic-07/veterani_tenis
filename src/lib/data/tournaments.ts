@@ -25,7 +25,7 @@ export async function getTournamentBySlug(slug: string) {
   const { data, error } = await supabase
     .from("tournaments")
     .select(
-      `id, legacy_id, naziv, serija, sistem, mesto, lat, lng, datum_od, datum_do, rok_prijave, status,
+      `id, legacy_id, naziv, serija, sistem, mesto, lat, lng, datum_od, datum_do, rok_prijave, status, direktor_ime,
        clubs ( naziv, grad ),
        direktor:players!tournaments_direktor_id_fkey ( ime, prezime ),
        tournament_events ( id, kategorija, disciplina )`,

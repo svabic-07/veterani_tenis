@@ -5,10 +5,10 @@ import { PageHero } from "@/components/ui/page-hero";
 import { formatDateRange } from "@/lib/format";
 import {
   toggleRoleAction,
-  createTournamentAction,
   assignRefereeAction,
   resolveCategoryAction,
 } from "./actions";
+import { NewTournamentForm } from "./new-tournament-form";
 
 export const dynamic = "force-dynamic";
 
@@ -63,10 +63,10 @@ export default async function KoordinatorPage({
     supabase
       .from("tournaments")
       .select(
-        "id, legacy_id, naziv, serija, status, datum_od, datum_do, mesto, direktor_id, direktor:players ( ime, prezime )",
+        "id, legacy_id, naziv, serija, status, datum_od, datum_do, mesto, direktor_id, direktor_ime, direktor:players ( ime, prezime )",
       )
       .order("datum_od", { ascending: true }),
-    supabase.from("clubs").select("id, naziv").order("naziv"),
+    supabase.from("clubs").select("id, naziv, grad").order("naziv"),
     supabase
       .from("audit_log")
       .select("id, action, entity, entity_id, created_at, actor")
@@ -110,108 +110,28 @@ export default async function KoordinatorPage({
       {/* Novi turnir */}
       <section className="mb-8 rounded-2xl border border-line bg-card p-5 shadow-sm">
         <h2 className="font-display text-lg font-bold text-navy">{t("newTournament")}</h2>
-        <form action={createTournamentAction} className="mt-4 grid gap-3 sm:grid-cols-2">
-          <input type="hidden" name="locale" value={locale} />
-          <label className="text-sm sm:col-span-2">
-            <span className="mb-1 block font-semibold text-navy">{t("f.name")}</span>
-            <input
-              type="text"
-              name="naziv"
-              required
-              minLength={3}
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold text-navy">{t("f.series")}</span>
-            <select
-              name="serija"
-              defaultValue="s1000"
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            >
-              {SERIES.map((s) => (
-                <option key={s} value={s}>
-                  {tc(`series.${s}`)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold text-navy">{t("f.system")}</span>
-            <select
-              name="sistem"
-              defaultValue="kvalitativni"
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            >
-              <option value="kvalitativni">{tc("system.kvalitativni")}</option>
-              <option value="starosni">{tc("system.starosni")}</option>
-            </select>
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold text-navy">{t("f.club")}</span>
-            <select
-              name="klubId"
-              defaultValue=""
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            >
-              <option value="">—</option>
-              {(clubs ?? []).map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.naziv}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold text-navy">{t("f.director")}</span>
-            <input
-              type="text"
-              name="direktorIme"
-              placeholder={t("f.directorHint")}
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold text-navy">{t("f.place")}</span>
-            <input
-              type="text"
-              name="mesto"
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold text-navy">{t("f.deadline")}</span>
-            <input
-              type="datetime-local"
-              name="rok"
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold text-navy">{t("f.from")}</span>
-            <input
-              type="date"
-              name="datumOd"
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            />
-          </label>
-          <label className="text-sm">
-            <span className="mb-1 block font-semibold text-navy">{t("f.to")}</span>
-            <input
-              type="date"
-              name="datumDo"
-              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
-            />
-          </label>
-          <div className="sm:col-span-2">
-            <button
-              type="submit"
-              className="rounded-xl bg-clay px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-clay-dark"
-            >
-              {t("create")}
-            </button>
-          </div>
-        </form>
+        <NewTournamentForm
+          locale={locale}
+          clubs={clubs ?? []}
+          seriesOptions={SERIES.map((s) => ({ value: s, label: tc(`series.${s}`) }))}
+          systemOptions={[
+            { value: "kvalitativni", label: tc("system.kvalitativni") },
+            { value: "starosni", label: tc("system.starosni") },
+          ]}
+          labels={{
+            name: t("f.name"),
+            series: t("f.series"),
+            system: t("f.system"),
+            club: t("f.club"),
+            director: t("f.director"),
+            directorHint: t("f.directorHint"),
+            place: t("f.place"),
+            deadline: t("f.deadline"),
+            from: t("f.from"),
+            to: t("f.to"),
+            create: t("create"),
+          }}
+        />
       </section>
 
       {/* Turniri + dodela sudije */}
