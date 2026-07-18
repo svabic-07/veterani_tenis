@@ -14,6 +14,7 @@ import {
   addEntryAction,
   addGuestEntryAction,
   updateTournamentAction,
+  moveEntryAction,
   removeEntryAction,
   scheduleMatchAction,
   swapSlotsAction,
@@ -354,6 +355,35 @@ export default async function SudijaTurnirPage({
                               {e.bodovi_snapshot !== null ? ` · ${e.bodovi_snapshot}` : ""}
                             </span>
                           </span>
+                          {tr.tournament_events.length > 1 && (
+                            <form action={moveEntryAction} className="flex items-center gap-1">
+                              <input type="hidden" name="locale" value={locale} />
+                              <input type="hidden" name="slug" value={slug} />
+                              <input type="hidden" name="entryId" value={e.id} />
+                              <select
+                                name="noviEventId"
+                                defaultValue=""
+                                className="rounded-md border border-line2 bg-card px-1.5 py-1 text-xs outline-none focus:border-clay"
+                              >
+                                <option value="" disabled>
+                                  {t("moveTo")}
+                                </option>
+                                {tr.tournament_events
+                                  .filter((e2) => e2.id !== ev.id)
+                                  .map((e2) => (
+                                    <option key={e2.id} value={e2.id}>
+                                      {tt(`discipline.${e2.disciplina}`)} · {e2.kategorija}
+                                    </option>
+                                  ))}
+                              </select>
+                              <button
+                                type="submit"
+                                className="rounded-md border border-line2 px-2 py-1 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+                              >
+                                {t("move")}
+                              </button>
+                            </form>
+                          )}
                           <form action={removeEntryAction}>
                             <input type="hidden" name="locale" value={locale} />
                             <input type="hidden" name="slug" value={slug} />

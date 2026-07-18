@@ -468,7 +468,8 @@
       "otvoren": "Tournament reopened — points deleted, rankings recalculated.",
       "konkurencija": "Event added.",
       "konkurencija_obrisana": "Event deleted.",
-      "podesavanja": "Tournament settings saved."
+      "podesavanja": "Tournament settings saved.",
+      "premestaj": "Player moved to another event (seeding points recalculated)."
     },
     "err": {
       "confirm_required": "Tick the confirmation before finishing the tournament.",
@@ -486,7 +487,7 @@
       "downstream_resolved": "Not possible — the winner already played the next match. Clear that result first.",
       "not_finished": "The tournament is not finished.",
       "event_exists": "That event already exists.",
-      "already_entered": "That player is already entered in this event.",
+      "already_entered": "The player is already entered in that event.",
       "swap_elimination_only": "Position swap works only for elimination draws (redraw for groups).",
       "not_enough_entries": "Not enough entries for a draw (minimum 3).",
       "draw_published": "The draw is already published — revoking is done by the coordinator.",
@@ -517,7 +518,9 @@
       "to": "To",
       "deadline": "Entry deadline",
       "save": "Save changes"
-    }
+    },
+    "moveTo": "Move to…",
+    "move": "Move"
   },
   "draw": {
     "title": "Draw",

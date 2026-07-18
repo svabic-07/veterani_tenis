@@ -163,6 +163,47 @@ export async function addGuestEntryAction(formData: FormData) {
   back("ok=prijava");
 }
 
+/** Premesti prijavu u drugu konkurenciju (kategoriju) istog turnira.
+ *  Delete + insert, da trigger ponovo popuni bodove za nošenje iz nove kategorije. */
+export async function moveEntryAction(formData: FormData) {
+  const entryId = String(formData.get("entryId") ?? "");
+  const noviEventId = String(formData.get("noviEventId") ?? "");
+  const back = backTo(formData, `event-${noviEventId}`);
+  try {
+    if (!UUID_RE.test(entryId) || !UUID_RE.test(noviEventId)) throw new DrawError("bad_request");
+    const supabase = await guard(formData, entryId);
+
+    const { data: entry } = await supabase
+      .from("entries")
+      .select("id, player_id, event_id, status")
+      .eq("id", entryId)
+      .maybeSingle();
+    if (!entry) throw new DrawError("bad_request");
+    if (entry.event_id === noviEventId) throw new DrawError("bad_request");
+
+    // obe konkurencije bez objavljenog žreba
+    for (const evId of [entry.event_id, noviEventId]) {
+      const { data: d } = await supabase
+        .from("draws")
+        .select("status")
+        .eq("event_id", evId)
+        .maybeSingle();
+      if (d && d.status !== "radna" && d.status !== "opozvan") throw new DrawError("draw_published");
+    }
+
+    const { error: delErr } = await supabase.from("entries").delete().eq("id", entryId);
+    if (delErr) throw new DrawError("forbidden");
+    const { error: insErr } = await supabase
+      .from("entries")
+      .insert({ event_id: noviEventId, player_id: entry.player_id, status: entry.status });
+    if (insErr) throw new DrawError(insErr.code === "23505" ? "already_entered" : "forbidden");
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=premestaj");
+}
+
 export async function removeEntryAction(formData: FormData) {
   const entryId = String(formData.get("entryId") ?? "");
   const eventId = String(formData.get("eventId") ?? "");

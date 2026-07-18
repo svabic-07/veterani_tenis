@@ -503,7 +503,8 @@
       "otvoren": "Turnir je ponovo otvoren — bodovi obrisani, rang preračunat.",
       "konkurencija": "Konkurencija je dodata.",
       "konkurencija_obrisana": "Konkurencija je obrisana.",
-      "podesavanja": "Podešavanja turnira su sačuvana."
+      "podesavanja": "Podešavanja turnira su sačuvana.",
+      "premestaj": "Igrač je premešten u drugu konkurenciju (bodovi za nošenje ponovo obračunati)."
     },
     "err": {
       "confirm_required": "Označite potvrdu pre završetka turnira.",
@@ -529,7 +530,7 @@
       "downstream_resolved": "Ne može — pobednik je već odigrao sledeći meč. Prvo poništite taj rezultat.",
       "not_finished": "Turnir nije završen.",
       "event_exists": "Ta konkurencija već postoji.",
-      "already_entered": "Taj igrač je već prijavljen u ovoj konkurenciji.",
+      "already_entered": "Igrač je već prijavljen u toj konkurenciji.",
       "swap_elimination_only": "Zamena pozicija radi samo za eliminacione žrebove (za grupe ponovite žreb).",
       "auth_required": "Prijavite se ponovo.",
       "bad_request": "Neispravan zahtev.",
@@ -552,7 +553,9 @@
       "to": "Do",
       "deadline": "Rok prijave",
       "save": "Sačuvaj izmene"
-    }
+    },
+    "moveTo": "Premesti u…",
+    "move": "Premesti"
   },
   "draw": {
     "title": "Žreb",
