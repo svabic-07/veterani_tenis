@@ -131,28 +131,47 @@ export async function createTournamentAction(formData: FormData) {
   const year = (datumOd || season?.pocetak || new Date().toISOString()).slice(0, 4);
   const legacyId = `${slugify(naziv)}-${year}`;
 
-  const { error } = await supabase.from("tournaments").insert({
-    legacy_id: legacyId,
-    naziv,
-    serija,
-    sistem,
-    mesto: mesto || null,
-    klub_id: UUID_RE.test(klubId) ? klubId : null,
-    direktor_id: direktorId,
-    direktor_ime: direktorIme,
-    domacin,
-    kontakt,
-    lokacija,
-    season_id: season?.id ?? null,
-    datum_od: datumOd || null,
-    datum_do: datumDo || null,
-    rok_prijave: rok ? belgradeInputToIso(rok) : null,
-    status: "najava",
-  });
+  const { data: created, error } = await supabase
+    .from("tournaments")
+    .insert({
+      legacy_id: legacyId,
+      naziv,
+      serija,
+      sistem,
+      mesto: mesto || null,
+      klub_id: UUID_RE.test(klubId) ? klubId : null,
+      direktor_id: direktorId,
+      direktor_ime: direktorIme,
+      domacin,
+      kontakt,
+      lokacija,
+      season_id: season?.id ?? null,
+      datum_od: datumOd || null,
+      datum_do: datumDo || null,
+      rok_prijave: rok ? belgradeInputToIso(rok) : null,
+      status: "najava",
+    })
+    .select("id")
+    .single();
 
-  if (error) {
-    back(formData, `greska=${error.code === "23505" ? "postoji" : "turnir"}`);
+  if (error || !created) {
+    back(formData, `greska=${error?.code === "23505" ? "postoji" : "turnir"}`);
+    throw new Error("unreachable");
   }
+
+  // Podrazumevane konkurencije po sistemu (singl); višak se briše na turniru.
+  const kategorije =
+    sistem === "kvalitativni"
+      ? ["I", "II", "III", "IV", "V"]
+      : ["30", "35", "40", "45", "50", "55", "60", "65", "70", "75"];
+  await supabase.from("tournament_events").insert(
+    kategorije.map((kategorija) => ({
+      turnir_id: created.id,
+      kategorija,
+      disciplina: "singl" as const,
+    })),
+  );
+
   back(formData, `ok=turnir&slug=${legacyId}`);
 }
 

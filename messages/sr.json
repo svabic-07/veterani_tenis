@@ -556,7 +556,8 @@
       "save": "Sačuvaj izmene"
     },
     "moveTo": "Premesti u…",
-    "move": "Premesti"
+    "move": "Premesti",
+    "noEventsYet": "Turnir još nema konkurencije — dodajte ih ispod („Nova konkurencija“), pa unesite prijave igrača po kategorijama."
   },
   "draw": {
     "title": "Žreb",

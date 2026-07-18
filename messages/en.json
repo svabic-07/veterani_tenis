@@ -521,7 +521,8 @@
       "save": "Save changes"
     },
     "moveTo": "Move to…",
-    "move": "Move"
+    "move": "Move",
+    "noEventsYet": "This tournament has no events yet — add them below (“New event”), then enter player entries per category."
   },
   "draw": {
     "title": "Draw",

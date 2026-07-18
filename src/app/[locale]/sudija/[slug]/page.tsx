@@ -216,6 +216,12 @@ export default async function SudijaTurnirPage({
         </form>
       </details>
 
+      {tr.tournament_events.length === 0 && (
+        <p className="mb-6 rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-slate">
+          {t("noEventsYet")}
+        </p>
+      )}
+
       <div className="space-y-6">
         {tr.tournament_events.map((ev) => {
           const draw = drawByEvent.get(ev.id);
