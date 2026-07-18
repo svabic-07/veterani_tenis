@@ -203,6 +203,10 @@ Po zajedničkoj analizi Claude + Codex (GPT 5.6) — prioritet: zaštita zvanič
 - **Štampanje satnice:** `/turnir/[slug]/satnica` — tabela po danima (vreme/teren/meč/konkurencija), dugme Štampaj, print CSS (header/footer sajta `print:hidden`); linkovi sa javne stranice i sudijskog portala.
 - **Offline (PWA):** `public/sw.js` — network-first (keš SAMO kad mreže nema — nikad zastareo sadržaj online), `/_next/static` cache-first (hešovano), `/api`+`/prijava`+`/nalog` se ne keširaju; odvojeni ključevi HTML vs RSC (Next prefetch ne gazi HTML); `offline.html` fallback. **Verifikovano Playwright-om:** keširana stranica se otvara sa ugašenim serverom, nekeširana pada na offline poruku.
 
+### 🧪 Demo nalozi (2026-07-18)
+- **Sudija:** `svabic+sudija@gmail.com` (uloga `sudija`, povezan sa neaktivnim igračem „Demo Sudija") · **Koordinator:** `svabic+koordinator@gmail.com` (uloga `koordinator`). Gmail plus-aliasi → magic link stiže u `svabic@gmail.com` inbox; prijava na `/prijava` unosom alias adrese. Rezervna lozinka `TVS-demo-2026` postavljena (UI nema password formu — za slučaj da se doda).
+- **DEMO turnir** `demo-obuka-2026` („DEMO turnir — obuka (nije zvaničan)", +30 dana, 3 konkurencije) — sudija mu je Demo Sudija, pa demo sudijski nalog ima šta da vodi. Obrisati pred go-live (i turnir i naloge i igrača `deadbeef-…`).
+
 ### 🟢 Sitnice (Faza 6 / pred go-live)
 - Obrisati staru zaglavljenu Supabase bazu (support tiket).
 - **Pravi domen** na Vercel (sada „test" `project-82ord.vercel.app`) → projekat `veterani_tenis` → Settings → Domains.
