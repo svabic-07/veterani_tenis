@@ -98,6 +98,7 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 23. `…0718110000_weekly_rankings_cron` — **`recalc_weekly_rankings()`** (pun nedeljni snapshot svih parova) + **pg_cron** `tvs-weekly-rankings` (pon 03:00 UTC) + `admin_recalc_rankings()` (ručno iz panela, uz audit)
 24. `…0718120000_atomic_admin_fixes` — **`admin_update_player()`** (atomska izmena igrača uklj. ime/prezime + kontakt) + **merge_players v2** (dedup `ranking_points` po turniru×kat×disc + preračun ranga posle spajanja)
 25. `…0718140000_referee_reports` — **`referee_reports`** (izveštaj sudije: loptice dodeljeno/potrošeno, sporne situacije, napomena; interno — RLS staff + direktor turnira)
+26. `…0718160000_gost_bez_bodova` — **gost ne dobija bodove** (pravilo saveza; gosti su obično stranci): plasman se kaskadno prenosi niz kostur na pobeđene članove (pobeđeni u finalu nasleđuje gostov plasman itd.; gost-pobedio-gosta se preskače); u čistoj grupi plasman samo među članovima; gost = prijava `status='gost'` ili `legacy_id 'gost-%'`. + `scoring_kolo_rank()` helper. Testirano simulacijom (gost pobednik u eliminaciji: 1000→finalista, 600→PF žrtva itd.; grupa: samo članovi).
 
 ⚠️ **Deploy migracija:** `supabase db push` NEBEZBEDAN (remote history koristi druge timestampove nego lokalni fajlovi). Migracije 13–15 primenjene preko Management API `database/query` + upis u `schema_migrations`.
 
