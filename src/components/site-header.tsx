@@ -36,7 +36,7 @@ export function SiteHeader() {
   const authLabel = loggedIn ? t("myAccount") : t("login");
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-navy/95 text-white backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-navy/95 text-white backdrop-blur print:hidden">
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
           <Logo size={38} />

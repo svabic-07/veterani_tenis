@@ -689,6 +689,50 @@ export type Database = {
           },
         ]
       }
+      referee_reports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          loptice_dodeljeno: number | null
+          loptice_potroseno: number | null
+          napomena: string | null
+          sporne: string | null
+          tournament_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          loptice_dodeljeno?: number | null
+          loptice_potroseno?: number | null
+          napomena?: string | null
+          sporne?: string | null
+          tournament_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          loptice_dodeljeno?: number | null
+          loptice_potroseno?: number | null
+          napomena?: string | null
+          sporne?: string | null
+          tournament_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referee_reports_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: true
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scoring_tables: {
         Row: {
           bodovi: number

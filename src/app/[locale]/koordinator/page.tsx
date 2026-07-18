@@ -59,6 +59,7 @@ export default async function KoordinatorPage({
     { data: clubs },
     { data: audit },
     { data: catRequests },
+    { data: refReports },
   ] = await Promise.all([
     supabase.rpc("admin_list_users"),
     supabase
@@ -80,6 +81,13 @@ export default async function KoordinatorPage({
       )
       .eq("status", "na_cekanju")
       .order("created_at", { ascending: true }),
+    supabase
+      .from("referee_reports")
+      .select(
+        "id, loptice_dodeljeno, loptice_potroseno, sporne, napomena, updated_at, tournaments ( naziv, legacy_id )",
+      )
+      .order("updated_at", { ascending: false })
+      .limit(10),
   ]);
 
   const emailByUser = new Map((users ?? []).map((u) => [u.user_id, u.email]));
@@ -394,6 +402,34 @@ export default async function KoordinatorPage({
           </button>
         </form>
       </section>
+
+      {/* Izveštaji sudija (loptice, sporne situacije) */}
+      {(refReports ?? []).length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 font-display text-lg font-bold text-navy">🎾 {t("refReports")}</h2>
+          <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+            {(refReports ?? []).map((r, i) => (
+              <li key={r.id} className={`px-4 py-3 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}>
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <Link
+                    href={`/sudija/${r.tournaments?.legacy_id ?? ""}#izvestaj`}
+                    className="font-semibold text-navy underline-offset-2 hover:underline"
+                  >
+                    {r.tournaments?.naziv ?? "—"}
+                  </Link>
+                  <span className="text-xs text-muted">
+                    {t("refBalls")}: {r.loptice_dodeljeno ?? "—"} / {r.loptice_potroseno ?? "—"}
+                  </span>
+                </div>
+                {r.sporne && (
+                  <p className="mt-1 text-xs text-clay-dark">⚠️ {r.sporne}</p>
+                )}
+                {r.napomena && <p className="mt-1 text-xs text-slate">{r.napomena}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Audit log */}
       <section>

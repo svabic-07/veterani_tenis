@@ -489,6 +489,39 @@ export async function finishTournamentAction(formData: FormData) {
   back(vestOk ? "ok=zavrsen" : "ok=zavrsenBezVesti");
 }
 
+/** Izveštaj sudije (loptice + sporne situacije) — namerno guard, NE guardOpen:
+ *  piše se na kraju turnira, i posle „ZAVRŠI TURNIR" (ne dira rezultate). */
+export async function saveRefereeReportAction(formData: FormData) {
+  const tournamentId = String(formData.get("tournamentId") ?? "");
+  const back = backTo(formData, "izvestaj");
+  try {
+    const supabase = await guard(formData, tournamentId);
+    const num = (name: string) => {
+      const v = String(formData.get(name) ?? "").trim();
+      return /^\d{1,5}$/.test(v) ? Number(v) : null;
+    };
+    const txt = (name: string, max: number) =>
+      String(formData.get(name) ?? "").trim().slice(0, max) || null;
+    const { data: me } = await supabase.auth.getClaims();
+    const { error } = await supabase.from("referee_reports").upsert(
+      {
+        tournament_id: tournamentId,
+        loptice_dodeljeno: num("lopticeDodeljeno"),
+        loptice_potroseno: num("lopticePotroseno"),
+        sporne: txt("sporne", 2000),
+        napomena: txt("napomena", 2000),
+        created_by: me?.claims?.sub ?? null,
+      },
+      { onConflict: "tournament_id" },
+    );
+    if (error) throw new DrawError("forbidden");
+  } catch (err) {
+    back(`greska=${errCode(err)}`);
+    return;
+  }
+  back("ok=izvestaj");
+}
+
 export async function enterResultAction(formData: FormData) {
   const matchId = String(formData.get("matchId") ?? "");
   const eventId = String(formData.get("eventId") ?? "");

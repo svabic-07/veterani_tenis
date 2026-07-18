@@ -24,6 +24,7 @@ import {
   reopenTournamentAction,
   addEventAction,
   removeEventAction,
+  saveRefereeReportAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -84,6 +85,13 @@ export default async function SudijaTurnirPage({
 
   const draws = await getDrawsForTournament(tr.id);
   const drawByEvent = new Map(draws.map((d) => [d.event.id, d]));
+
+  // izveštaj sudije (loptice, sporne situacije) — interno, RLS: staff/direktor
+  const { data: report } = await supabase
+    .from("referee_reports")
+    .select("loptice_dodeljeno, loptice_potroseno, sporne, napomena")
+    .eq("tournament_id", tr.id)
+    .maybeSingle();
 
   const eventIds = tr.tournament_events.map((e) => e.id);
   const { data: entryRows } = eventIds.length
@@ -155,6 +163,16 @@ export default async function SudijaTurnirPage({
           {formatDateRange(tr.datum_od, tr.datum_do, locale)}
           {tr.mesto ? ` · ${tr.mesto}` : ""}
         </p>
+        {draws.some((d) => d.matches.some((m) => m.termin)) && (
+          <p className="mt-2">
+            <Link
+              href={`/turnir/${slug}/satnica`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line2 px-3 py-1.5 text-sm font-semibold text-navy transition hover:border-clay hover:text-clay"
+            >
+              🖨️ {t("printSchedule")}
+            </Link>
+          </p>
+        )}
       </header>
 
       {ok && (
@@ -749,6 +767,65 @@ export default async function SudijaTurnirPage({
           )}
         </section>
       )}
+
+      {/* Izveštaj sudije: loptice + sporne situacije — za koordinatora.
+          Upisiv i posle „ZAVRŠI TURNIR" (piše se na kraju turnira). */}
+      <section id="izvestaj" className="mt-6 rounded-2xl border border-line bg-card p-5 shadow-sm">
+        <h2 className="font-display text-lg font-bold text-navy">🎾 {t("reportTitle")}</h2>
+        <p className="mt-1 text-sm text-muted">{t("reportHint")}</p>
+        <form action={saveRefereeReportAction} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="slug" value={slug} />
+          <input type="hidden" name="tournamentId" value={tr.id} />
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("ballsIssued")}</span>
+            <input
+              type="text"
+              name="lopticeDodeljeno"
+              inputMode="numeric"
+              defaultValue={report?.loptice_dodeljeno ?? ""}
+              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
+            />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block font-semibold text-navy">{t("ballsUsed")}</span>
+            <input
+              type="text"
+              name="lopticePotroseno"
+              inputMode="numeric"
+              defaultValue={report?.loptice_potroseno ?? ""}
+              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
+            />
+          </label>
+          <label className="text-sm sm:col-span-2">
+            <span className="mb-1 block font-semibold text-navy">{t("disputes")}</span>
+            <textarea
+              name="sporne"
+              rows={2}
+              defaultValue={report?.sporne ?? ""}
+              placeholder={t("disputesPlaceholder")}
+              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
+            />
+          </label>
+          <label className="text-sm sm:col-span-2">
+            <span className="mb-1 block font-semibold text-navy">{t("reportNote")}</span>
+            <textarea
+              name="napomena"
+              rows={2}
+              defaultValue={report?.napomena ?? ""}
+              className="w-full rounded-xl border border-line2 bg-bg px-3 py-2.5 outline-none focus:border-clay"
+            />
+          </label>
+          <div className="sm:col-span-2">
+            <button
+              type="submit"
+              className="rounded-xl bg-navy px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              {t("reportSave")}
+            </button>
+          </div>
+        </form>
+      </section>
     </div>
   );
 }

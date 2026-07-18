@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { getTournamentBySlug, getEntriesForTournament } from "@/lib/data/tournaments";
 import { getDrawsForTournament, type TournamentDraw } from "@/lib/data/draws";
 import { isRoundRobin, groupStandings } from "@/lib/draw-groups";
@@ -241,9 +242,17 @@ export default async function TurnirPage({
           if (scheduled.length === 0) return null;
           return (
             <section className="mb-8">
-              <h3 className="mb-3 font-display text-lg font-bold text-navy">
-                {td("scheduleTitle")}
-              </h3>
+              <div className="mb-3 flex flex-wrap items-baseline gap-3">
+                <h3 className="font-display text-lg font-bold text-navy">
+                  {td("scheduleTitle")}
+                </h3>
+                <Link
+                  href={`/turnir/${slug}/satnica`}
+                  className="text-sm font-semibold text-clay underline-offset-2 hover:underline"
+                >
+                  🖨️ {td("printSchedule")}
+                </Link>
+              </div>
               <ul className="overflow-hidden rounded-2xl border border-line bg-card">
                 {scheduled.map((m, i) => (
                   <li

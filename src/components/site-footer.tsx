@@ -35,7 +35,7 @@ export function SiteFooter() {
   ] as const;
 
   return (
-    <footer className="mt-16 border-t border-line bg-navy text-white/70">
+    <footer className="mt-16 border-t border-line bg-navy text-white/70 print:hidden">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2.5">
