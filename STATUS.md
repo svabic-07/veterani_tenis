@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
 > **Poslednje ažurirano:** 2026-07-18
-> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga ✅ radi na produkciji + samoprijava singl + zahtev za promenu kategorije; ostaje custom SMTP) · 3 ✅ (žreb → rezultati → obračun, sudijski portal + **strukturisan unos rezultata, ručni nosioci, satnica default, auto-izveštaj u vestima**) · 4 ✅ jezgro (koordinatorski **mini-admin**: turniri/igrači/gosti/klubovi/uloge/uplate/vesti/duplikati; ostaje SMTP blast, model B tablica) · 5 🔶 (dvojezičnost ✅ + PWA ✅ + redizajn ✅, ostaje E2E)
+> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga ✅ + samoprijava singl + zahtev za kategoriju; ostaje custom SMTP + aktivacioni kodovi) · 3 ✅ **KOMPLETNA** (žreb → rezultati → obračun; zaključavanje posle završetka i u RLS; izveštaj sudije, štampa satnice, offline) · 4 ✅ jezgro (mini-admin; **oba bodovna modela** + gost/solo pravila + nedeljni cron rang; ostaje SMTP blast) · 5 🔶 (dvojezičnost ✅ + PWA offline ✅ + redizajn ✅, ostaje E2E) · **Revizija Claude+Codex 2026-07-18 ✅** (2 kritična nalaza popravljena isti dan)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -99,6 +99,9 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 24. `…0718120000_atomic_admin_fixes` — **`admin_update_player()`** (atomska izmena igrača uklj. ime/prezime + kontakt) + **merge_players v2** (dedup `ranking_points` po turniru×kat×disc + preračun ranga posle spajanja)
 25. `…0718140000_referee_reports` — **`referee_reports`** (izveštaj sudije: loptice dodeljeno/potrošeno, sporne situacije, napomena; interno — RLS staff + direktor turnira)
 26. `…0718160000_gost_bez_bodova` — **gost ne dobija bodove** (pravilo saveza; gosti su obično stranci): plasman se kaskadno prenosi niz kostur na pobeđene članove (pobeđeni u finalu nasleđuje gostov plasman itd.; gost-pobedio-gosta se preskače); u čistoj grupi plasman samo među članovima; gost = prijava `status='gost'` ili `legacy_id 'gost-%'`. + `scoring_kolo_rank()` helper. Testirano simulacijom (gost pobednik u eliminaciji: 1000→finalista, 600→PF žrtva itd.; grupa: samo članovi).
+27. `…0718180000_solo_kategorija` — **jedini prijavljeni u kategoriji = pobednik „bez borbe"** (bodovi pobednika, kostur 8); uz „Prijavi i u jaču" u portalu igrač osvaja bodove **u obe** kategorije; gost kao jedini prijavljen ne dobija ništa
+28. `…0718200000_lock_finished_rls` — **`can_edit_event()`**: RLS zaključavanje završenog turnira (manager write politike na entries/draws/matches/match_sets + direktorske politike) — ni direktan PostgREST poziv ne može da piše po završenom turniru
+29. `…0718210000_finish_v5` — revizione popravke obračuna: svi-solo turnir može da se završi; solo samo singl + samo bez ijednog žreba (opozvan = otkazano); **čista grupa tie-break po spec-u** (pobede → h2h → set-razlika → gem-razlika)
 
 ⚠️ **Deploy migracija:** `supabase db push` NEBEZBEDAN (remote history koristi druge timestampove nego lokalni fajlovi). Migracije 13–15 primenjene preko Management API `database/query` + upis u `schema_migrations`.
 
@@ -257,6 +260,16 @@ Dvostruka revizija (Codex GPT 5.6 čitao kod + Claude SQL/RLS/smoke testovi). Po
 | 2026-07-16 | `Panel + prijave UX` | Aktivni turniri na vrhu; premeštanje prijave; auto-konkurencije; „Upravljaj" |
 | 2026-07-16 | `Žreb: nosioci + bodovi` | Ručne oznake nosilaca; broj nosilaca uvek po kosturu; bodovi u žrebu; satnica default datum |
 | 2026-07-16 | `Auto-izveštaj` | „ZAVRŠI TURNIR" objavljuje izveštaj u vestima (pobednici, finale, PF) |
+| 2026-07-18 | `Integritet obračuna` | Model B „svi boduju" + validacija tablice + nedeljni cron rang + atomske korekcije |
+| 2026-07-18 | `Sudija read-only` | Posle ZAVRŠI TURNIR nema izmena; javna stranica: osvojeni bodovi po konkurenciji |
+| 2026-07-18 | `Izveštaj + satnica` | Izveštaj sudije (loptice, sporne) + `/turnir/[slug]/satnica` za štampu |
+| 2026-07-18 | `PWA offline` | Servisni radnik (network-first) + offline fallback; verifikovano Playwright-om |
+| 2026-07-18 | *(podaci u bazi)* | Test turniri obrisani (+14 bodova, gost); demo nalozi sudija/koordinator + DEMO turnir |
+| 2026-07-18 | `Gost bez bodova` | Kaskada plasmana niz kostur; čista grupa samo članovi |
+| 2026-07-18 | `Medalje + anchori` | Konkurencije klikabilne → kostur; osvajači medalja po kategoriji |
+| 2026-07-18 | `Svak sa svakim` | Štiklir za jednu RR grupu (5–8 igrača) uz Kreiraj žreb |
+| 2026-07-18 | `Solo kategorija` | Jedini prijavljeni = pobednik bez borbe; „Prijavi i u jaču" (bodovi u obe) |
+| 2026-07-18 | `Revizija Claude+Codex` | guardOpen po entitetu + RLS lock završenog + SW privatnost + finish v5 (tie-break) |
 
 ---
 
