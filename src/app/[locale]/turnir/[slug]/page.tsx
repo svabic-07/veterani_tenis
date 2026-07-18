@@ -155,21 +155,47 @@ export default async function TurnirPage({
     };
   }
 
-  // Osvojeni bodovi po konkurenciji — samo za završen turnir (obračunat ili uvezen)
+  // Osvojeni bodovi + osvajači medalja po konkurenciji — samo za završen turnir
   const pointsByEvent = new Map<string, { name: string; bodovi: number }[]>();
+  const medalsByEvent = new Map<string, { mesto: number; name: string }[]>();
   if (tr.status === "zavrsen") {
     const supabase = await createClient();
-    const { data: pts } = await supabase
-      .from("ranking_points")
-      .select("kategorija, disciplina, bodovi, players ( ime, prezime )")
-      .eq("tournament_id", tr.id)
-      .order("bodovi", { ascending: false });
+    const [{ data: pts }, { data: podiums }] = await Promise.all([
+      supabase
+        .from("ranking_points")
+        .select("kategorija, disciplina, bodovi, players ( ime, prezime )")
+        .eq("tournament_id", tr.id)
+        .order("bodovi", { ascending: false }),
+      supabase
+        .from("player_podiums")
+        .select("kategorija, disciplina, mesto, player_id")
+        .eq("turnir_id", tr.id)
+        .order("mesto"),
+    ]);
     for (const r of pts ?? []) {
       if (!r.players) continue;
       const key = `${r.kategorija}|${r.disciplina}`;
       const list = pointsByEvent.get(key) ?? [];
       list.push({ name: `${r.players.ime} ${r.players.prezime}`, bodovi: r.bodovi });
       pointsByEvent.set(key, list);
+    }
+    const podRows = podiums ?? [];
+    const pids = [...new Set(podRows.map((r) => r.player_id).filter((x): x is string => !!x))];
+    const nameById = new Map<string, string>();
+    if (pids.length) {
+      const { data: names } = await supabase
+        .from("players")
+        .select("id, ime, prezime")
+        .in("id", pids);
+      for (const p of names ?? []) nameById.set(p.id, `${p.ime} ${p.prezime}`);
+    }
+    for (const r of podRows) {
+      const name = r.player_id ? nameById.get(r.player_id) : null;
+      if (!name || r.kategorija == null || r.disciplina == null || r.mesto == null) continue;
+      const key = `${r.kategorija}|${r.disciplina}`;
+      const list = medalsByEvent.get(key) ?? [];
+      list.push({ mesto: r.mesto, name });
+      medalsByEvent.set(key, list);
     }
   }
 
@@ -290,7 +316,11 @@ export default async function TurnirPage({
               const points =
                 pointsByEvent.get(`${d.event.kategorija}|${d.event.disciplina}`) ?? [];
               return (
-                <section key={d.id}>
+                <section
+                  key={d.id}
+                  id={`zreb-${d.event.disciplina}-${d.event.kategorija}`}
+                  className="scroll-mt-24"
+                >
                   <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <h3 className="font-display text-lg font-bold text-navy">
                       {td("title")} · {t(`discipline.${d.event.disciplina}`)} ·{" "}
@@ -387,15 +417,72 @@ export default async function TurnirPage({
                     <div className="mb-2 text-xs font-bold uppercase tracking-wide text-court-dark">
                       {t(`discipline.${g.disc}`)}
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {g.kategorije.map((k) => (
-                        <span
-                          key={k}
-                          className="inline-flex items-center rounded-lg border border-line2 bg-bg2 px-2.5 py-1 font-mono text-xs text-slate"
-                        >
-                          {k}
-                        </span>
-                      ))}
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {[...g.kategorije]
+                        .sort((a, b) => catRank(a) - catRank(b))
+                        .map((k) => {
+                          const medals = medalsByEvent.get(`${k}|${g.disc}`) ?? [];
+                          const hasDraw = draws.some(
+                            (d) => d.event.kategorija === k && d.event.disciplina === g.disc,
+                          );
+                          const anchor = `#zreb-${g.disc}-${k}`;
+                          // Završen turnir sa žrebom: kartica sa osvajačima
+                          // medalja — klik vodi pravo na kostur te konkurencije.
+                          if (medals.length > 0) {
+                            const treci = medals.filter((m) => m.mesto === 3);
+                            return (
+                              <a
+                                key={k}
+                                href={anchor}
+                                className="block rounded-xl border border-line2 bg-bg2 px-3 py-2 transition hover:border-clay"
+                              >
+                                <div className="flex items-center">
+                                  <span className="font-mono text-sm font-bold text-navy">{k}</span>
+                                  <span className="ml-auto text-xs font-bold text-clay">
+                                    {td("title")} →
+                                  </span>
+                                </div>
+                                <ul className="mt-1.5 space-y-0.5 text-xs text-slate">
+                                  {medals
+                                    .filter((m) => m.mesto === 1)
+                                    .map((m) => (
+                                      <li key={`1${m.name}`} className="font-semibold text-navy">
+                                        🥇 {m.name}
+                                      </li>
+                                    ))}
+                                  {medals
+                                    .filter((m) => m.mesto === 2)
+                                    .map((m) => (
+                                      <li key={`2${m.name}`}>🥈 {m.name}</li>
+                                    ))}
+                                  {treci.length > 0 && (
+                                    <li>🥉 {treci.map((m) => m.name).join(", ")}</li>
+                                  )}
+                                </ul>
+                              </a>
+                            );
+                          }
+                          // Ima žreb, nema podijuma (u toku / grupe): samo link
+                          if (hasDraw) {
+                            return (
+                              <a
+                                key={k}
+                                href={anchor}
+                                className="inline-flex items-center gap-1.5 justify-self-start rounded-lg border border-line2 bg-bg2 px-2.5 py-1 font-mono text-xs text-navy transition hover:border-clay hover:text-clay"
+                              >
+                                {k} <span className="font-sans">→</span>
+                              </a>
+                            );
+                          }
+                          return (
+                            <span
+                              key={k}
+                              className="inline-flex items-center justify-self-start rounded-lg border border-line2 bg-bg2 px-2.5 py-1 font-mono text-xs text-slate"
+                            >
+                              {k}
+                            </span>
+                          );
+                        })}
                     </div>
                   </div>
                 ))}
