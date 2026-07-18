@@ -425,7 +425,9 @@
       "hide": "Sakrij",
       "show": "Objavi",
       "delete": "Obriši"
-    }
+    },
+    "noActiveTournaments": "Nema aktivnih ni predstojećih turnira — kreirajte novi iznad.",
+    "finishedTournaments": "Završeni turniri ({n})"
   },
   "referee": {
     "title": "Sudijski portal",

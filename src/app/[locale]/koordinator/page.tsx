@@ -169,15 +169,25 @@ export default async function KoordinatorPage({
             </Link>
           </div>
         </div>
-        <ul className="overflow-hidden rounded-2xl border border-line bg-card">
-          {(tournaments ?? []).map((tr, i) => {
+        {(() => {
+          // Particija po datumu: aktivni/predstojeći (i bez datuma — sveže kreirani)
+          // na vrhu, najskoriji prvi; završeni u sklopivoj sekciji ispod.
+          const today = new Date().toISOString().slice(0, 10);
+          const endOf = (tr: NonNullable<typeof tournaments>[number]) =>
+            tr.datum_do ?? tr.datum_od ?? "";
+          const all = tournaments ?? [];
+          const active = all
+            .filter((tr) => endOf(tr) === "" || endOf(tr) >= today)
+            .sort((a, b) => (a.datum_od ?? "").localeCompare(b.datum_od ?? ""));
+          const finished = all
+            .filter((tr) => endOf(tr) !== "" && endOf(tr) < today)
+            .sort((a, b) => (b.datum_od ?? "").localeCompare(a.datum_od ?? ""));
+
+          const row = (tr: (typeof all)[number], i: number) => {
             const refName =
               tr.direktor_ime ?? (tr.direktor ? `${tr.direktor.ime} ${tr.direktor.prezime}` : null);
             return (
-              <li
-                key={tr.id}
-                className={`px-4 py-2.5 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}
-              >
+              <li key={tr.id} className={`px-4 py-2.5 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <Link
                     href={`/sudija/${tr.legacy_id}`}
@@ -201,8 +211,30 @@ export default async function KoordinatorPage({
                 />
               </li>
             );
-          })}
-        </ul>
+          };
+
+          return (
+            <>
+              {active.length === 0 ? (
+                <p className="rounded-2xl border border-dashed border-line2 bg-card p-5 text-sm text-muted">
+                  {t("noActiveTournaments")}
+                </p>
+              ) : (
+                <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+                  {active.map(row)}
+                </ul>
+              )}
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm font-semibold text-slate hover:text-clay">
+                  {t("finishedTournaments", { n: finished.length })}
+                </summary>
+                <ul className="mt-2 overflow-hidden rounded-2xl border border-line bg-card">
+                  {finished.map(row)}
+                </ul>
+              </details>
+            </>
+          );
+        })()}
       </section>
 
       {/* Zahtevi za promenu kategorije */}

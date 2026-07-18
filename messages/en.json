@@ -390,7 +390,9 @@
       "hide": "Hide",
       "show": "Publish",
       "delete": "Delete"
-    }
+    },
+    "noActiveTournaments": "No active or upcoming tournaments — create one above.",
+    "finishedTournaments": "Finished tournaments ({n})"
   },
   "referee": {
     "title": "Referee portal",
