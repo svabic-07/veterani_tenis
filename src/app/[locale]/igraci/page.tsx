@@ -31,8 +31,19 @@ export default async function IgraciPage({
   const kategorija =
     typeof sp.kategorija === "string" && catList.includes(sp.kategorija) ? sp.kategorija : "";
 
+  const strana = Math.max(1, Number(typeof sp.strana === "string" ? sp.strana : "1") || 1);
   const t = await getTranslations("players");
-  const { players, count } = await searchPlayers({ q, kategorija });
+  const { players, count } = await searchPlayers({ q, kategorija, page: strana });
+  const PO_STRANI = 60;
+  const ukupnoStrana = Math.max(1, Math.ceil(count / PO_STRANI));
+  const pageHref = (n: number) => {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (kategorija) params.set("kategorija", kategorija);
+    if (n > 1) params.set("strana", String(n));
+    const qs = params.toString();
+    return `/igraci${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <>
@@ -79,8 +90,10 @@ export default async function IgraciPage({
 
         <p className="mb-5 text-sm font-semibold text-muted">
           {t("count", { n: count })}
-          {count > players.length && (
-            <span className="ml-2 font-normal">{t("showingFirst", { n: players.length })}</span>
+          {ukupnoStrana > 1 && (
+            <span className="ml-2 font-normal">
+              {t("pageOf", { page: strana, total: ukupnoStrana })}
+            </span>
           )}
         </p>
 
@@ -115,6 +128,30 @@ export default async function IgraciPage({
               </li>
             ))}
           </ul>
+        )}
+
+        {ukupnoStrana > 1 && (
+          <nav className="mt-8 flex items-center justify-center gap-3">
+            {strana > 1 && (
+              <Link
+                href={pageHref(strana - 1)}
+                className="rounded-xl border border-line2 bg-card px-4 py-2 text-sm font-semibold text-navy transition hover:border-clay hover:text-clay"
+              >
+                ← {t("prevPage")}
+              </Link>
+            )}
+            <span className="font-mono text-sm text-muted">
+              {strana} / {ukupnoStrana}
+            </span>
+            {strana < ukupnoStrana && (
+              <Link
+                href={pageHref(strana + 1)}
+                className="rounded-xl border border-line2 bg-card px-4 py-2 text-sm font-semibold text-navy transition hover:border-clay hover:text-clay"
+              >
+                {t("nextPage")} →
+              </Link>
+            )}
+          </nav>
         )}
       </div>
     </>

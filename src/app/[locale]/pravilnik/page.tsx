@@ -192,7 +192,7 @@ export default async function PravilnikPage({
           <div className="rounded-2xl border border-line bg-card p-5">
             <h3 className="mb-3 font-display font-bold text-navy">{L("Rang lista", "Ranking")}</h3>
             <ul className="space-y-2 text-sm text-slate">
-              <li>• {L("Zbir N najboljih rezultata (N = 8/10/13, bira koordinator po sezoni)", "Sum of N best results (N = 8/10/13, set per season)")}</li>
+              <li>• {L("Zbir 13 najboljih rezultata (podešavanje sezone — može 8/10/13)", "Sum of the 13 best results (season setting — 8/10/13)")}</li>
               <li>• {L("Samo aktivni turniri — poslednjih 52 nedelje", "Active tournaments only — last 52 weeks")}</li>
               <li>• {L("Bodovi stariji od godinu dana ispadaju automatski", "Points older than a year drop off automatically")}</li>
               <li>• {L("Obračun nedeljno, po kategoriji × disciplini", "Weekly recalculation, per category × discipline")}</li>
@@ -246,6 +246,120 @@ export default async function PravilnikPage({
             "Round-robin (groups): 3–5 players = 0 seeds · 6–7 = 2 seeds. Unranked are not seeded. Same club/country separated per ITF rule.",
           )}
         </p>
+      </Section>
+
+      {/* Brisanje bodova */}
+      <Section num="06" title={L("Brisanje bodova sa rang liste", "Ranking points expiry")}>
+        <div className="rounded-2xl border border-line bg-card p-5 text-sm leading-relaxed text-slate">
+          <p>
+            {L(
+              "Bodovi važe 52 nedelje od turnira na kome su osvojeni. Sistem ih briše automatski: na današnji dan ispadaju bodovi osvojeni na turniru koji se odigrao na isti kalendarski datum prošle sezone.",
+              "Points are valid for 52 weeks from the tournament where they were earned. The system removes them automatically: today, the points earned at the tournament played on this calendar date last season drop off.",
+            )}
+          </p>
+          <p className="mt-2">
+            {L(
+              "Rang lista se preračunava svakog ponedeljka, po kategoriji i disciplini. Na profilu igrača istekli rezultati ostaju vidljivi u istoriji, ali ne ulaze u zbir.",
+              "Rankings are recalculated every Monday, per category and discipline. Expired results stay visible in the player's history but no longer count towards the total.",
+            )}
+          </p>
+        </div>
+      </Section>
+
+      {/* Posebne odredbe */}
+      <Section num="07" title={L("Posebne odredbe", "Special provisions")}>
+        <ul className="space-y-3">
+          {[
+            L(
+              "Predaja meča: igrač koji preda meč gubi sve poene osvojene na tom turniru; u sledeće kolo ga menja protivnik iz prethodnog kola (odluka sudije).",
+              "Match forfeit: a player who forfeits loses all points earned at that tournament; the opponent from the previous round replaces them (referee's decision).",
+            ),
+            L(
+              "Gosti (obično stranci) ne osvajaju bodove — njihov plasman se prenosi na članove koje su pobedili (pobeđeni u finalu dobija bodove pobednika itd.).",
+              "Guests (usually foreign players) do not earn points — their placement transfers to the members they defeated (the beaten finalist receives winner's points, etc.).",
+            ),
+            L(
+              "Jedini prijavljeni u kategoriji je pobednik bez borbe i dobija bodove pobednika svoje kategorije; sudija ga može dodatno prijaviti u jaču kategoriju, gde osvaja bodove po rezultatu — dakle u obe.",
+              "The sole entrant in a category wins unopposed and receives their category's winner points; the referee may additionally enter them in a stronger category, where they earn points by result — in both.",
+            ),
+            L(
+              "Nepojavljivanje bez odjave: prvi put opomena, zatim oduzimanje bodova, pa isključenje sa turnira do kraja sezone (Takmičarska komisija).",
+              "No-show without withdrawal: first a warning, then point deduction, then exclusion from tournaments for the rest of the season (Competition Committee).",
+            ),
+            L(
+              "Oba polufinala se igraju u isto vreme; finala se moraju odigrati poslednjeg dana turnira.",
+              "Both semifinals are played at the same time; finals must be played on the tournament's last day.",
+            ),
+          ].map((txt) => (
+            <li key={txt.slice(0, 24)} className="rounded-xl border border-line bg-card px-4 py-3 text-sm leading-relaxed text-slate">
+              {txt}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      {/* FAQ */}
+      <Section num="08" title={L("Česta pitanja", "FAQ")}>
+        <div className="space-y-2">
+          {[
+            [
+              L("Ko može da se učlani?", "Who can join?"),
+              L(
+                "Svaki državljanin Srbije od 20 godina naviše, bez obzira na pol. Dame se takmiče ravnopravno u svim kategorijama. Član bira kvalitativnu kategoriju (I–V) uz starosne minimume, a potvrđuje je koordinator.",
+                "Any Serbian citizen aged 20 or over, regardless of gender. Women compete equally in all categories. A member picks a quality category (I–V) subject to age minimums, confirmed by the coordinator.",
+              ),
+            ],
+            [
+              L("Kako se prijavljujem na sajt?", "How do I sign in?"),
+              L(
+                "Bez lozinke — na stranici Prijava unesete svoju email adresu i dobijete link za prijavu. Nalog se automatski povezuje sa vašim igračkim profilom. Ako vaš email nije u bazi članova, javite se koordinatoru.",
+                "No password — enter your email on the Sign-in page and you'll receive a sign-in link. The account links automatically to your player profile. If your email isn't in the member database, contact the coordinator.",
+              ),
+            ],
+            [
+              L("Kako se prijavljujem na turnir?", "How do I enter a tournament?"),
+              L(
+                "Na stranici turnira, dok su prijave otvorene (do roka, pre žreba), jednim klikom u svojoj ili jačoj kategoriji. Odjava je moguća do isteka roka. Dubl i miks prijave vodi sudija turnira.",
+                "On the tournament page, while entries are open (before the deadline and the draw), with one click in your own or a stronger category. Withdrawal is possible until the deadline. Doubles and mixed entries are handled by the tournament referee.",
+              ),
+            ],
+            [
+              L("Kako mogu da promenim kategoriju?", "How do I change category?"),
+              L(
+                "Na stranici Moj nalog podnesete zahtev — samo ka jačoj kategoriji i najviše jednom godišnje; odobrava koordinator. Za prelazak u slabiju kategoriju odlučuje Takmičarska komisija.",
+                "Submit a request on My account — only to a stronger category and at most once per year; approved by the coordinator. Moving to a weaker category is decided by the Competition Committee.",
+              ),
+            ],
+            [
+              L("Kada se objavljuju žreb i satnica?", "When are the draw and schedule published?"),
+              L(
+                "Žreb se objavljuje po zatvaranju prijava (za Seriju 2000 četvrtkom do 14h), a satnica do četvrtka u 19h. Oboje su javno vidljivi na stranici turnira, a satnica može i da se odštampa.",
+                "The draw is published once entries close (for Series 2000 by Thursday 2 pm), the schedule by Thursday 7 pm. Both are public on the tournament page, and the schedule can be printed.",
+              ),
+            ],
+            [
+              L("Kako se računa rang lista?", "How are rankings calculated?"),
+              L(
+                "Zbir 13 najboljih rezultata sa turnira odigranih u poslednje 52 nedelje, posebno po kategoriji i disciplini. Preračun je automatski, svakog ponedeljka.",
+                "The sum of your 13 best results from tournaments in the last 52 weeks, per category and discipline. Recalculated automatically every Monday.",
+              ),
+            ],
+            [
+              L("Prijava na ITF turnire?", "Entering ITF tournaments?"),
+              L(
+                "ITF Masters turniri se prijavljuju preko itftennis.com/seniors uz IPIN nalog.",
+                "ITF Masters tournaments are entered via itftennis.com/seniors with an IPIN account.",
+              ),
+            ],
+          ].map(([q, a]) => (
+            <details key={q as string} className="group rounded-2xl border border-line bg-card">
+              <summary className="cursor-pointer px-5 py-3.5 font-semibold text-navy transition group-open:border-b group-open:border-line">
+                {q}
+              </summary>
+              <p className="px-5 py-3.5 text-sm leading-relaxed text-slate">{a}</p>
+            </details>
+          ))}
+        </div>
       </Section>
       </div>
     </>

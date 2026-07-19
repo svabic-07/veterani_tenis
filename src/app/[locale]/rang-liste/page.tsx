@@ -13,6 +13,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 const CATEGORIES = Constants.public.Enums.quality_category;
+// starosne kategorije koje postoje u rang listi (stari sistem ih vodi uporedo)
+const AGE_CATS = ["20", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75"] as const;
 const DISCIPLINES = Constants.public.Enums.discipline;
 const MEDAL: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
@@ -27,7 +29,7 @@ export default async function RangListePage({
   setRequestLocale(locale);
   const sp = await searchParams;
 
-  const cats: readonly string[] = CATEGORIES;
+  const cats: readonly string[] = [...CATEGORIES, ...AGE_CATS];
   const discs: readonly string[] = DISCIPLINES;
   const kat = typeof sp.kat === "string" && cats.includes(sp.kat) ? sp.kat : "I";
   const disc = (typeof sp.disc === "string" && discs.includes(sp.disc) ? sp.disc : "singl") as (typeof DISCIPLINES)[number];
@@ -41,7 +43,7 @@ export default async function RangListePage({
       <PageHero
         compact
         crumb="/ rang-liste"
-        eyebrow={week ? `${t("week")}: ${week}` : "Rang"}
+        eyebrow={week ? `${t("week")}: ${week}` : t("title")}
         title={t("title")}
         lead={t("subtitle")}
       />
@@ -78,6 +80,22 @@ export default async function RangListePage({
                 }`}
               >
                 {c}
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {AGE_CATS.map((c) => (
+              <Link
+                key={c}
+                href={hrefFor(c, disc)}
+                scroll={false}
+                className={`grid h-9 min-w-11 place-items-center rounded-lg px-1.5 font-mono text-sm font-bold transition ${
+                  c === kat
+                    ? "bg-court text-white"
+                    : "border border-line2 bg-card text-slate hover:border-court hover:text-court-dark"
+                }`}
+              >
+                {c}+
               </Link>
             ))}
           </div>
@@ -147,7 +165,7 @@ export default async function RangListePage({
                     </span>
                     <span className="shrink-0 text-right">
                       <span className="block font-mono font-bold text-court-dark">{r.bodovi}</span>
-                      <span className="block text-xs text-muted">{r.broj_turnira} tur.</span>
+                      <span className="block text-xs text-muted">{r.broj_turnira} {t("tourShort")}</span>
                     </span>
                   </Link>
                 </li>

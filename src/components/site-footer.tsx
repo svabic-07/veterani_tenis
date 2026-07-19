@@ -15,12 +15,14 @@ export function SiteFooter() {
         { label: t("links.rankings"), href: "/rang-liste" },
         { label: t("links.players"), href: "/igraci" },
         { label: t("links.news"), href: "/vesti" },
+        { label: t("links.gallery"), href: "/galerija" },
       ],
     },
     {
       title: t("sections.account"),
       links: [
         { label: t("links.login"), href: "/prijava" },
+        { label: t("links.join"), href: "/uclanjenje" },
         { label: t("links.referee"), href: "/sudija" },
         { label: t("links.rules"), href: "/pravilnik" },
       ],

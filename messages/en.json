@@ -73,6 +73,8 @@
       "rules": "Regulations",
       "news": "News",
       "login": "Player sign in",
+      "join": "Join us",
+      "gallery": "Gallery",
       "referee": "Referee portal",
       "about": "About the association",
       "contact": "Contact"
@@ -91,6 +93,7 @@
     "title": "Tournament calendar",
     "subtitle": "Upcoming tournaments and a results archive by year.",
     "seasonEyebrow": "Season {year}",
+    "allSeries": "All series",
     "upcomingTitle": "Upcoming tournaments",
     "register": "Register →",
     "noUpcoming": "No announced tournaments right now. See the archive below.",
@@ -190,7 +193,7 @@
     "errorLimit": "Too many attempts — please wait a bit and try again.",
     "errorSend": "Sending failed. Please try again in a minute.",
     "errorLink": "The link is invalid or has expired. Please request a new one.",
-    "helpTitle": "Need help?",
+    "joinCta": "Not a member? Join here", "helpTitle": "Need help?",
     "helpBody": "If your email isn't in the member database or you're stuck, contact your club coordinator — they can also enter tournaments on your behalf."
   },
   "account": {
@@ -293,6 +296,24 @@
       "bez_pobede": "No win",
       "rezerva": "Reserve"
     },
+    "membershipTitle": "Membership requests",
+    "membershipApprove": "Approve & create member",
+    "membershipReject": "Reject",
+    "gallery": {
+      "title": "Gallery",
+      "lead": "Tournament photos — upload and delete.",
+      "uploadTitle": "Add photos",
+      "caption": "Caption (optional)",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "uploadError": "Upload failed — check the format (JPG/PNG/WebP, up to 8 MB).",
+      "delete": "Delete"
+    },
+    "sankcija": {
+      "opomena": "Warning",
+      "oduzimanje_bodova": "Point deduction",
+      "suspenzija": "Suspension"
+    },
     "refReports": "Referee reports",
     "refBalls": "Balls (issued/used)",
     "rankingsTitle": "Rankings",
@@ -300,6 +321,11 @@
     "recalcRankings": "Recalculate rankings now",
     "ok": {
       "rang": "Rankings recalculated.",
+      "uclanjenjeOdobreno": "Member created — they can activate an account with their email.",
+      "uclanjenjeOdbijeno": "Membership request rejected.",
+      "sankcija": "Sanction recorded.",
+      "sankcijaUklonjena": "Sanction removed.",
+      "galerijaObrisana": "Photo deleted.",
       "uloga": "Role updated.",
       "turnir": "Tournament created.",
       "sudija": "Referee assigned.",
@@ -319,6 +345,9 @@
     },
     "err": {
       "rang": "Rankings recalculation failed.",
+      "uclanjenje": "Processing the request failed.",
+      "sankcija": "Recording the sanction failed.",
+      "galerija": "Deleting the photo failed.",
       "zahtev": "Invalid request.",
       "auth": "Please sign in again.",
       "samoodbrana": "You cannot revoke your own admin role.",
@@ -379,7 +408,13 @@
       "mergeKeep": "Keep player",
       "mergeDup": "Duplicate (deleted)",
       "mergeCta": "Merge players",
-      "mergeConfirm": "I understand merging is irreversible."
+      "mergeConfirm": "I understand merging is irreversible.",
+      "sanctions": "Sanctions",
+      "sanctionUntil": "until",
+      "sanctionReason": "reason…",
+      "sanctionAdd": "Add",
+      "sanctionRemove": "Remove",
+      "sanctionHint": "Rulebook ladder: warning → point deduction → suspension. A suspension blocks tournament self-entry while active."
     },
     "payments": {
       "title": "Payments",
@@ -602,6 +637,9 @@
     "allCategories": "All categories",
     "count": "{n, plural, =0 {no players} one {# player} other {# players}}",
     "showingFirst": "Showing the first {n} — narrow the search by name.",
+    "pageOf": "page {page} of {total}",
+    "prevPage": "Previous",
+    "nextPage": "Next",
     "empty": "No results for the selected filters.",
     "profile": {
       "back": "← Players",
@@ -616,6 +654,8 @@
       "titles": "titles",
       "history": "Tournament history",
       "matches": "Recent matches",
+      "h2h": "Head-to-head",
+      "h2hHint": "Opponents with the most matches played (wins : losses).",
       "noRanking": "Ranking has not been calculated for this player yet.",
       "noHistory": "No recorded appearances.",
       "noMatches": "No recorded matches.",
@@ -639,6 +679,7 @@
     "player": "Player",
     "points": "Points",
     "tournaments": "Events",
+    "tourShort": "trn.",
     "empty": "The ranking for this category and discipline has not been calculated yet. It will appear after the first tournaments are played or existing data is migrated.",
     "disc": {
       "singl": "Singles",

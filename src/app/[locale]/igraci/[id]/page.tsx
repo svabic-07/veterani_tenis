@@ -7,6 +7,7 @@ import {
   getPlayerHistory,
   getPlayerMatches,
   getPlayerTrophies,
+  getPlayerH2H,
 } from "@/lib/data/players";
 import { formatDateRange } from "@/lib/format";
 import { Avatar } from "@/components/ui/avatar";
@@ -39,11 +40,12 @@ export default async function ProfilPage({
   const p = await getPlayerById(id);
   if (!p) notFound();
 
-  const [rankings, history, matches, trophies] = await Promise.all([
+  const [rankings, history, matches, trophies, h2h] = await Promise.all([
     getPlayerRankings(id),
     getPlayerHistory(id),
     getPlayerMatches(id),
     getPlayerTrophies(id),
+    getPlayerH2H(id),
   ]);
 
   const age = p.godiste ? new Date().getFullYear() - p.godiste : null;
@@ -274,6 +276,34 @@ export default async function ProfilPage({
               </ul>
             )}
           </div>
+
+          {/* Međusobni skor (H2H) — protivnici sa najviše mečeva */}
+          {h2h.length > 0 && (
+            <div>
+              <h2 className="mb-2 font-display text-lg font-bold text-navy">{t("h2h")}</h2>
+              <ul className="overflow-hidden rounded-2xl border border-line bg-card">
+                {h2h.map((r, i) => (
+                  <li
+                    key={r.opponentId}
+                    className={`flex items-center gap-3 px-4 py-2.5 text-sm ${i % 2 ? "bg-[#FBF8F3]" : ""}`}
+                  >
+                    <Link
+                      href={`/igraci/${r.opponentId}`}
+                      className="min-w-0 flex-1 truncate font-medium text-navy hover:text-clay"
+                    >
+                      {r.ime} {r.prezime}
+                    </Link>
+                    <span className="shrink-0 font-mono text-sm">
+                      <b className={r.pobede >= r.porazi ? "text-court-dark" : "text-navy"}>{r.pobede}</b>
+                      <span className="text-muted"> : </span>
+                      <b className={r.porazi > r.pobede ? "text-clay-dark" : "text-navy"}>{r.porazi}</b>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1.5 text-xs text-muted">{t("h2hHint")}</p>
+            </div>
+          )}
         </section>
         </div>
       </div>

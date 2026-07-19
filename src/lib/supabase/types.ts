@@ -234,6 +234,30 @@ export type Database = {
           },
         ]
       }
+      gallery_photos: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          naslov: string | null
+          path: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          naslov?: string | null
+          path: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          naslov?: string | null
+          path?: string
+        }
+        Relationships: []
+      }
       match_sets: {
         Row: {
           gem1: number
@@ -380,6 +404,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      membership_requests: {
+        Row: {
+          created_at: string
+          email: string
+          godiste: number | null
+          grad: string | null
+          id: string
+          ime: string
+          kategorija: Database["public"]["Enums"]["quality_category"] | null
+          klub: string | null
+          napomena: string | null
+          prezime: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          telefon: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          godiste?: number | null
+          grad?: string | null
+          id?: string
+          ime: string
+          kategorija?: Database["public"]["Enums"]["quality_category"] | null
+          klub?: string | null
+          napomena?: string | null
+          prezime: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          telefon?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          godiste?: number | null
+          grad?: string | null
+          id?: string
+          ime?: string
+          kategorija?: Database["public"]["Enums"]["quality_category"] | null
+          klub?: string | null
+          napomena?: string | null
+          prezime?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          telefon?: string | null
+        }
+        Relationships: []
       }
       news: {
         Row: {
@@ -733,6 +808,44 @@ export type Database = {
           },
         ]
       }
+      sanctions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          player_id: string
+          razlog: string | null
+          tip: string
+          vazi_do: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          player_id: string
+          razlog?: string | null
+          tip: string
+          vazi_do?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          player_id?: string
+          razlog?: string | null
+          tip?: string
+          vazi_do?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sanctions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scoring_tables: {
         Row: {
           bodovi: number
@@ -1017,6 +1130,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      can_edit_event: { Args: { _event_id: string }; Returns: boolean }
       can_manage_event: { Args: { _event_id: string }; Returns: boolean }
       can_self_enter_event: { Args: { _event_id: string }; Returns: boolean }
       claim_player: { Args: { p_player_id: string }; Returns: undefined }
@@ -1082,7 +1196,12 @@ export type Database = {
         Args: { _approve: boolean; _request_id: string }
         Returns: undefined
       }
+      resolve_membership_request: {
+        Args: { _approve: boolean; _request_id: string }
+        Returns: string
+      }
       revoke_draw: { Args: { _draw_id: string }; Returns: undefined }
+      scoring_kolo_rank: { Args: { _kolo: string }; Returns: number }
       set_referee_role: {
         Args: { _grant: boolean; _user_id: string }
         Returns: undefined

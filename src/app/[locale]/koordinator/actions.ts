@@ -199,6 +199,73 @@ function backTo(formData: FormData, path: string, query: string): never {
   throw new Error("unreachable");
 }
 
+/** Odobri/odbij zahtev za učlanjenje (RPC: kreira igrača + kontakt, audit). */
+export async function resolveMembershipAction(formData: FormData) {
+  const requestId = String(formData.get("requestId") ?? "");
+  const approve = formData.get("approve") === "1";
+  if (!UUID_RE.test(requestId)) back(formData, "greska=zahtev");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("resolve_membership_request", {
+    _request_id: requestId,
+    _approve: approve,
+  });
+  if (error) back(formData, "greska=uclanjenje");
+  back(formData, `ok=${approve ? "uclanjenjeOdobreno" : "uclanjenjeOdbijeno"}`);
+}
+
+/** Nova sankcija (RLS: staff). */
+export async function addSanctionAction(formData: FormData) {
+  const playerId = String(formData.get("playerId") ?? "");
+  const tip = String(formData.get("tip") ?? "");
+  const razlog = String(formData.get("razlog") ?? "").trim().slice(0, 300) || null;
+  const vaziDoRaw = String(formData.get("vaziDo") ?? "").trim();
+  const vaziDo = /^\d{4}-\d{2}-\d{2}$/.test(vaziDoRaw) ? vaziDoRaw : null;
+  const q = String(formData.get("q") ?? "");
+  const backQ = q ? `&q=${encodeURIComponent(q)}` : "";
+
+  if (!UUID_RE.test(playerId) || !["opomena", "oduzimanje_bodova", "suspenzija"].includes(tip)) {
+    backTo(formData, "/koordinator/clanovi", `greska=zahtev${backQ}`);
+  }
+
+  const supabase = await createClient();
+  const { data: me } = await supabase.auth.getClaims();
+  const { error } = await supabase.from("sanctions").insert({
+    player_id: playerId,
+    tip,
+    razlog,
+    vazi_do: vaziDo,
+    created_by: me?.claims?.sub ?? null,
+  });
+  if (error) backTo(formData, "/koordinator/clanovi", `greska=sankcija${backQ}`);
+  backTo(formData, "/koordinator/clanovi", `ok=sankcija${backQ}`);
+}
+
+/** Ukidanje sankcije (RLS: staff). */
+export async function deleteSanctionAction(formData: FormData) {
+  const id = String(formData.get("sanctionId") ?? "");
+  if (!UUID_RE.test(id)) backTo(formData, "/koordinator/clanovi", "greska=zahtev");
+  const supabase = await createClient();
+  const { error } = await supabase.from("sanctions").delete().eq("id", id);
+  if (error) backTo(formData, "/koordinator/clanovi", "greska=sankcija");
+  backTo(formData, "/koordinator/clanovi", "ok=sankcijaUklonjena");
+}
+
+/** Brisanje fotografije iz galerije (storage + metapodaci; RLS staff). */
+export async function deleteGalleryPhotoAction(formData: FormData) {
+  const id = String(formData.get("photoId") ?? "");
+  const path = String(formData.get("path") ?? "").slice(0, 300);
+  if (!UUID_RE.test(id) || !path || path.includes("..")) {
+    backTo(formData, "/koordinator/galerija", "greska=zahtev");
+  }
+  const supabase = await createClient();
+  await supabase.storage.from("galerija").remove([path]);
+  const { error } = await supabase.from("gallery_photos").delete().eq("id", id);
+  if (error) backTo(formData, "/koordinator/galerija", "greska=galerija");
+  revalidatePath("/galerija");
+  backTo(formData, "/koordinator/galerija", "ok=galerijaObrisana");
+}
+
 /** Ručni preračun nedeljnog ranga (RPC: is_staff + audit); inače cron ponedeljkom. */
 export async function recalcRankingsAction(formData: FormData) {
   const supabase = await createClient();

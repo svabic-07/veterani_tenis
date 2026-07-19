@@ -73,6 +73,8 @@
       "rules": "Pravilnik",
       "news": "Vesti",
       "login": "Prijava igrača",
+      "join": "Učlanjenje",
+      "gallery": "Galerija",
       "referee": "Sudijski portal",
       "about": "O savezu",
       "contact": "Kontakt"
@@ -91,6 +93,7 @@
     "title": "Kalendar turnira",
     "subtitle": "Predstojeći turniri i arhiva rezultata po godinama.",
     "seasonEyebrow": "Sezona {year}",
+    "allSeries": "Sve serije",
     "upcomingTitle": "Predstojeći turniri",
     "register": "Prijavi se →",
     "noUpcoming": "Trenutno nema najavljenih turnira. Pogledajte arhivu ispod.",
@@ -185,6 +188,9 @@
     "allCategories": "Sve kategorije",
     "count": "{n, plural, =0 {nema igrača} one {# igrač} few {# igrača} other {# igrača}}",
     "showingFirst": "Prikazano je prvih {n} — suzite pretragom po imenu.",
+    "pageOf": "strana {page} od {total}",
+    "prevPage": "Prethodna",
+    "nextPage": "Sledeća",
     "empty": "Nema rezultata za zadate filtere.",
     "profile": {
       "back": "← Igrači",
@@ -199,6 +205,8 @@
       "titles": "titula",
       "history": "Istorija turnira",
       "matches": "Poslednji mečevi",
+      "h2h": "Međusobni skor",
+      "h2hHint": "Protivnici sa najviše odigranih mečeva (pobede : porazi).",
       "noRanking": "Rang lista još nije obračunata za ovog igrača.",
       "noHistory": "Nema zabeleženih nastupa.",
       "noMatches": "Nema zabeleženih mečeva.",
@@ -226,7 +234,7 @@
     "errorLimit": "Previše pokušaja — sačekajte malo pa pokušajte ponovo.",
     "errorSend": "Slanje nije uspelo. Pokušajte ponovo za koji minut.",
     "errorLink": "Link nije važeći ili je istekao. Zatražite novi.",
-    "helpTitle": "Treba vam pomoć?",
+    "joinCta": "Niste član? Učlanite se ovde", "helpTitle": "Treba vam pomoć?",
     "helpBody": "Ako nemate email u bazi članova ili se ne snalazite, javite se koordinatoru svog kluba — može da vas prijavi na turnir i u vaše ime."
   },
   "account": {
@@ -329,6 +337,24 @@
       "bez_pobede": "Bez pobede",
       "rezerva": "Rezerva"
     },
+    "membershipTitle": "Zahtevi za učlanjenje",
+    "membershipApprove": "Odobri i kreiraj člana",
+    "membershipReject": "Odbij",
+    "gallery": {
+      "title": "Galerija",
+      "lead": "Fotografije sa turnira — otpremanje i brisanje.",
+      "uploadTitle": "Dodaj fotografije",
+      "caption": "Opis (opciono)",
+      "upload": "Otpremi",
+      "uploading": "Otpremanje…",
+      "uploadError": "Otpremanje nije uspelo — proverite format (JPG/PNG/WebP, do 8 MB).",
+      "delete": "Obriši"
+    },
+    "sankcija": {
+      "opomena": "Opomena",
+      "oduzimanje_bodova": "Oduzimanje bodova",
+      "suspenzija": "Suspenzija"
+    },
     "refReports": "Izveštaji sudija",
     "refBalls": "Loptice (dodeljeno/potrošeno)",
     "rankingsTitle": "Rang liste",
@@ -336,6 +362,11 @@
     "recalcRankings": "Preračunaj rang sada",
     "ok": {
       "rang": "Rang liste su preračunate.",
+      "uclanjenjeOdobreno": "Član je kreiran — može da aktivira nalog svojim emailom.",
+      "uclanjenjeOdbijeno": "Zahtev za učlanjenje je odbijen.",
+      "sankcija": "Sankcija je zabeležena.",
+      "sankcijaUklonjena": "Sankcija je uklonjena.",
+      "galerijaObrisana": "Fotografija je obrisana.",
       "uloga": "Uloga je ažurirana.",
       "turnir": "Turnir je kreiran.",
       "sudija": "Sudija je dodeljen.",
@@ -355,6 +386,9 @@
     },
     "err": {
       "rang": "Preračun ranga nije uspeo.",
+      "uclanjenje": "Obrada zahteva nije uspela.",
+      "sankcija": "Upis sankcije nije uspeo.",
+      "galerija": "Brisanje fotografije nije uspelo.",
       "zahtev": "Neispravan zahtev.",
       "auth": "Prijavite se ponovo.",
       "samoodbrana": "Ne možete sami sebi oduzeti admin ulogu.",
@@ -415,7 +449,13 @@
       "mergeKeep": "Zadrži igrača",
       "mergeDup": "Duplikat (briše se)",
       "mergeCta": "Spoji igrače",
-      "mergeConfirm": "Razumem da je spajanje nepovratno."
+      "mergeConfirm": "Razumem da je spajanje nepovratno.",
+      "sanctions": "Sankcije",
+      "sanctionUntil": "važi do",
+      "sanctionReason": "razlog…",
+      "sanctionAdd": "Dodaj",
+      "sanctionRemove": "Ukloni",
+      "sanctionHint": "Redosled po pravilniku: opomena → oduzimanje bodova → suspenzija. Suspenzija blokira samoprijavu na turnire dok važi."
     },
     "payments": {
       "title": "Uplate",
@@ -639,6 +679,7 @@
     "player": "Igrač",
     "points": "Bodovi",
     "tournaments": "Turnira",
+    "tourShort": "tur.",
     "empty": "Rang lista za ovu kategoriju i disciplinu još nije obračunata. Pojaviće se nakon prvih odigranih turnira ili migracije postojećih podataka.",
     "disc": {
       "singl": "Singl",

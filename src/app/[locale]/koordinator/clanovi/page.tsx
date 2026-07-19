@@ -2,7 +2,12 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHero } from "@/components/ui/page-hero";
-import { addPlayerAction, updatePlayerAction } from "../actions";
+import {
+  addPlayerAction,
+  updatePlayerAction,
+  addSanctionAction,
+  deleteSanctionAction,
+} from "../actions";
 import { CopyEmails } from "./copy-emails";
 import { MergeForm } from "./merge-form";
 
@@ -65,6 +70,32 @@ export default async function ClanoviPage({
     supabase.from("player_private").select("email").not("email", "is", null),
     words.length > 0 ? foundQuery : Promise.resolve({ data: [] as never[] }),
   ]);
+
+  // sankcije nađenih igrača (za prikaz u kartici)
+  const foundIds = (found ?? []).map((p) => p.id);
+  type SankcijaRow = {
+    id: string;
+    player_id: string;
+    tip: string;
+    razlog: string | null;
+    vazi_do: string | null;
+    created_at: string;
+  };
+  let sankcijeRows: SankcijaRow[] = [];
+  if (foundIds.length) {
+    const { data } = await supabase
+      .from("sanctions")
+      .select("id, player_id, tip, razlog, vazi_do, created_at")
+      .in("player_id", foundIds)
+      .order("created_at", { ascending: false });
+    sankcijeRows = data ?? [];
+  }
+  const sankcijeByPlayer = new Map<string, SankcijaRow[]>();
+  for (const s of sankcijeRows) {
+    const list = sankcijeByPlayer.get(s.player_id) ?? [];
+    list.push(s);
+    sankcijeByPlayer.set(s.player_id, list);
+  }
   const emails = [
     ...new Set(
       (privateRows ?? [])
@@ -219,6 +250,49 @@ export default async function ClanoviPage({
                     </button>
                   </div>
                 </form>
+
+                {/* Sankcije (disciplinska evidencija) */}
+                <details className="mt-3 rounded-lg border border-clay/25 bg-bg2 p-2.5">
+                  <summary className="cursor-pointer text-xs font-semibold text-clay-dark">
+                    ⚠️ {t("members.sanctions")} ({(sankcijeByPlayer.get(p.id) ?? []).length})
+                  </summary>
+                  {(sankcijeByPlayer.get(p.id) ?? []).length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {(sankcijeByPlayer.get(p.id) ?? []).map((s) => (
+                        <li key={s.id} className="flex items-center gap-2 text-xs">
+                          <span className="min-w-0 flex-1 text-navy">
+                            <b>{t(`sankcija.${s.tip}`)}</b>
+                            {s.vazi_do ? ` · ${t("members.sanctionUntil")} ${s.vazi_do}` : ""}
+                            {s.razlog ? ` · ${s.razlog}` : ""}
+                          </span>
+                          <form action={deleteSanctionAction}>
+                            <input type="hidden" name="locale" value={locale} />
+                            <input type="hidden" name="sanctionId" value={s.id} />
+                            <button type="submit" className="rounded px-1.5 py-0.5 font-semibold text-clay hover:bg-clay/10">
+                              {t("members.sanctionRemove")}
+                            </button>
+                          </form>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <form action={addSanctionAction} className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="playerId" value={p.id} />
+                    <input type="hidden" name="q" value={q} />
+                    <select name="tip" defaultValue="opomena" className="rounded-md border border-line2 bg-card px-1.5 py-1 text-xs outline-none focus:border-clay">
+                      <option value="opomena">{t("sankcija.opomena")}</option>
+                      <option value="oduzimanje_bodova">{t("sankcija.oduzimanje_bodova")}</option>
+                      <option value="suspenzija">{t("sankcija.suspenzija")}</option>
+                    </select>
+                    <input type="date" name="vaziDo" className="rounded-md border border-line2 bg-card px-1.5 py-1 text-xs outline-none focus:border-clay" title={t("members.sanctionUntil")} />
+                    <input type="text" name="razlog" placeholder={t("members.sanctionReason")} className="min-w-0 flex-1 basis-32 rounded-md border border-line2 bg-card px-1.5 py-1 text-xs outline-none focus:border-clay" />
+                    <button type="submit" className="rounded-md border border-clay/40 px-2 py-1 text-xs font-semibold text-clay-dark transition hover:bg-clay/10">
+                      {t("members.sanctionAdd")}
+                    </button>
+                  </form>
+                  <p className="mt-1.5 text-[11px] text-muted">{t("members.sanctionHint")}</p>
+                </details>
               </li>
             ))}
           </ul>

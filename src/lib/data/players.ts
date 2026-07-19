@@ -10,8 +10,11 @@ export async function searchPlayers(opts: {
   q?: string;
   kategorija?: string;
   limit?: number;
+  page?: number;
 }) {
   const supabase = createPublicClient();
+  const limit = opts.limit ?? 60;
+  const page = Math.max(1, opts.page ?? 1);
   let query = supabase
     .from("players")
     .select("id, ime, prezime, kategorija, drzava, godiste, clubs ( naziv, grad )", {
@@ -20,7 +23,7 @@ export async function searchPlayers(opts: {
     .eq("is_active", true)
     .order("prezime", { ascending: true })
     .order("ime", { ascending: true })
-    .limit(opts.limit ?? 60);
+    .range((page - 1) * limit, page * limit - 1);
 
   const q = opts.q?.replace(/[,()%*]/g, "").trim();
   if (q) {
@@ -133,6 +136,52 @@ export async function getPlayerMatches(playerId: string, limit = 15) {
       if (da !== db) return da < db ? 1 : -1;
       return b.kolo - a.kolo;
     })
+    .slice(0, limit);
+}
+
+export type H2HRow = {
+  opponentId: string;
+  ime: string;
+  prezime: string;
+  pobede: number;
+  porazi: number;
+};
+
+/** Međusobni skor (H2H): protivnici sa najviše odigranih mečeva. */
+export async function getPlayerH2H(playerId: string, limit = 8): Promise<H2HRow[]> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("matches")
+    .select(
+      `winner_slot, status, player1_id, player2_id,
+       p1:players!matches_player1_id_fkey ( id, ime, prezime ),
+       p2:players!matches_player2_id_fkey ( id, ime, prezime )`,
+    )
+    .or(`player1_id.eq.${playerId},player2_id.eq.${playerId}`)
+    .not("winner_slot", "is", null)
+    .neq("status", "bye")
+    .limit(1000);
+  if (error) throw error;
+
+  const map = new Map<string, H2HRow>();
+  for (const m of data ?? []) {
+    const jaSam1 = m.player1_id === playerId;
+    const protivnik = jaSam1 ? m.p2 : m.p1;
+    if (!protivnik) continue;
+    const row = map.get(protivnik.id) ?? {
+      opponentId: protivnik.id,
+      ime: protivnik.ime,
+      prezime: protivnik.prezime,
+      pobede: 0,
+      porazi: 0,
+    };
+    const pobedio = (m.winner_slot === 1) === jaSam1;
+    if (pobedio) row.pobede++;
+    else row.porazi++;
+    map.set(protivnik.id, row);
+  }
+  return [...map.values()]
+    .sort((a, b) => b.pobede + b.porazi - (a.pobede + a.porazi))
     .slice(0, limit);
 }
 

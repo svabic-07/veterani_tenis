@@ -8,6 +8,7 @@ import {
   resolveCategoryAction,
   setRefereeRoleAction,
   recalcRankingsAction,
+  resolveMembershipAction,
 } from "./actions";
 import { NewTournamentForm } from "./new-tournament-form";
 import { AssignRefereeForm } from "./assign-referee-form";
@@ -60,6 +61,7 @@ export default async function KoordinatorPage({
     { data: audit },
     { data: catRequests },
     { data: refReports },
+    { data: memberRequests },
   ] = await Promise.all([
     supabase.rpc("admin_list_users"),
     supabase
@@ -88,6 +90,11 @@ export default async function KoordinatorPage({
       )
       .order("updated_at", { ascending: false })
       .limit(10),
+    supabase
+      .from("membership_requests")
+      .select("id, ime, prezime, godiste, grad, klub, kategorija, email, telefon, napomena, created_at")
+      .eq("status", "na_cekanju")
+      .order("created_at", { ascending: true }),
   ]);
 
   const emailByUser = new Map((users ?? []).map((u) => [u.user_id, u.email]));
@@ -179,6 +186,12 @@ export default async function KoordinatorPage({
               className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
             >
               {t("scoringTables")} →
+            </Link>
+            <Link
+              href="/koordinator/galerija"
+              className="rounded-xl border border-line2 px-3 py-1.5 text-xs font-semibold text-slate transition hover:border-clay hover:text-clay"
+            >
+              {t("gallery.title")} →
             </Link>
           </div>
         </div>
@@ -402,6 +415,50 @@ export default async function KoordinatorPage({
           </button>
         </form>
       </section>
+
+      {/* Zahtevi za učlanjenje */}
+      {(memberRequests ?? []).length > 0 && (
+        <section className="mb-8">
+          <h2 className="mb-3 font-display text-lg font-bold text-navy">
+            🆕 {t("membershipTitle")} ({(memberRequests ?? []).length})
+          </h2>
+          <ul className="space-y-2">
+            {(memberRequests ?? []).map((r) => (
+              <li key={r.id} className="rounded-2xl border border-line bg-card p-4">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="font-semibold text-navy">
+                    {r.ime} {r.prezime}
+                  </span>
+                  <span className="text-xs text-muted">
+                    {[r.godiste, r.grad, r.klub, r.kategorija ? `kat. ${r.kategorija}` : null]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                  <span className="ml-auto font-mono text-xs text-slate">{r.email}{r.telefon ? ` · ${r.telefon}` : ""}</span>
+                </div>
+                {r.napomena && <p className="mt-1 text-xs text-slate">{r.napomena}</p>}
+                <div className="mt-3 flex gap-2">
+                  <form action={resolveMembershipAction}>
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="requestId" value={r.id} />
+                    <input type="hidden" name="approve" value="1" />
+                    <button type="submit" className="rounded-lg bg-court px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-court-dark">
+                      {t("membershipApprove")}
+                    </button>
+                  </form>
+                  <form action={resolveMembershipAction}>
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="requestId" value={r.id} />
+                    <button type="submit" className="rounded-lg border border-clay/40 px-3.5 py-1.5 text-xs font-semibold text-clay-dark transition hover:bg-clay/10">
+                      {t("membershipReject")}
+                    </button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Izveštaji sudija (loptice, sporne situacije) */}
       {(refReports ?? []).length > 0 && (

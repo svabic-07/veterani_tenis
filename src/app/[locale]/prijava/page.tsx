@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { redirect } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHero } from "@/components/ui/page-hero";
 import { sendLoginLink } from "./actions";
@@ -88,6 +88,11 @@ export default async function PrijavaPage({
       <div className="mt-8 rounded-2xl border border-line bg-card p-5 text-sm text-slate">
         <p className="font-semibold text-navy">{t("helpTitle")}</p>
         <p className="mt-1.5 leading-relaxed">{t("helpBody")}</p>
+        <p className="mt-3">
+          <Link href="/uclanjenje" className="font-semibold text-clay underline-offset-2 hover:underline">
+            {t("joinCta")} →
+          </Link>
+        </p>
       </div>
       </div>
     </>

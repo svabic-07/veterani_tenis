@@ -29,7 +29,15 @@ export default async function KalendarPage({
   const sp = await searchParams;
 
   const t = await getTranslations("calendar");
-  const all = await getTournaments();
+  const sve = await getTournaments();
+
+  // filter po seriji (?serija=s1000|...)
+  const SERIES_FILTER = ["s2000", "s1000", "s500", "s250", "master"] as const;
+  const serija =
+    typeof sp.serija === "string" && (SERIES_FILTER as readonly string[]).includes(sp.serija)
+      ? sp.serija
+      : "";
+  const all = serija ? sve.filter((tr) => tr.serija === serija) : sve;
 
   const today = todayISO();
   const endOf = (tr: (typeof all)[number]) => tr.datum_do ?? tr.datum_od ?? "";
@@ -47,6 +55,13 @@ export default async function KalendarPage({
   const years = [...new Set(archive.map((tr) => (tr.datum_od ?? "").slice(0, 4)).filter(Boolean))];
   const selectedYear =
     typeof sp.god === "string" && years.includes(sp.god) ? sp.god : years[0] ?? "";
+  const filterHref = (ser: string, god?: string) => {
+    const params = new URLSearchParams();
+    if (ser) params.set("serija", ser);
+    if (god) params.set("god", god);
+    const qs = params.toString();
+    return `/kalendar${qs ? `?${qs}` : ""}`;
+  };
   const archiveYear = archive.filter((tr) => (tr.datum_od ?? "").startsWith(selectedYear));
   const winners = await getWinnersForTournaments(archiveYear.map((tr) => tr.id));
 
@@ -69,6 +84,35 @@ export default async function KalendarPage({
       />
 
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+        {/* Filter po seriji */}
+        <div className="mb-8 flex flex-wrap gap-2">
+          <Link
+            href={filterHref("")}
+            scroll={false}
+            className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition ${
+              serija === ""
+                ? "bg-navy text-white"
+                : "border border-line2 bg-card text-slate hover:border-clay hover:text-clay"
+            }`}
+          >
+            {t("allSeries")}
+          </Link>
+          {SERIES_FILTER.map((ser) => (
+            <Link
+              key={ser}
+              href={filterHref(ser)}
+              scroll={false}
+              className={`rounded-full px-3.5 py-1.5 text-sm font-semibold transition ${
+                ser === serija
+                  ? "bg-navy text-white"
+                  : "border border-line2 bg-card text-slate hover:border-clay hover:text-clay"
+              }`}
+            >
+              {t(`series.${ser}`)}
+            </Link>
+          ))}
+        </div>
+
         {/* Predstojeći */}
         <section className="mb-14">
           <h2 className="mb-4 font-display text-xl font-extrabold text-navy">{t("upcomingTitle")}</h2>
@@ -112,7 +156,7 @@ export default async function KalendarPage({
               {years.map((y) => (
                 <Link
                   key={y}
-                  href={`/kalendar?god=${y}`}
+                  href={filterHref(serija, y)}
                   scroll={false}
                   className={`rounded-full px-3.5 py-1.5 font-mono text-sm font-bold transition ${
                     y === selectedYear
