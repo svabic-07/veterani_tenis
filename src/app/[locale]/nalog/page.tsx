@@ -73,7 +73,9 @@ export default async function NalogPage({
 
   let greskaKey = "";
   if (greska === "zauzet") greskaKey = "errorTaken";
-  else if (["vecPodnet", "istaKat", "nemaIgraca", "kategorija"].includes(greska))
+  else if (
+    ["vecPodnet", "istaKat", "nemaIgraca", "kategorija", "samoJaca", "godisnjiLimit", "starosniMin"].includes(greska)
+  )
     greskaKey = `catErr.${greska}`;
   else if (greska) greskaKey = "errorClaim";
 
@@ -144,7 +146,14 @@ export default async function NalogPage({
                   <option value="" disabled>
                     {t("catChoose")}
                   </option>
-                  {CATS.filter((c) => c !== player.kategorija).map((c) => (
+                  {CATS.filter((c) =>
+                    // pravilnik: promena samo ka JAČOJ (I najjača); bez
+                    // kategorije se bira bilo koja (starosne minimume
+                    // proverava server)
+                    player.kategorija
+                      ? CATS.indexOf(c) < CATS.indexOf(player.kategorija as (typeof CATS)[number])
+                      : true,
+                  ).map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>

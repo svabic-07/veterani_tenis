@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { todayISO } from "@/lib/tournament-status";
 import { createPublicClient } from "@/lib/supabase/public";
 
 /** Turnir sa domaćinom i direktorom — za javni kalendar/listu. */
@@ -46,7 +47,7 @@ export type TournamentDetail = NonNullable<Awaited<ReturnType<typeof getTourname
  */
 export async function getUpcomingTournaments(limit = 3) {
   const supabase = createPublicClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const { data, error } = await supabase
     .from("tournaments")
     .select(
@@ -66,7 +67,7 @@ export type UpcomingTournament = Awaited<ReturnType<typeof getUpcomingTournament
 /** Brojači za hero statistiku (igrači, odigrani turniri). Keširano (anon). */
 export async function getSiteStats() {
   const supabase = createPublicClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const [players, tournaments] = await Promise.all([
     supabase.from("players").select("id", { count: "exact", head: true }).eq("is_active", true),
     supabase
@@ -83,7 +84,7 @@ export async function getSiteStats() {
  */
 export async function getRecentTournaments(limit = 3) {
   const supabase = createPublicClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const { data, error } = await supabase
     .from("tournaments")
     .select("id, legacy_id, naziv, serija, sistem, mesto, datum_od, datum_do, clubs ( naziv, grad )")
@@ -97,6 +98,7 @@ export async function getRecentTournaments(limit = 3) {
 export type EventEntry = {
   eventId: string;
   playerId: string;
+  partnerId: string | null;
   ime: string;
   prezime: string;
   klub: string | null;
@@ -112,7 +114,7 @@ export async function getEntriesForTournament(turnirId: string): Promise<EventEn
   const { data, error } = await supabase
     .from("entries")
     .select(
-      `event_id, player_id, status, bodovi_snapshot,
+      `event_id, player_id, partner_id, status, bodovi_snapshot,
        tournament_events!inner ( turnir_id ),
        players!entries_player_id_fkey ( ime, prezime, clubs ( naziv ) )`,
     )
@@ -122,6 +124,7 @@ export async function getEntriesForTournament(turnirId: string): Promise<EventEn
   return (data ?? []).map((r) => ({
     eventId: r.event_id,
     playerId: r.player_id,
+    partnerId: r.partner_id ?? null,
     ime: r.players?.ime ?? "",
     prezime: r.players?.prezime ?? "",
     klub: r.players?.clubs?.naziv ?? null,

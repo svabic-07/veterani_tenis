@@ -52,6 +52,9 @@ export async function requestCategoryChangeAction(formData: FormData) {
       pending_exists: "vecPodnet",
       same_category: "istaKat",
       no_player: "nemaIgraca",
+      only_stronger: "samoJaca",
+      yearly_limit: "godisnjiLimit",
+      age_minimum: "starosniMin",
     };
     const kod = Object.keys(MAP).find((k) => error.message.includes(k));
     redirect({ href: `/nalog?greska=${kod ? MAP[kod] : "kategorija"}`, locale });

@@ -49,7 +49,9 @@ export default async function VestiPage({ params }: { params: Promise<{ locale: 
                 <h2 className="mt-1.5 font-display text-xl font-extrabold text-navy">{n.naslov}</h2>
                 <div className="mt-3 space-y-3 text-[15px] leading-relaxed text-slate">
                   {n.sadrzaj.split(/\n{2,}/).map((par, i) => (
-                    <p key={i}>{par}</p>
+                    // pojedinačni \n unutar pasusa (npr. auto-izveštaj) mora
+                    // da ostane prelom reda
+                    <p key={i} className="whitespace-pre-line">{par}</p>
                   ))}
                 </div>
               </article>

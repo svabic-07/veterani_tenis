@@ -138,6 +138,7 @@ export default async function TurnirPage({
       eventId: e.id,
       kategorija: e.kategorija,
       isOpen: withinDeadline && !publishedEventIds.has(e.id),
+      hasDraw: publishedEventIds.has(e.id),
       recommended: isRecommended(e.kategorija),
       mine: myPlayerId != null && entries.some((x) => x.eventId === e.id && x.playerId === myPlayerId),
       entries: entries
@@ -214,7 +215,10 @@ export default async function TurnirPage({
       catRank(a.event.kategorija) - catRank(b.event.kategorija),
   );
 
-  const participantCount = new Set(allEntries.map((e) => e.playerId)).size;
+  // dubl/miks par = dva učesnika
+  const participantCount = new Set(
+    allEntries.flatMap((e) => (e.partnerId ? [e.playerId, e.partnerId] : [e.playerId])),
+  ).size;
 
   const info: { label: string; value: string; href?: string }[] = [
     { label: t("series"), value: tc(`series.${tr.serija}`) },

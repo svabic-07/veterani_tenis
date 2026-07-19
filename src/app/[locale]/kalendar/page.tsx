@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getTournaments, getWinnersForTournaments } from "@/lib/data/tournaments";
 import { formatDateParts, formatDeadline } from "@/lib/format";
-import { statusByDate } from "@/lib/tournament-status";
+import { statusByDate, todayISO } from "@/lib/tournament-status";
 import { PageHero } from "@/components/ui/page-hero";
 import { TournamentCard, type Champion } from "@/components/ui/tournament-card";
 import { TOURNAMENT_STATUS_TONE } from "@/components/ui/pill";
@@ -31,14 +31,15 @@ export default async function KalendarPage({
   const t = await getTranslations("calendar");
   const all = await getTournaments();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const endOf = (tr: (typeof all)[number]) => tr.datum_do ?? tr.datum_od ?? "";
   // Particija STROGO po datumu (uvezeni podaci su svi `zavrsen`):
   //   predstojeći = datum se još nije završio (svi, ne samo 3) → nude prijavu;
+  //   turnir BEZ datuma = najava (ne sme da nestane sa kalendara);
   //   arhiva = samo turniri čiji je datum prošao.
   const upcoming = all
-    .filter((tr) => endOf(tr) >= today)
-    .sort((a, b) => (a.datum_od ?? "").localeCompare(b.datum_od ?? ""));
+    .filter((tr) => endOf(tr) === "" || endOf(tr) >= today)
+    .sort((a, b) => (a.datum_od ?? "9999").localeCompare(b.datum_od ?? "9999"));
   const archive = all
     .filter((tr) => endOf(tr) !== "" && endOf(tr) < today)
     .sort((a, b) => (b.datum_od ?? "").localeCompare(a.datum_od ?? ""));
@@ -62,7 +63,7 @@ export default async function KalendarPage({
       <PageHero
         compact
         crumb="/ kalendar"
-        eyebrow="Sezona 2026"
+        eyebrow={t("seasonEyebrow", { year: today.slice(0, 4) })}
         title={t("title")}
         lead={t("subtitle")}
       />

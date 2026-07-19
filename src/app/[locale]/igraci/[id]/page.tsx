@@ -103,7 +103,10 @@ export default async function ProfilPage({
           <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Metric value={`#${best.mesto}`} label={`${t("disc.singl")} ${best.kategorija}`} accent />
             <Metric value={best.bodovi} label={t("points")} />
-            <Metric value={history.length} label={t("tournaments")} />
+            <Metric
+              value={new Set(history.map((h) => h.tournaments?.legacy_id ?? h.tournaments?.naziv)).size}
+              label={t("tournaments")}
+            />
             <Metric value={titula} label={t("titles")} />
           </div>
         )}

@@ -77,7 +77,12 @@ export default async function IgraciPage({
           </button>
         </form>
 
-        <p className="mb-5 text-sm font-semibold text-muted">{t("count", { n: count })}</p>
+        <p className="mb-5 text-sm font-semibold text-muted">
+          {t("count", { n: count })}
+          {count > players.length && (
+            <span className="ml-2 font-normal">{t("showingFirst", { n: players.length })}</span>
+          )}
+        </p>
 
         {players.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line2 bg-card p-10 text-center text-muted">

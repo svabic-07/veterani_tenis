@@ -7,9 +7,10 @@
  */
 export type DateStatusKey = "najava" | "u_toku" | "zavrsen";
 
-/** Današnji datum u ISO obliku (YYYY-MM-DD), za poređenje sa datumima turnira. */
+/** Današnji datum u ISO obliku (YYYY-MM-DD) po BEOGRADSKOM kalendaru —
+ *  UTC bi između ponoći i 1–2h svrstavao turnire u pogrešan dan. */
 export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Belgrade" }).format(new Date());
 }
 
 /** Poslednji dan turnira (datum_do ako postoji, inače datum_od). */

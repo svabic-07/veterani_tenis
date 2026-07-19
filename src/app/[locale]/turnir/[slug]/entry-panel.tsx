@@ -15,6 +15,7 @@ export type EntryEvent = {
   eventId: string;
   kategorija: string;
   isOpen: boolean;
+  hasDraw: boolean;
   recommended: boolean;
   mine: boolean;
   entries: { name: string; klub: string | null; bodovi: number | null }[];
@@ -135,13 +136,18 @@ export async function TournamentEntry({
                       {t("entry.count", { n: ev.entries.length })}
                     </span>
                   </div>
-                  {ev.mine ? (
+                  {ev.mine && ev.isOpen ? (
                     <button
                       type="submit"
                       className="shrink-0 rounded-lg border border-court/35 bg-court/12 px-3.5 py-2 text-[13px] font-semibold text-court-dark transition hover:bg-court/20"
                     >
                       ✓ {t("entry.withdraw")}
                     </button>
+                  ) : ev.mine ? (
+                    // prijavljen, ali odjava više nije moguća (rok/žreb)
+                    <span className="shrink-0 rounded-lg border border-court/35 bg-court/12 px-3.5 py-2 text-[13px] font-semibold text-court-dark">
+                      ✓ {t("entry.entered")}
+                    </span>
                   ) : ev.isOpen ? (
                     <button
                       type="submit"
@@ -151,7 +157,7 @@ export async function TournamentEntry({
                     </button>
                   ) : (
                     <span className="shrink-0 rounded-lg bg-bg2 px-3.5 py-2 text-[13px] font-semibold text-muted">
-                      {t("entry.drawPublished")}
+                      {ev.hasDraw ? t("entry.drawPublished") : t("entry.entriesClosed")}
                     </span>
                   )}
                 </form>

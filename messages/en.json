@@ -90,6 +90,7 @@
   "calendar": {
     "title": "Tournament calendar",
     "subtitle": "Upcoming tournaments and a results archive by year.",
+    "seasonEyebrow": "Season {year}",
     "upcomingTitle": "Upcoming tournaments",
     "register": "Register →",
     "noUpcoming": "No announced tournaments right now. See the archive below.",
@@ -134,6 +135,8 @@
     "noEvents": "Events have not been defined yet.",
     "entry": {
       "title": "Enter this tournament",
+      "entered": "You are entered",
+      "entriesClosed": "Entries closed",
       "openNow": "Entries open",
       "deadlineShort": "Entries until {date}",
       "loginTitle": "Sign in to enter this tournament",
@@ -216,7 +219,10 @@
       "vecPodnet": "You already have a pending request.",
       "istaKat": "That is your current category.",
       "nemaIgraca": "Account is not linked to a player.",
-      "kategorija": "Sending the request failed. Please try again."
+      "kategorija": "Sending the request failed. Please try again.",
+      "samoJaca": "Per the rulebook you can only move to a stronger category — moving to a weaker one is decided by the Competition Committee (contact the coordinator).",
+      "godisnjiLimit": "Only one category change per year is allowed — you have already used it this year.",
+      "starosniMin": "You do not meet the age minimum for that category (II ≥ 35 · III ≥ 45 · IV ≥ 50 · V ≥ 60 years)."
     },
     "signOut": "Sign out"
   },
@@ -595,6 +601,7 @@
     "category": "Category",
     "allCategories": "All categories",
     "count": "{n, plural, =0 {no players} one {# player} other {# players}}",
+    "showingFirst": "Showing the first {n} — narrow the search by name.",
     "empty": "No results for the selected filters.",
     "profile": {
       "back": "← Players",

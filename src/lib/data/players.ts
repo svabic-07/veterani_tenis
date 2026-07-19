@@ -23,7 +23,18 @@ export async function searchPlayers(opts: {
     .limit(opts.limit ?? 60);
 
   const q = opts.q?.replace(/[,()%*]/g, "").trim();
-  if (q) query = query.or(`ime.ilike.%${q}%,prezime.ilike.%${q}%`);
+  if (q) {
+    const words = q.split(/\s+/).filter(Boolean);
+    if (words.length >= 2) {
+      // „Petar Petrović": obe permutacije ime/prezime
+      const [a, b] = [words[0], words.slice(1).join(" ")];
+      query = query.or(
+        `and(ime.ilike.${a}%,prezime.ilike.${b}%),and(ime.ilike.${b}%,prezime.ilike.${a}%)`,
+      );
+    } else {
+      query = query.or(`ime.ilike.%${q}%,prezime.ilike.%${q}%`);
+    }
+  }
   if (opts.kategorija) query = query.eq("kategorija", opts.kategorija as QualityCategory);
 
   const { data, error, count } = await query;

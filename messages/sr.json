@@ -90,6 +90,7 @@
   "calendar": {
     "title": "Kalendar turnira",
     "subtitle": "Predstojeći turniri i arhiva rezultata po godinama.",
+    "seasonEyebrow": "Sezona {year}",
     "upcomingTitle": "Predstojeći turniri",
     "register": "Prijavi se →",
     "noUpcoming": "Trenutno nema najavljenih turnira. Pogledajte arhivu ispod.",
@@ -134,6 +135,8 @@
     "noEvents": "Konkurencije još nisu definisane.",
     "entry": {
       "title": "Prijavi se na turnir",
+      "entered": "Prijavljeni ste",
+      "entriesClosed": "Prijave zatvorene",
       "openNow": "Prijave otvorene",
       "deadlineShort": "Prijave do {date}",
       "loginTitle": "Prijavi se da bi ušao na turnir",
@@ -181,6 +184,7 @@
     "category": "Kategorija",
     "allCategories": "Sve kategorije",
     "count": "{n, plural, =0 {nema igrača} one {# igrač} few {# igrača} other {# igrača}}",
+    "showingFirst": "Prikazano je prvih {n} — suzite pretragom po imenu.",
     "empty": "Nema rezultata za zadate filtere.",
     "profile": {
       "back": "← Igrači",
@@ -251,7 +255,10 @@
       "vecPodnet": "Već imate zahtev na čekanju.",
       "istaKat": "To je vaša trenutna kategorija.",
       "nemaIgraca": "Nalog nije povezan sa igračem.",
-      "kategorija": "Slanje zahteva nije uspelo. Pokušajte ponovo."
+      "kategorija": "Slanje zahteva nije uspelo. Pokušajte ponovo.",
+      "samoJaca": "Po pravilniku se prelazi samo u jaču kategoriju — za prelazak u slabiju odlučuje Takmičarska komisija (obratite se koordinatoru).",
+      "godisnjiLimit": "Dozvoljena je samo jedna promena kategorije godišnje — ove godine ste je već iskoristili.",
+      "starosniMin": "Ne ispunjavate starosni minimum za tu kategoriju (II ≥ 35 · III ≥ 45 · IV ≥ 50 · V ≥ 60 godina)."
     },
     "signOut": "Odjavi se"
   },

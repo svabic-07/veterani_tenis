@@ -215,6 +215,17 @@ Dvostruka revizija (Codex GPT 5.6 čitao kod + Claude SQL/RLS/smoke testovi). Po
 - Codex nalaz „gost-pobedio-gosta kaskada ne radi" — **opovrgnut testom** (kaskada tačna: obe gostove putanje se obrađuju).
 - Test baterija (rollback na produkcionoj bazi): 11 regresionih + 8 novih testova + smoke 19 ruta — sve zeleno. Preostalo iz revizije (sitnica): eksplicitni opt-out za solo bodove (sada: ukloniti prijavu = ne boduje se).
 
+### ✅ Usklađivanje sa starim sajtom + revizija javnog dela (2026-07-18, kasno veče)
+Provera parnosti sa teniskiveteranisrbije.com (nav + 5 pravilničkih stranica + FAQ) + druga Codex revizija (javni deo/UX, 14 nalaza).
+**Pravila usklađena (migracije 30–31):**
+- **Utešni bodovi po kosturu** = bodovi 1. kola ÷ 3 (potvrđeno iz uvezene istorije: s1000 → 60/30/15; s2000 → 120/60/30) — bilo fiksno po seriji.
+- **Rang = 13 najboljih** (FAQ starog sajta) — `n_best` 8→13 + preračun.
+- **Predaja meča = igrač gubi sve poene turnira** (propozicije); `retiranje` i dalje boduje.
+- **Promena kategorije**: samo ka jačoj + jedna odobrena godišnje + starosni minimumi (II≥35 · III≥45 · IV≥50 · V≥60); `/nalog` nudi samo jače + prevedene poruke grešaka.
+- **Samoprijava v2**: pravo nastupa (kvalitativna svoja/jača; starosna po godištu), bilo koji aktivan žreb zatvara prijave (i radni), beogradski datum. 6/6 testova.
+**Popravke javnog dela (Codex nalazi):** pretraga „Ime Prezime" radi (permutacije), broj turnira na profilu po jedinstvenom turniru, broj učesnika računa i partnere u dublu, kalendar ne gubi turnire bez datuma, beogradski dan umesto UTC (status/particija/SQL), auto-izveštaj u vestima zadržava prelome redova (`whitespace-pre-line`), entry-panel razlikuje „Prijave zatvorene" od „Žreb objavljen" + „Prijavljeni ste" bez lažnog dugmeta za odjavu, direktorijum prikazuje napomenu „prvih 60", sezona u hero-u dinamička.
+**Preostali gap prema starom sajtu (backlog po prioritetu):** galerija; FAQ + „brisanje bodova" stranice pravilnika (sadržaj postoji u spec-u); registraciona forma za nove članove (sada magic link samo za postojeće); rang-liste po starosnim kategorijama (podaci postoje, UI nudi samo I–V); paginacija direktorijuma; sankcije za nepojavljivanje (opomena→bodovi→suspenzija — deo disciplinske, Faza 4); H2H na profilu; kalendar filteri (serija/mesec/grad).
+
 ### 🧪 Demo nalozi (2026-07-18)
 - **Sudija:** `svabic+sudija@gmail.com` (uloga `sudija`, povezan sa neaktivnim igračem „Demo Sudija") · **Koordinator:** `svabic+koordinator@gmail.com` (uloga `koordinator`). Gmail plus-aliasi → magic link stiže u `svabic@gmail.com` inbox; prijava na `/prijava` unosom alias adrese. Rezervna lozinka `TVS-demo-2026` postavljena (UI nema password formu — za slučaj da se doda).
 - **DEMO turnir** `demo-obuka-2026` („DEMO turnir — obuka (nije zvaničan)", +30 dana, 3 konkurencije) — sudija mu je Demo Sudija, pa demo sudijski nalog ima šta da vodi. Obrisati pred go-live (i turnir i naloge i igrača `deadbeef-…`).
