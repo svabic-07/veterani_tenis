@@ -1,7 +1,7 @@
 # TVS — Status projekta
 
-> **Poslednje ažurirano:** 2026-07-18
-> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga ✅ + samoprijava singl + zahtev za kategoriju; ostaje custom SMTP + aktivacioni kodovi) · 3 ✅ **KOMPLETNA** (žreb → rezultati → obračun; zaključavanje posle završetka i u RLS; izveštaj sudije, štampa satnice, offline) · 4 ✅ jezgro (mini-admin; **oba bodovna modela** + gost/solo pravila + nedeljni cron rang; ostaje SMTP blast) · 5 🔶 (dvojezičnost ✅ + PWA offline ✅ + redizajn ✅, ostaje E2E) · **Revizija Claude+Codex 2026-07-18 ✅** (2 kritična nalaza popravljena isti dan)
+> **Poslednje ažurirano:** 2026-07-19
+> **Faza:** 0 ✅ · 1 ✅ (javni sloj + pravi podaci + **istorija: 154 turnira, 6.745 mečeva, rang liste**) · 2 🔶 (aktivacija naloga ✅ + samoprijava v3 + učlanjenje ✅; ostaje custom SMTP + aktivacioni kodovi) · 3 ✅ **KOMPLETNA** · 4 ✅ (mini-admin + oba bodovna modela + gost/solo/predaja pravila + cron rang + sankcije v1 + odobravanje članova + galerija; ostaje SMTP blast) · 5 🔶 (dvojezičnost ✅ + PWA offline ✅ + redizajn ✅, ostaje E2E) · **Parnost sa starim sajtom teniskiveteranisrbije.com ✅ 2026-07-19** (funkcije i pravila)
 > Prati: `docs/TVS-Plan-Implementacije.md` i `docs/TVS-Redizajn-Specifikacija.html`
 
 ---
@@ -102,6 +102,9 @@ Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetada
 27. `…0718180000_solo_kategorija` — **jedini prijavljeni u kategoriji = pobednik „bez borbe"** (bodovi pobednika, kostur 8); uz „Prijavi i u jaču" u portalu igrač osvaja bodove **u obe** kategorije; gost kao jedini prijavljen ne dobija ništa
 28. `…0718200000_lock_finished_rls` — **`can_edit_event()`**: RLS zaključavanje završenog turnira (manager write politike na entries/draws/matches/match_sets + direktorske politike) — ni direktan PostgREST poziv ne može da piše po završenom turniru
 29. `…0718210000_finish_v5` — revizione popravke obračuna: svi-solo turnir može da se završi; solo samo singl + samo bez ijednog žreba (opozvan = otkazano); **čista grupa tie-break po spec-u** (pobede → h2h → set-razlika → gem-razlika)
+30. `…0718230000_pravila_starog_sajta` — **pravila starog sajta**: utešni po kosturu (1. kolo ÷ 3), `n_best` 13, **predaja = 0 poena** (finish v6), promena kategorije samo ka jačoj + 1× godišnje + starosni minimumi
+31. `…0718240000_self_entry_v2` — samoprijava: pravo nastupa (kvalitativna svoja/jača, starosna po godištu), bilo koji aktivan žreb zatvara prijave, beogradski datum
+32. `…0719100000_uclanjenje_sankcije_galerija` — **`membership_requests`** (javna forma + `resolve_membership_request`) · **`sanctions`** (opomena/oduzimanje bodova/suspenzija; suspenzija blokira samoprijavu — self-entry v3) · **galerija** (storage bucket + `gallery_photos`)
 
 ⚠️ **Deploy migracija:** `supabase db push` NEBEZBEDAN (remote history koristi druge timestampove nego lokalni fajlovi). Migracije 13–15 primenjene preko Management API `database/query` + upis u `schema_migrations`.
 
@@ -158,7 +161,7 @@ Tok: `/prijava` (email → Supabase magic link, bez lozinke) → `/api/auth/conf
 - **`/koordinator`**: novi turnir (naziv/serija/sistem/klub/direktor po imenu/datumi/rok), lista turnira, **korisnici i uloge** (admin klikom dodeljuje/oduzima; zaštita da admin sebi ne skine admin), audit trag (poslednjih 15).
 - **`/sudija/[slug]`** za staff: „Opozovi žreb", „Korekcije rezultata" (poništavanje po meču), „Ponovo otvori turnir" (checkbox potvrda); **konkurencije**: dodavanje (kategorija × disciplina) i brisanje praznih.
 
-**Ostaje u Fazi 4:** SMTP blast (masovni email sa segmentima), disciplinska, **odobravanje članova** (nedovoljno definisano), aktivacioni kodovi za 656 članova bez emaila. *(uredive bodovne tablice UI, dodela sudije, odobravanje kategorije — ✅ 2026-07-15; `svi_boduju` + Master tablica + validacija obračuna, nedeljni cron rang, atomske korekcije — ✅ 2026-07-18, vidi dole)*
+**Ostaje u Fazi 4:** SMTP blast (masovni email sa segmentima) i aktivacioni kodovi za 656 članova bez emaila. *(disciplinska v1 — sankcije ✅ i odobravanje članova — učlanjenje ✅ 2026-07-19)* *(uredive bodovne tablice UI, dodela sudije, odobravanje kategorije — ✅ 2026-07-15; `svi_boduju` + Master tablica + validacija obračuna, nedeljni cron rang, atomske korekcije — ✅ 2026-07-18, vidi dole)*
 
 ### 🔶 Faza 5 — dvojezičnost + PWA + polish (2026-07-14, u toku)
 - **EN prevod:** auditom potvrđena parnost `sr.json`/`en.json` (310 = 310 ključeva), statične stranice (`o-savezu`/`kontakt`/`pravilnik`) kroz `L(sr,en)` helper — prevod je kompletan (sistem građen dvojezično od početka). Sitne popravke: metadata fallback naslovi (`Igrač`/`Player`, `Turnir`/`Tournament`) locale-aware; `o-savezu` statistika ~2.600 → ~2.900.
@@ -287,6 +290,8 @@ Provera parnosti sa teniskiveteranisrbije.com (nav + 5 pravilničkih stranica + 
 | 2026-07-18 | `Svak sa svakim` | Štiklir za jednu RR grupu (5–8 igrača) uz Kreiraj žreb |
 | 2026-07-18 | `Solo kategorija` | Jedini prijavljeni = pobednik bez borbe; „Prijavi i u jaču" (bodovi u obe) |
 | 2026-07-18 | `Revizija Claude+Codex` | guardOpen po entitetu + RLS lock završenog + SW privatnost + finish v5 (tie-break) |
+| 2026-07-18 | `Pravila starog sajta` | Utešni po kosturu (÷3), n_best 13, predaja=0, kategorija ka jačoj 1×god; 11 Codex popravki javnog dela |
+| 2026-07-19 | `Parnost sa starim sajtom` | Učlanjenje, sankcije v1, galerija, pravilnik FAQ+brisanje bodova, starosne rang liste, H2H, paginacija, kalendar filter |
 
 ---
 
