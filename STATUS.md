@@ -43,9 +43,9 @@ Dizajn tokeni (`src/app/globals.css` `@theme`): boje `clay/court/ball/navy`, fon
 | `/` (početna) | ISR 10m | ✅ | naredni turniri iz baze |
 | `/kalendar` | dinamička | ✅ | **predstojeći + arhiva po godinama + pobednici po kategoriji** |
 | `/turnir/[slug]` | dinamička | ✅ | turnir + konkurencije |
-| `/igraci` | dinamička | ✅ | `players` (pretraga + filter kategorije) |
-| `/igraci/[id]` | dinamička | ✅ | profil: **trofeji (🥇🥈🥉)** + rang + istorija turnira + poslednji mečevi |
-| `/rang-liste` | dinamička | ✅ | `rankings` (kat × disc) — **popunjeno iz istorije** |
+| `/igraci` | dinamička | ✅ | `players` (pretraga + filter kategorije + paginacija) |
+| `/igraci/[id]` | dinamička | ✅ | profil: trofeji 🥇🥈🥉 + rang + istorija + mečevi + **H2H** |
+| `/rang-liste` | dinamička | ✅ | `rankings` (kvalitativne I–V **+ starosne 20–75+** × disc) |
 | `/pravilnik` | statička | ✅ | sadržaj iz spec-a (dvojezično) |
 | `/o-savezu`, `/kontakt` | statička | ✅ | statički sadržaj |
 | `/sudija` | dinamička | ✅ | lista turnira koje nalog vodi (staff/direktor) |
@@ -53,7 +53,11 @@ Dizajn tokeni (`src/app/globals.css` `@theme`): boje `clay/court/ball/navy`, fon
 | `/prijava` | dinamička | ✅ | magic link prijava (Supabase OTP) |
 | `/nalog` | dinamička | ✅ | profil naloga + povezivanje sa igračem |
 | `/api/auth/confirm` | route handler | ✅ | potvrda email linka (PKCE `code` + `token_hash`) |
-| `/vesti` | statička | 🔶 WIP | Faza 1/4 (CMS) |
+| `/vesti` | ISR 5m | ✅ | `news` (CMS v1 + auto-izveštaji turnira) |
+| `/turnir/[slug]/satnica` | dinamička | ✅ | satnica za štampu (po danima, print CSS) |
+| `/uclanjenje` | dinamička | ✅ | javna forma → `membership_requests` → koordinator odobrava |
+| `/galerija` | ISR 5m | ✅ | `gallery_photos` + storage bucket `galerija` |
+| `/koordinator/*` | dinamička | ✅ | panel: turniri, članovi, klubovi, uplate, vesti, tablice, galerija, izveštaji |
 
 Plus: `/icon` (generisana PWA ikonica), `/manifest.webmanifest`, `generateMetadata` naslovi.
 
