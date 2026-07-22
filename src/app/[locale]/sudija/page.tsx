@@ -49,16 +49,17 @@ export default async function SudijaPage({
       .eq("id", claims.sub)
       .maybeSingle();
 
-    if (staff || profile?.player_id) {
-      let query = supabase
+    // Sudijski portal prikazuje SAMO turnire na kojima je nalog određen za
+    // direktora/sudiju (i za staff) — koordinator vodi ostale iz /koordinator.
+    if (profile?.player_id) {
+      const { data } = await supabase
         .from("tournaments")
         .select("id, legacy_id, naziv, status, datum_od, datum_do, mesto")
+        .eq("direktor_id", profile.player_id)
         .order("datum_od", { ascending: false, nullsFirst: false });
-      if (!staff) query = query.eq("direktor_id", profile!.player_id!);
-      const { data } = await query;
       tournaments = data ?? [];
-      isManager = !!staff || tournaments.length > 0;
     }
+    isManager = tournaments.length > 0;
   }
 
   // Grupisanje po godinama (najnovija prva), u okviru godine najnoviji prvi.

@@ -45,6 +45,16 @@ export default async function NalogPage({
     .eq("id", claims.sub)
     .maybeSingle();
 
+  // Uloge naloga — izbornik uloga vide samo nalozi sa staff/sudijskim pravima.
+  const { data: roleRows } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", claims.sub);
+  const roles = new Set((roleRows ?? []).map((r) => r.role));
+  const canKoordinator = roles.has("koordinator") || roles.has("admin");
+  const canSudija = roles.has("sudija");
+  const hasExtraRoles = canKoordinator || canSudija;
+
   // Povezani igrač (ako postoji)
   const { data: player } = profile?.player_id
     ? await supabase
@@ -83,6 +93,42 @@ export default async function NalogPage({
     <>
       <PageHero compact crumb="/ nalog" eyebrow={email} title={t("title")} />
       <div className="mx-auto max-w-lg px-4 py-12 sm:px-6">
+      {hasExtraRoles && (
+        <div className="mb-8 rounded-2xl border border-line bg-card p-5 shadow-sm">
+          <p className="font-display text-lg font-bold text-navy">{t("rolePickerTitle")}</p>
+          <p className="mt-1 text-sm text-slate">{t("rolePickerHint")}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border-2 border-clay bg-clay/5 p-4">
+              <p className="text-2xl leading-none">🎾</p>
+              <p className="mt-2 font-display font-bold text-navy">{t("roleIgrac")}</p>
+              <p className="mt-0.5 text-xs text-muted">{t("roleIgracDesc")}</p>
+              <p className="mt-2 text-[0.62rem] font-semibold uppercase tracking-wide text-clay">
+                {t("roleActive")}
+              </p>
+            </div>
+            {canKoordinator && (
+              <Link
+                href="/koordinator"
+                className="rounded-xl border border-line2 p-4 transition hover:border-clay hover:bg-clay/5"
+              >
+                <p className="text-2xl leading-none">🛠️</p>
+                <p className="mt-2 font-display font-bold text-navy">{t("roleKoordinator")}</p>
+                <p className="mt-0.5 text-xs text-muted">{t("roleKoordinatorDesc")}</p>
+              </Link>
+            )}
+            {canSudija && (
+              <Link
+                href="/sudija"
+                className="rounded-xl border border-line2 p-4 transition hover:border-clay hover:bg-clay/5"
+              >
+                <p className="text-2xl leading-none">⚖️</p>
+                <p className="mt-2 font-display font-bold text-navy">{t("roleSudija")}</p>
+                <p className="mt-0.5 text-xs text-muted">{t("roleSudijaDesc")}</p>
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
       {povezan && (
         <p className="mb-5 rounded-xl border border-court/30 bg-court/8 px-4 py-3 text-sm font-semibold text-court-dark">
           ✅ {t("linkedSuccess")}
