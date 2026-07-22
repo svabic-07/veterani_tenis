@@ -37,3 +37,25 @@ export async function sendLoginLink(formData: FormData) {
 
   redirect({ href: `/prijava?poslato=${encodeURIComponent(email)}`, locale });
 }
+
+/** Prijava email + lozinkom (test/demo nalozi — npr. sudija, koordinator). */
+export async function passwordLogin(formData: FormData) {
+  const locale = String(formData.get("locale") ?? "sr");
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+  const password = String(formData.get("password") ?? "");
+
+  if (!EMAIL_RE.test(email) || password.length < 1) {
+    redirect({ href: "/prijava?greska=lozinka", locale });
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    redirect({ href: "/prijava?greska=lozinka", locale });
+  }
+
+  redirect({ href: "/nalog", locale });
+}

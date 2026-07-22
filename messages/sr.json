@@ -235,7 +235,12 @@
     "errorSend": "Slanje nije uspelo. Pokušajte ponovo za koji minut.",
     "errorLink": "Link nije važeći ili je istekao. Zatražite novi.",
     "joinCta": "Niste član? Učlanite se ovde", "helpTitle": "Treba vam pomoć?",
-    "helpBody": "Ako nemate email u bazi članova ili se ne snalazite, javite se koordinatoru svog kluba — može da vas prijavi na turnir i u vaše ime."
+    "helpBody": "Ako nemate email u bazi članova ili se ne snalazite, javite se koordinatoru svog kluba — može da vas prijavi na turnir i u vaše ime.",
+    "passwordTitle": "Prijava lozinkom",
+    "passwordBody": "Za test/demo naloge (npr. sudija, koordinator). Unesite email i lozinku.",
+    "passwordLabel": "Lozinka",
+    "passwordSubmit": "Prijavi se",
+    "errorPassword": "Pogrešan email ili lozinka."
   },
   "account": {
     "title": "Moj nalog",

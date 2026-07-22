@@ -194,7 +194,12 @@
     "errorSend": "Sending failed. Please try again in a minute.",
     "errorLink": "The link is invalid or has expired. Please request a new one.",
     "joinCta": "Not a member? Join here", "helpTitle": "Need help?",
-    "helpBody": "If your email isn't in the member database or you're stuck, contact your club coordinator — they can also enter tournaments on your behalf."
+    "helpBody": "If your email isn't in the member database or you're stuck, contact your club coordinator — they can also enter tournaments on your behalf.",
+    "passwordTitle": "Sign in with password",
+    "passwordBody": "For test/demo accounts (e.g. referee, coordinator). Enter your email and password.",
+    "passwordLabel": "Password",
+    "passwordSubmit": "Sign in",
+    "errorPassword": "Wrong email or password."
   },
   "account": {
     "title": "My account",

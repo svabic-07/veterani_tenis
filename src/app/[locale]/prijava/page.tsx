@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHero } from "@/components/ui/page-hero";
-import { sendLoginLink } from "./actions";
+import { sendLoginLink, passwordLogin } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +84,45 @@ export default async function PrijavaPage({
           <p className="mt-4 text-xs leading-relaxed text-muted">{t("noPassword")}</p>
         </form>
       )}
+
+      <form action={passwordLogin} className="mt-6 rounded-2xl border border-line bg-card p-6 shadow-sm">
+        <input type="hidden" name="locale" value={locale} />
+        <p className="font-display text-lg font-bold text-navy">{t("passwordTitle")}</p>
+        <p className="mt-1.5 text-sm text-slate">{t("passwordBody")}</p>
+        <label htmlFor="pw-email" className="mt-4 block text-sm font-semibold text-navy">
+          {t("emailLabel")}
+        </label>
+        <input
+          id="pw-email"
+          type="email"
+          name="email"
+          required
+          autoComplete="email"
+          inputMode="email"
+          placeholder={t("emailPlaceholder")}
+          className="mt-2 w-full rounded-xl border border-line2 bg-bg px-4 py-3 text-base outline-none focus:border-clay"
+        />
+        <label htmlFor="pw-password" className="mt-3 block text-sm font-semibold text-navy">
+          {t("passwordLabel")}
+        </label>
+        <input
+          id="pw-password"
+          type="password"
+          name="password"
+          required
+          autoComplete="current-password"
+          className="mt-2 w-full rounded-xl border border-line2 bg-bg px-4 py-3 text-base outline-none focus:border-clay"
+        />
+        {greska === "lozinka" && (
+          <p className="mt-3 rounded-lg bg-clay/10 px-3 py-2 text-sm text-clay-dark">{t("errorPassword")}</p>
+        )}
+        <button
+          type="submit"
+          className="mt-4 w-full rounded-xl bg-navy px-5 py-3 text-base font-semibold text-white transition hover:bg-navy/90"
+        >
+          {t("passwordSubmit")}
+        </button>
+      </form>
 
       <div className="mt-8 rounded-2xl border border-line bg-card p-5 text-sm text-slate">
         <p className="font-semibold text-navy">{t("helpTitle")}</p>
